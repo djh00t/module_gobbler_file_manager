@@ -86,9 +86,11 @@ def manage_file(
 
     except Exception as exception:
         result['status'] = 500
+        result['error_message'] = str(exception)
 
         # Add the debug info for the exception
         debug_info['exception'] = str(exception)
+        debug_info['error_message'] = str(exception)
 
     # If the debug flag is not set and there was no failure, remove the debug field
     if not debug and result['status'] != 500:
