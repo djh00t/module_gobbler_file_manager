@@ -45,7 +45,10 @@ def assert_s3_file_content(path, content):
     s3 = boto3.resource('s3')
     obj = s3.Object(s3_bucket_name, path)
     assert obj.content_length > 0
-    assert obj.get()['Body'].read().decode() == content
+    actual_content = obj.get()['Body'].read().decode()
+    print(f"Actual content: {actual_content}")
+    print(f"Expected content: {content}")
+    assert actual_content == content
 
 # Create test files
 def setup_test_files():
