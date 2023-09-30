@@ -30,7 +30,7 @@ aws_secret_access_key = aws_credentials['credentials']['AWS_SECRET_ACCESS_KEY']
 # Test 1 - get local text file
 def test_get_local_txt_file():
     result = manage_file('get', None, test_txt_get_local, False)
-    assert result['status'] == 'success'
+    assert result['status'] == 200
     assert result['action'] == 'get'
     assert result['file'] == test_txt_content
     assert result['path'] == test_txt_get_local
