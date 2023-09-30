@@ -259,6 +259,7 @@ def is_binary_file(file_path: str, debug: bool = False) -> bool:
     Returns:
         bool: True if the file is binary, False otherwise.
     """
+
     try:
         with open(file_path, "rb") as file:
             # Read the first few bytes from the file
@@ -275,14 +276,5 @@ def is_binary_file(file_path: str, debug: bool = False) -> bool:
             
             # If none of the above conditions matched, it's likely a text file
             return False
-    except Exception as e:
-        if debug:
-            return {
-                "status": 500,
-                "message": f"Failed to check if file is binary: {str(e)}",
-                "debug": {"exception": str(e)},
-            }
-        return {
-            "status": 500,
-            "message": "Failed to check if file is binary.",
-        }
+    except:
+        return False
