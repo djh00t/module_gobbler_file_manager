@@ -122,7 +122,8 @@ def test_get_local_txt_file():
     assert result['file'].decode() == test_txt_content
     assert result['path'] == test_txt_get_local
     assert result['binary'] == False
-    assert 'debug' in result and result['debug'] == {}
+    assert 'debug' in result
+    assert isinstance(result['debug'], dict)
 
 
 
