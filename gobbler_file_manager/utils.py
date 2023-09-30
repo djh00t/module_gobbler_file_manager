@@ -277,5 +277,12 @@ def is_binary_file(file_path: str, debug: bool = False) -> bool:
             return False
     except Exception as e:
         if debug:
-            print(f"Failed to check if file is binary: {str(e)}")
-        return False
+            return {
+                "status": 500,
+                "message": f"Failed to check if file is binary: {str(e)}",
+                "debug": {"exception": str(e)},
+            }
+        return {
+            "status": 500,
+            "message": "Failed to check if file is binary.",
+        }
