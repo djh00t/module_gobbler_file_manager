@@ -172,3 +172,9 @@ jobs:
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'github-actions@github.com'
           git diff --quiet VERSION || (git add VERSION && git commit -m "Update version number - $VERSION" && git push) || echo "VERSION file not updated"
+      
+      # If VERSION push is successful, tag the commit with the version number
+      - name: Tag commit with version number $VERSION
+        run: |
+          git tag $VERSION
+          git push origin $VERSION

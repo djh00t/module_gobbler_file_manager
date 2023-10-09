@@ -76,4 +76,12 @@ generate-pyproject:
 	@echo "requires = ['setuptools', 'wheel']" >> pyproject.toml
 	@echo "build-backend = 'setuptools.build_meta'" >> pyproject.toml
 
+## release: Once version has been pushed to git, run this to create a new github tag and release
+release:
+	@echo "Creating new release..."
+	@NEW_VERSION=$$(awk -F. '{print $$1"."$$2"."$$3}' VERSION); \
+	git tag -a $$NEW_VERSION -m "Release $$NEW_VERSION"; \
+	git push origin $$NEW_VERSION; \
+	echo "New release $$NEW_VERSION created"
+
 .PHONY: clean check-packages sdist wheel upload-test upload install uninstall test update-version generate-pyproject
