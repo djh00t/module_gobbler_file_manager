@@ -90,7 +90,7 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo $VERSION > VERSION
           git add VERSION || true
-          git commit -m "Update version number - ${{ env.VERSION }}" || true
+          git commit -m "Update version number - $VERSION" || true
           git push || true
           sleep 5
       
@@ -126,13 +126,14 @@ jobs:
         run: |
           echo "APP_NAME:               ${{ vars.APP_NAME }}"
 
-      # Get the version number in the VERSION file and set the VERSION
-      # environment variable
-      - name: Get version number
+      # Echo the new version number ${{ env.VERSION }}
+      - name: Echo the version number
         run: |
-          git pull || true
-          echo "VERSION:                ${{ env.VERSION }}"
-          sleep 5
+          echo "env.VERSION:                    ${{ env.VERSION }}"
+          echo "env.VERSION:                    ${{ env.VERSION }}"
+          echo "env.VERSION:                    ${{ env.VERSION }}"
+          echo "env.VERSION:                    ${{ env.VERSION }}"
+          echo "env.VERSION:                    ${{ env.VERSION }}"
 
       # Install dependencies
       - name: Install dependencies
