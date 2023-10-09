@@ -59,7 +59,7 @@ jobs:
         run: |
           export PYPI_TEST_VERSION=$(curl -s https://test.pypi.org/pypi/${{ vars.APP_NAME }}/json | jq -r '.info.version')
           echo "PYPI_TEST_VERSION=$PYPI_TEST_VERSION" >> $GITHUB_ENV
-          echo "PYPI_TEST_VERSION:      $PYPI_TEST_VERSION"
+          echo "PYPI_TEST_VERSION:            $PYPI_TEST_VERSION"
       
       # Get PyPI Production Version Number
       - name: Get PyPI Production Version Number
@@ -68,35 +68,31 @@ jobs:
           echo "PYPI_PRODUCTION_VERSION=$PYPI_PRODUCTION_VERSION" >> $GITHUB_ENV
           echo "PYPI_PRODUCTION_VERSION: $PYPI_PRODUCTION_VERSION"
 
-      # Work out if the value in the VERSION file is higher than PyPi and PyPi
-      # Test. If not, increment the value in the VERSION file to the next
-      # highest patch value.
-      - name: Check version number
+      # Get version number in VERSION file
+      - name: Get version number in VERSION file
         run: |
           export VERSION=$(cat VERSION)
-          echo "VERSION:                $VERSION"
-          export VERSION_MAJOR=$(echo $VERSION | cut -d'.' -f1)
-          echo "VERSION_MAJOR:          $VERSION_MAJOR"
-          export VERSION_MINOR=$(echo $VERSION | cut -d'.' -f2)
-          echo "VERSION_MINOR:          $VERSION_MINOR"
-          export VERSION_PATCH=$(echo $VERSION | cut -d'.' -f3)
-          echo "VERSION_PATCH:          $VERSION_PATCH"
-          export VERSION_PATCH_NEXT=$(($VERSION_PATCH + 1))
-          echo "VERSION_PATCH_NEXT:     $VERSION_PATCH_NEXT"
-          export VERSION_NEXT="$VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH_NEXT"
-          echo "VERSION_NEXT:           $VERSION_NEXT"
-
-          if [ "$VERSION_PATCH" -lt "$PYPI_TEST_VERSION" ] || [ "$VERSION_PATCH" -lt "$PYPI_PRODUCTION_VERSION" ]; then
-            echo "Version number in VERSION file is lower than PyPI Test or PyPI Production"
-            echo "Incrementing version number in VERSION file to $VERSION_NEXT"
-            echo $VERSION_NEXT > VERSION
-            echo VERSION=`cat VERSION`  >> $GITHUB_ENV
-          else
-            echo "Version number in VERSION file is higher than PyPI Test and PyPI Production. Proceeding with build and test."
-            echo VERSION=`cat VERSION`  >> $GITHUB_ENV
-          fi
-          echo "VERSION:                $VERSION"
-
+          echo "CURRENT VERSION:                $VERSION"
+          echo "CURRENT_VERSION=$VERSION" >> $GITHUB_ENV
+      
+      # Find highest pypi version number
+      - name: Find highest pypi version number
+        run: |
+          export HIGHEST_VERSION=$(echo -e "$VERSION\n$PYPI_TEST_VERSION\n$PYPI_PRODUCTION_VERSION" | sort -V | tail -1)
+          echo "HIGHEST_VERSION:                $HIGHEST_VERSION"
+          echo "HIGHEST_VERSION=$HIGHEST_VERSION" >> $GITHUB_ENV
+      
+      # Set version number as $HIGHEST_VERSION + 1
+      - name: Set version number as $HIGHEST_VERSION + 1
+        run: |
+          export VERSION=$(echo $HIGHEST_VERSION | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
+          echo "NEW VERSION:                    $VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo $VERSION > VERSION
+          git add VERSION
+          git commit -m "Update version number - $VERSION"
+          git push
+          sleep 5
 
   # build-test workflow
   build-test:
