@@ -52,7 +52,7 @@ jobs:
       # Get APP_NAME from Makefile
       - name: Get APP_NAME from Makefile
         run: |
-          export APP_NAME=$(grep APP_NAME Makefile | cut -d'=' -f2 | head -1 | sed 's/"//g')
+          export APP_NAME=$(grep APP_NAME Makefile | cut -d'=' -f2 | head -1 | sed 's/"//g'| sed 's/ //g')
           echo "APP_NAME:               $APP_NAME"
 
       # Increment the version number in the VERSION file and set the VERSION
@@ -66,7 +66,7 @@ jobs:
       # Check the current version number in pypi
       - name: Check current version number in pypi
         run: |
-          export APP_NAME=$(grep APP_NAME Makefile | cut -d'=' -f2 | head -1 | sed 's/"//g')
+          # export APP_NAME=$(grep APP_NAME Makefile | cut -d'=' -f2 | head -1 | sed 's/"//g'| sed 's/ //g')
           export URL=$(echo -e https://pypi.org/pypi/$APP_NAME/json)
           echo "URL:                    $URL"
           export PYPI_VERSION=$(curl -s $URL | jq -r '.info.version')
@@ -95,7 +95,7 @@ jobs:
       # Check the current version number in test-pypi
       - name: Check current version number in test-pypi
         run: |
-          export APP_NAME=$(grep APP_NAME Makefile | cut -d'=' -f2 | head -1 | sed 's/"//g')
+          # export APP_NAME=$(grep APP_NAME Makefile | cut -d'=' -f2 | head -1 | sed 's/"//g'| sed 's/ //g')
           export TESTURL=$(echo -e https://test.pypi.org/pypi/$APP_NAME/json)
           echo "TESTURL:                $TESTURL"
           export TEST_PYPI_VERSION=$(curl -s $TESTURL | jq -r '.info.version')
