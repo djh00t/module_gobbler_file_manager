@@ -69,9 +69,10 @@ test:
 ## push to origin
 update-version:
 	@CURRENT_VERSION=$$(cat VERSION); \
+	echo "Current version is:		$$CURRENT_VERSION"; \
 	NEW_VERSION=$$(awk -F. '{print $$1"."$$2"."$$3+1}' VERSION); \
 	echo $$NEW_VERSION > VERSION; \
-	echo "New version $$NEW_VERSION created"; \
+	echo "New version is:			$$NEW_VERSION"; \
 	git add VERSION; \
 	git commit -m "Bump version to $$NEW_VERSION"; \
 	git push origin main
