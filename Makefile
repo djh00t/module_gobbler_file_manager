@@ -1,6 +1,13 @@
+# Makefile for klingon_serial Python package
+
+# Variables
+TWINE_USERNAME ?= __token__
+TEST_TWINE_PASSWORD ?= $(TEST_PYPI_USER_AGENT)
+PYPI_TWINE_PASSWORD ?= $(PYPI_USER_AGENT)
+
 # Clean up build files
 clean:
-	rm -rf build dist klingon_file_manager.egg-info .mypy_cache .pytest_cache klingon_file_manager/__pycache__ tests/__pycache__
+	rm -rf build dist *.egg-info .mypy_cache .pytest_cache */__pycache__
 
 ## check-packages: Check for required pip packages and requirements.txt, install if missing
 check-packages:
@@ -45,7 +52,6 @@ uninstall:
 test:
 	@echo "Running unit tests..."
 	pytest tests
-
 
 
 ## update-version: Read the version number from VERSION file, it will look like A.B.C Increment the third (C) number by 1 and write it back to the VERSION file
