@@ -2,25 +2,26 @@ name: Generate release notes and create GitHub release
 on:
   push:
     tags:
-	  - 'v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'
+      - 'v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/github-script@v6
-      with:
-        script: "const currentTag = '${{ github.ref }}'\nconst previousTag = await\
-          \ github.getPreviousTag()\n\nconst changelog = await github.generateReleaseChangelog({\n\
-          \  fromCommit: previousTag.sha,\n  toCommit: currentTag.sha,\n})\n\ngithub.outputs.changelog\
-          \ = changelog\n"
-    - uses: actions/create-release@v3
-      with:
-        body: ${{ steps.generate_release_notes.outputs.changelog }}
-        name: ${{ github.ref }}
-        tag_name: ${{ github.ref }}
+      - uses: actions/github-script@v6
+        with:
+          script:
+            "const currentTag = '${{ github.ref }}'\nconst previousTag = await\
+            \ github.getPreviousTag()\n\nconst changelog = await github.generateReleaseChangelog({\n\
+            \  fromCommit: previousTag.sha,\n  toCommit: currentTag.sha,\n})\n\ngithub.outputs.changelog\
+            \ = changelog\n"
+      - uses: actions/create-release@v3
+        with:
+          body: ${{ steps.generate_release_notes.outputs.changelog }}
+          name: ${{ github.ref }}
+          tag_name: ${{ github.ref }}
   checkout:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
