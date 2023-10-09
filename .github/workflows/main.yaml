@@ -93,6 +93,12 @@ jobs:
           git commit -m "Update version number - $VERSION" || true
           git push || true
           sleep 5
+      
+      # Echo the new version number ${{ env.VERSION }}
+      - name: Echo the new version number
+        run: |
+          echo "env.VERSION:                    ${{ env.VERSION }}"
+          echo "VERSION:                        $VERSION"
 
   # build-test workflow
   build-test:
@@ -244,18 +250,12 @@ jobs:
           pip install klingon-serial
           python -m unittest discover
 
-      # If uploads are successful, and the VERSION file has changed create a
-      # checkpoint by tagging the commit with the version number
-      - name: Tag commit with version number $VERSION
+      # If uploads are successful, and the VERSION file has changed, tag the
+      # codebase and push the code and tags to the repository
+      - name: Tag and push
         run: |
-          git config --global user.name 'GitHub Actions'
-          git config --global user.email 'github@hooton.org'
-          git diff --quiet VERSION || git tag $VERSION
-
-      # If uploads are successful, and the VERSION file has changed push the
-      # updated VERSION file back to the repository
-      - name: Push updated VERSION to repository
-        run: |
-          git config --global user.name 'GitHub Actions'
-          git config --global user.email 'github-actions@github.com'
-          git diff --quiet VERSION || (git add VERSION && git commit -m "Update version number - $VERSION" && git push) || echo "VERSION file not updated"
+          git pull || true
+          git tag -a v${{ env.VERSION }} -m "Version ${{ env.VERSION }}"
+          git push origin v${{ env.VERSION }}
+          git push || true
+          sleep 5
