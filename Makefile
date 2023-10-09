@@ -1,7 +1,7 @@
-# Makefile for klingon_file_manager Python package
+# Makefile for klingon-file-manager Python package
 
 # Variables
-APP_NAME = "klingon_file_manager"
+APP_NAME = "klingon-file-manager"
 TWINE_USERNAME ?= __token__
 TEST_TWINE_PASSWORD ?= $(TEST_PYPI_USER_AGENT)
 PYPI_TWINE_PASSWORD ?= $(PYPI_USER_AGENT)
