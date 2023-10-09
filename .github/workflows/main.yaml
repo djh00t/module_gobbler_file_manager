@@ -93,11 +93,6 @@ jobs:
           git commit -m "Update version number - $VERSION" || true
           git push || true
           sleep 5
-      
-      # Echo the new version number ${{ env.VERSION }}
-      - name: Echo the new version number
-        run: |
-          echo "env.VERSION:                    ${{ env.VERSION }}"
 
   # build-test workflow
   build-test:
@@ -210,7 +205,6 @@ jobs:
           export VERSION=$(cat VERSION)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "VERSION:                        $VERSION"
-          echo "env.VERSION:                    ${{ env.VERSION }}"
 
       # Add AWS Credentials to environment variables
       - name: Add AWS Credentials
