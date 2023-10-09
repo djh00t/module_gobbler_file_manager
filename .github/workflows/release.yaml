@@ -5,8 +5,11 @@ name: New Release
 ###
 on:
     push:
+        paths:
+            - .github/workflows/release.yml
         tags:
             - '*'
+            - '**'
 
 jobs:
     create-release:
