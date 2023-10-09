@@ -68,7 +68,7 @@ update-version:
 	@NEW_VERSION=$$(awk -F. '{print $$1"."$$2"."$$3+1}' VERSION) \
 	echo $$NEW_VERSION > VERSION
 	git add VERSION
-	git commit -m "Update version number to $$NEW_VERSION"
+	git commit -m "Update version number to NEW_VERSION"
 	git pull
 	git push
 	echo "New version number is $$NEW_VERSION"
