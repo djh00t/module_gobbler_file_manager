@@ -59,7 +59,7 @@ uninstall:
 # Run tests
 test:
 	@echo "Running unit tests..."
-	pytest tests
+	pytest -v  --disable-warnings tests
 
 
 ## update-version: Read the version number from VERSION file, it will look like A.B.C Increment the third (C) number by 1 and write it back to the VERSION file

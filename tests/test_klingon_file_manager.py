@@ -8,7 +8,7 @@ AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 AWS_S3_BUCKET_NAME = os.environ.get("AWS_S3_BUCKET_NAME")
 
 # Set s3 bucket name
-s3_bucket_name = {AWS_S3_BUCKET_NAME}
+s3_bucket_name = AWS_S3_BUCKET_NAME
 
 # Generate a 100 word string of lorem ipsum text
 test_txt_content = lorem.text()
@@ -192,6 +192,10 @@ def test_get_invalid_s3_path():
 def test_check_aws_credentials():
     assert AWS_ACCESS_KEY_ID is not None
     assert AWS_SECRET_ACCESS_KEY is not None
+
+# Test 13 - Test s3 bucket name
+def test_check_s3_bucket_name():
+    assert AWS_S3_BUCKET_NAME is not None
 
 def test_teardown_test_files():
     ##
