@@ -90,7 +90,7 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo $VERSION > VERSION
           git add VERSION || true
-          git commit -m "Update version number - $VERSION" || true
+          git commit -m "Update version number - ${{ env.VERSION }}" || true
           git push || true
           sleep 5
       
@@ -98,7 +98,6 @@ jobs:
       - name: Echo the new version number
         run: |
           echo "env.VERSION:                    ${{ env.VERSION }}"
-          echo "VERSION:                        $VERSION"
 
   # build-test workflow
   build-test:
@@ -132,9 +131,7 @@ jobs:
       - name: Get version number
         run: |
           git pull || true
-          export VERSION=$(cat VERSION)
-          echo "VERSION:          $VERSION"
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "VERSION:                ${{ env.VERSION }}"
           sleep 5
 
       # Install dependencies
@@ -143,8 +140,6 @@ jobs:
           python -m pip install --upgrade pip
           make check-packages
       
-
-
       # Add AWS Credentials to environment variables
       - name: Add AWS Credentials
         run: |
@@ -194,7 +189,6 @@ jobs:
       # Install dependencies
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
           make check-packages
 
       # Set git user and email
@@ -203,10 +197,9 @@ jobs:
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'david@hooton.org'
 
-      # Get APP_NAME from Makefile
-      - name: Get APP_NAME from Makefile
+      # Get APP_NAME from Variables
+      - name: Get APP_NAME from Variables
         run: |
-          export APP_NAME=$(grep APP_NAME Makefile | cut -d'=' -f2 | head -1 | sed 's/"//g')
           echo "APP_NAME:               ${{ vars.APP_NAME }}"
 
       # Get the version number in the VERSION file and set the VERSION
@@ -214,10 +207,7 @@ jobs:
       - name: Get version number
         run: |
           git pull || true
-          export VERSION=$(cat VERSION)
-          echo "VERSION:          $VERSION"
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          sleep 5
+          echo "VERSION:                ${{ env.VERSION }}"
 
       # Add AWS Credentials to environment variables
       - name: Add AWS Credentials
@@ -244,12 +234,6 @@ jobs:
         run: |
           make upload PYPI_USER_AGENT=${{ secrets.PYPI_USER_AGENT }}
 
-      # Pulls the package from PyPI and runs tests
-      - name: Pull from PyPI and test
-        run: |
-          pip install klingon-serial
-          python -m unittest discover
-
       # If uploads are successful, and the VERSION file has changed, tag the
       # codebase and push the code and tags to the repository
       - name: Tag and push
@@ -265,11 +249,11 @@ jobs:
     steps:
       - name: Build Changelog
         id: github_release
-        uses: mikepenz/release-changelog-builder-action@{latest}
+        uses: mikepenz/release-changelog-builder-action@v4.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create Release
-        uses: mikepenz/action-gh-release@{latest}
+        uses: mikepenz/action-gh-release@v0.4.0
         with:
           body: ${{steps.github_release.outputs.changelog}}
           generate_release_notes: true
