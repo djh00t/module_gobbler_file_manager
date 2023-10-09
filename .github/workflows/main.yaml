@@ -255,8 +255,8 @@ jobs:
       - name: Tag and push
         run: |
           git pull || true
-          git tag -a ${{ env.VERSION }} -m "Version ${{ env.VERSION }}"
-          git push origin ${{ env.VERSION }}
+          git tag -a v${{ env.VERSION }} -m "Version v${{ env.VERSION }}"
+          git push origin v${{ env.VERSION }}
           git push || true
           sleep 5
   create-release:
