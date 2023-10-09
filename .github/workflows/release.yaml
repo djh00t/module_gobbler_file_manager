@@ -1,36 +1,34 @@
+name: Generate release notes and create GitHub release
 
-name: Release
-
-# Controls when the action will run. 
 on:
-  # Triggers the workflow on push or pull request events but only for the main
-  # branch and not for VERSION file changes
   push:
     tags:
-      - '*.*.*'
-      - 'v**.**.**'
+      - 'v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  create-release:
+  build:
     runs-on: ubuntu-latest
-    needs: build-production
-    permissions:
-      contents: write
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Build Changelog
-        id: github_release
-        uses: mikepenz/release-changelog-builder-action@v4.0.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create Release
-        uses: mikepenz/action-gh-release@v0.4.0
+      - uses: actions/checkout@v3
+
+      - name: Generate release notes
+        uses: actions/github-script@v6
         with:
-          body: ${{steps.github_release.outputs.changelog}}
-          generate_release_notes: true
-        
+          script: |
+            const currentTag = '${{ github.ref }}'
+            const previousTag = await github.getPreviousTag()
+
+            const changelog = await github.generateReleaseChangelog({
+              fromCommit: previousTag.sha,
+              toCommit: currentTag.sha,
+            })
+
+            github.outputs.changelog = changelog
+
+      - name: Create GitHub release
+        uses: actions/create-release@v3
+        with:
+          tag_name: '${{ github.ref }}'
+          name: '${{ github.ref }}'
+          body: '${{ steps.generate_release_notes.outputs.changelog }}'
