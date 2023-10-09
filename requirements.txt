@@ -8,3 +8,5 @@ sphinx_rtd_theme
 sphinx_autodoc_typehints
 nbsphinx
 ipython
+datetime
+uuid

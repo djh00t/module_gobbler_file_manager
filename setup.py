@@ -10,10 +10,10 @@ with open("VERSION", "r") as version_file:
     version = version_file.read().strip()
 
 setup(
-    name='gobbler_file_manager',
+    name='klingon_file_manager',
     version=version,
     author='David Hooton',
-    author_email='gobbler_file_manager+david@hooton.org',
+    author_email='klingon_file_manager+david@hooton.org',
     description='A Python module for managing files on both local and AWS S3 storage.',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -24,6 +24,8 @@ setup(
         'boto3>=1.18,<2.0',
         'pytest>=6.2,<7.0',
         'python-dotenv>=0.19,<1.0',
+        'datetime',
+        'uuid',
     ],
     entry_points={
         'console_scripts': [

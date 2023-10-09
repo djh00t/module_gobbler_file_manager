@@ -5,9 +5,10 @@ import boto3
 
 AWS_ACCESS_KEY_ID  = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+AWS_S3_BUCKET_NAME = os.environ.get("AWS_S3_BUCKET_NAME")
 
 # Set s3 bucket name
-s3_bucket_name = 'fsg-gobbler'
+s3_bucket_name = {AWS_S3_BUCKET_NAME}
 
 # Generate a 100 word string of lorem ipsum text
 test_txt_content = lorem.text()

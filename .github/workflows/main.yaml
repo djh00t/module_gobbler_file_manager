@@ -48,6 +48,12 @@ jobs:
         with:
           python-version: 3.x
       
+      # Get APP_NAME from Makefile
+      - name: Get APP_NAME from Makefile
+        run: |
+          export APP_NAME=$(grep APP_NAME Makefile | cut -d'=' -f2)
+          echo "APP_NAME:               $APP_NAME"
+
       # Install dependencies
       - name: Install dependencies
         run: |
@@ -66,11 +72,13 @@ jobs:
       - name: Add AWS Credentials
         run: |
           echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
-          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
-          echo "AWS_DEFAULT_REGION=${{ vars.AWS_DEFAULT_REGION }}" >> $GITHUB_ENV
           echo "AWS_ACCESS_KEY_ID:      ${{ secrets.AWS_ACCESS_KEY_ID }}"
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+          echo "AWS_DEFAULT_REGION=${{ vars.AWS_DEFAULT_REGION }}" >> $GITHUB_ENV
           echo "AWS_DEFAULT_REGION:     ${{ vars.AWS_DEFAULT_REGION }}"
+          echo "AWS_S3_BUCKET_NAME=${{ vars.AWS_S3_BUCKET_NAME }}" >> $GITHUB_ENV
+          echo "AWS_S3_BUCKET_NAME:     ${{ vars.AWS_S3_BUCKET_NAME }}"
 
       # Builds the package and runs tests
       - name: Build and test
@@ -105,13 +113,19 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.x
-      
+          
       # Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           make check-packages
-      
+
+      # Get APP_NAME from Makefile
+      - name: Get APP_NAME from Makefile
+        run: |
+          export APP_NAME=$(grep APP_NAME Makefile | cut -d'=' -f2)
+          echo "APP_NAME:               $APP_NAME"
+
       # Increment the version number in the VERSION file and set the VERSION
       # environment variable
       - name: Increment version number
@@ -124,11 +138,13 @@ jobs:
       - name: Add AWS Credentials
         run: |
           echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
-          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
-          echo "AWS_DEFAULT_REGION=${{ vars.AWS_DEFAULT_REGION }}" >> $GITHUB_ENV
           echo "AWS_ACCESS_KEY_ID:      ${{ secrets.AWS_ACCESS_KEY_ID }}"
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+          echo "AWS_DEFAULT_REGION=${{ vars.AWS_DEFAULT_REGION }}" >> $GITHUB_ENV
           echo "AWS_DEFAULT_REGION:     ${{ vars.AWS_DEFAULT_REGION }}"
+          echo "AWS_S3_BUCKET_NAME=${{ vars.AWS_S3_BUCKET_NAME }}" >> $GITHUB_ENV
+          echo "AWS_S3_BUCKET_NAME:     ${{ vars.AWS_S3_BUCKET_NAME }}"
 
       # Builds the package and runs tests
       - name: Build and test

@@ -1,6 +1,7 @@
-# Makefile for klingon_serial Python package
+# Makefile for klingon_file_manager Python package
 
 # Variables
+APP_NAME = "klingon_file_manager"
 TWINE_USERNAME ?= __token__
 TEST_TWINE_PASSWORD ?= $(TEST_PYPI_USER_AGENT)
 PYPI_TWINE_PASSWORD ?= $(PYPI_USER_AGENT)
@@ -43,10 +44,17 @@ upload: test wheel
 install:
 	pip install -e .
 
+## install-pip: Install the package locally using pip
+install-pip:
+	pip install $(APP_NAME)
+
+## install-pip-test: Install the package locally using pip from TestPyPI
+install-pip-test:
+	pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple $(APP_NAME)
 
 ## uninstall: Uninstall the local package
 uninstall:
-	pip uninstall get-user-agent
+	pip uninstall $(APP_NAME)
 
 # Run tests
 test:
