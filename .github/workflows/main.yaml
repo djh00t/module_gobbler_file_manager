@@ -49,69 +49,55 @@ jobs:
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'david@hooton.org'
 
-      # Get APP_NAME from Makefile
-      - name: Get APP_NAME from Makefile
+      # Get APP_NAME
+      - name: Get APP_NAME
         run: |
-          export APP_NAME=$(grep APP_NAME Makefile | cut -d'=' -f2 | head -1 | sed 's/"//g'| sed 's/ //g')
-          echo "APP_NAME:               $APP_NAME"
+          echo "APP_NAME:               ${{ vars.APP_NAME }}"
 
-      # Increment the version number in the VERSION file and set the VERSION
-      # environment variable
-      - name: Increment version number
+      # Get PyPI Test Version Number
+      - name: Get PyPI Test Version Number
         run: |
-          make update-version
-          export VERSION=$(cat VERSION)
-          echo "VERSION:                $VERSION"
-
-      # Check the current version number in pypi
-      - name: Check current version number in pypi
+          export PYPI_TEST_VERSION=$(curl -s https://test.pypi.org/pypi/${{ vars.APP_NAME }}/json | jq -r '.info.version')
+          echo "PYPI_TEST_VERSION=$PYPI_TEST_VERSION" >> $GITHUB_ENV
+          echo "PYPI_TEST_VERSION:      $PYPI_TEST_VERSION"
+      
+      # Get PyPI Production Version Number
+      - name: Get PyPI Production Version Number
         run: |
-          # export APP_NAME=$(grep APP_NAME Makefile | cut -d'=' -f2 | head -1 | sed 's/"//g'| sed 's/ //g')
-          export URL=$(echo -e https://pypi.org/pypi/$APP_NAME/json)
-          echo "URL:                    $URL"
-          export PYPI_VERSION=$(curl -s $URL | jq -r '.info.version')
-          echo "PYPI_VERSION:           $PYPI_VERSION"
+          export PYPI_PRODUCTION_VERSION=$(curl -s https://pypi.org/pypi/${{ vars.APP_NAME }}/json | jq -r '.info.version')
+          echo "PYPI_PRODUCTION_VERSION=$PYPI_PRODUCTION_VERSION" >> $GITHUB_ENV
+          echo "PYPI_PRODUCTION_VERSION: $PYPI_PRODUCTION_VERSION"
 
-      # Check that the current version number is greater than the version
-      # number in pypi
-      - name: Check that the current version number is greater than the version number in pypi
-        run: |
-          if [[ $VERSION < $PYPI_VERSION ]]; then
-            echo "INFO: Version number $VERSION is less than the version number in pypi $PYPI_VERSION. Incrementing version number in VERSION file and pushing to repository."
-            make update-version
-            exit 0
-          else
-            echo "Version number $VERSION is greater than the version number in pypi $PYPI_VERSION"
-          fi
-
-
-      # Get the version number in the VERSION file and set the VERSION
-      # environment variable
-      - name: Get version number
+      # Work out if the value in the VERSION file is higher than PyPi and PyPi
+      # Test. If not, increment the value in the VERSION file to the next
+      # highest patch value.
+      - name: Check version number
         run: |
           export VERSION=$(cat VERSION)
           echo "VERSION:                $VERSION"
+          export VERSION_MAJOR=$(echo $VERSION | cut -d'.' -f1)
+          echo "VERSION_MAJOR:          $VERSION_MAJOR"
+          export VERSION_MINOR=$(echo $VERSION | cut -d'.' -f2)
+          echo "VERSION_MINOR:          $VERSION_MINOR"
+          export VERSION_PATCH=$(echo $VERSION | cut -d'.' -f3)
+          echo "VERSION_PATCH:          $VERSION_PATCH"
+          export VERSION_PATCH_NEXT=$(($VERSION_PATCH + 1))
+          echo "VERSION_PATCH_NEXT:     $VERSION_PATCH_NEXT"
+          export VERSION_NEXT="$VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH_NEXT"
+          echo "VERSION_NEXT:           $VERSION_NEXT"
 
-      # Check the current version number in test-pypi
-      - name: Check current version number in test-pypi
-        run: |
-          # export APP_NAME=$(grep APP_NAME Makefile | cut -d'=' -f2 | head -1 | sed 's/"//g'| sed 's/ //g')
-          export TESTURL=$(echo -e https://test.pypi.org/pypi/$APP_NAME/json)
-          echo "TESTURL:                $TESTURL"
-          export TEST_PYPI_VERSION=$(curl -s $TESTURL | jq -r '.info.version')
-          echo "TEST_PYPI_VERSION:      $TEST_PYPI_VERSION"
-
-      # Check that the current version number is greater than the version
-      # number in test-pypi
-      - name: Check that the current version number is greater than the version number in test-pypi
-        run: |
-          if [[ $VERSION < $TEST_PYPI_VERSION ]]; then
-            echo "INFO: Version number $VERSION is less than the version number in test-pypi $TEST_PYPI_VERSION. Incrementing version number in VERSION file and pushing to repository."
-            make update-version
-            exit 0
+          if [ "$VERSION_PATCH" -lt "$PYPI_TEST_VERSION" ] || [ "$VERSION_PATCH" -lt "$PYPI_PRODUCTION_VERSION" ]; then
+            echo "Version number in VERSION file is lower than PyPI Test or PyPI Production"
+            echo "Incrementing version number in VERSION file to $VERSION_NEXT"
+            echo $VERSION_NEXT > VERSION
+            echo VERSION=`cat VERSION`  >> $GITHUB_ENV
           else
-            echo "Version number $VERSION is greater than the version number in test-pypi $TEST_PYPI_VERSION"
+            echo "Version number in VERSION file is higher than PyPI Test and PyPI Production. Proceeding with build and test."
+            echo VERSION=`cat VERSION`  >> $GITHUB_ENV
           fi
+          echo "VERSION:                $VERSION"
+
+
   # build-test workflow
   build-test:
     # The type of runner that the job will run on
@@ -134,11 +120,10 @@ jobs:
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'david@hooton.org'
       
-      # Get APP_NAME from Makefile
-      - name: Get APP_NAME from Makefile
+      # Get APP_NAME
+      - name: Get APP_NAME
         run: |
-          export APP_NAME=$(grep APP_NAME Makefile | cut -d'=' -f2 | head -1 | sed 's/"//g')
-          echo "APP_NAME:               $APP_NAME"
+          echo "APP_NAME:               ${{ vars.APP_NAME }}"
 
       # Install dependencies
       - name: Install dependencies
@@ -215,7 +200,7 @@ jobs:
       - name: Get APP_NAME from Makefile
         run: |
           export APP_NAME=$(grep APP_NAME Makefile | cut -d'=' -f2 | head -1 | sed 's/"//g')
-          echo "APP_NAME:               $APP_NAME"
+          echo "APP_NAME:               ${{ vars.APP_NAME }}"
 
       # Get the version number in the VERSION file and set the VERSION
       # environment variable
