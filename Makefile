@@ -67,8 +67,7 @@ update-version:
 	@echo "Updating version number..."
 	@NEW_VERSION=$$(awk -F. '{print $$1"."$$2"."$$3+1}' VERSION); \
 	echo $$NEW_VERSION > VERSION; \
-	sed -i '' "s/version='[0-9]*\.[0-9]*\.[0-9]*'/version='$$NEW_VERSION'/g" setup.py; \
-	git add VERSION setup.py; \
+	git add VERSION ; \ 
 	git commit -m "Update version number to $$NEW_VERSION"; \
 	git pull origin main; \
 	git push origin main; \
