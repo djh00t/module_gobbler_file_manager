@@ -13,7 +13,7 @@ setup(
     name='gobbler_file_manager',
     version=version,
     author='David Hooton',
-    author_email='gobbler_file_manager+david@@hooton.org',
+    author_email='gobbler_file_manager+david@hooton.org',
     description='A Python module for managing files on both local and AWS S3 storage.',
     long_description=long_description,
     long_description_content_type="text/markdown",
