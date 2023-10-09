@@ -1,9 +1,12 @@
-name: Releases
+name: New Release
 
+###
+### Activate when a new tag is pushed
+###
 on:
     push:
         tags:
-        - "*"
+            - '*'
 
 jobs:
     create-release:
