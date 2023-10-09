@@ -69,8 +69,8 @@ update-version:
 	echo $$NEW_VERSION > VERSION
 	git add VERSION
 	git commit -m "Update version number to $$NEW_VERSION"
-	git pull origin main
-	git push origin main
+	git pull
+	git push
 	echo "New version number is $$NEW_VERSION"
 
 ## generate-pyproject: Generate a pyproject.toml file
