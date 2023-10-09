@@ -127,8 +127,8 @@ jobs:
         run: |
           git pull || true
           export FILE_VERSION=$(cat VERSION)
-          echo "FILE_VERSION:          $FILE_VERSION"
-          echo "VERSION:                ${VERSION}"
+          echo "VERSION:          $VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
           sleep 5
 
       # Install dependencies
@@ -205,10 +205,13 @@ jobs:
 
       # Get the version number in the VERSION file and set the VERSION
       # environment variable
-      - name: Increment version number
+      - name: Get version number
         run: |
-          export VERSION=$(cat VERSION)
-          echo "VERSION:                $VERSION"
+          git pull || true
+          export FILE_VERSION=$(cat VERSION)
+          echo "VERSION:          $VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          sleep 5
 
       # Add AWS Credentials to environment variables
       - name: Add AWS Credentials
