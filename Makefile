@@ -65,12 +65,12 @@ test:
 ## update-version: Read the version number from VERSION file, it will look like A.B.C Increment the third (C) number by 1 and write it back to the VERSION file
 update-version:
 	@echo "Updating version number..."
-	@NEW_VERSION=$$(awk -F. '{print $$1"."$$2"."$$3+1}' VERSION); \
-	echo $$NEW_VERSION > VERSION; \
-	git add VERSION ; \ 
-	git commit -m "Update version number to $$NEW_VERSION"; \
-	git pull origin main; \
-	git push origin main; \
+	@NEW_VERSION=$$(awk -F. '{print $$1"."$$2"."$$3+1}' VERSION) \
+	echo $$NEW_VERSION > VERSION
+	git add VERSION
+	git commit -m "Update version number to $$NEW_VERSION"
+	git pull origin main
+	git push origin main
 	echo "New version number is $$NEW_VERSION"
 
 ## generate-pyproject: Generate a pyproject.toml file
