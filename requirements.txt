@@ -1,0 +1,10 @@
+# File Content
+boto3>=1.18,<2.0
+pytest>=6.2,<7.0
+lorem
+sphinx
+pydantic
+sphinx_rtd_theme
+sphinx_autodoc_typehints
+nbsphinx
+ipython

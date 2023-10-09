@@ -3,15 +3,13 @@ import os
 import boto3
 from typing import Union, Dict
 
-def read_file(path: str, debug: bool = False, aws_access_key_id: str = None, aws_secret_access_key: str = None) -> Dict[str, Union[int, str, bytes, bool, Dict[str, str]]]:
+def read_file(path: str, debug: bool = False) -> Dict[str, Union[int, str, bytes, bool, Dict[str, str]]]:
     """
     Reads a file from a given path, which can be either a local file or an S3 object.
     
     Args:
         path (str): The path of the file to read. Can be a local path or an S3 URI (e.g., 's3://bucket/key').
         debug (bool, optional): Flag to enable debugging. Defaults to False.
-        aws_access_key_id (str, optional): AWS Access Key ID. Defaults to None.
-        aws_secret_access_key (str, optional): AWS Secret Access Key. Defaults to None.
         
     Returns:
         dict: A dictionary containing the file content and type.
@@ -20,8 +18,10 @@ def read_file(path: str, debug: bool = False, aws_access_key_id: str = None, aws
         debug_info = {}
         
         if path.startswith("s3://"):
+            AWS_ACCESS_KEY_ID  = os.environ.get("AWS_ACCESS_KEY_ID")
+            AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
             # Read from S3 if the path is an S3 URI
-            if aws_access_key_id is None or aws_secret_access_key is None:
+            if AWS_ACCESS_KEY_ID is None or AWS_SECRET_ACCESS_KEY is None:
                 aws_credentials = get_aws_credentials()
                 if aws_credentials["status"] != 200:
                     return {
@@ -31,19 +31,22 @@ def read_file(path: str, debug: bool = False, aws_access_key_id: str = None, aws
                         "is_binary": None,
                         "debug": {"error": "AWS credentials not found"},
                     }
-                aws_access_key_id = aws_credentials["credentials"]["aws_access_key_id"]
-                aws_secret_access_key = aws_credentials["credentials"]["aws_secret_access_key"]
+                AWS_ACCESS_KEY_ID = aws_credentials["credentials"]["AWS_ACCESS_KEY_ID"]
+                AWS_SECRET_ACCESS_KEY = aws_credentials["credentials"]["AWS_SECRET_ACCESS_KEY"]
 
             # Extract S3 bucket and key from the path
             s3_uri_parts = path[5:].split("/", 1)
             bucket_name = s3_uri_parts[0]
             key = s3_uri_parts[1]
 
+            # Add s3_uri_parts, bucket_name, and key to debug_info
+            debug_info["s3_uri_parts"] = s3_uri_parts
+            debug_info["bucket_name"] = bucket_name
+            debug_info["key"] = key
+
             # Initialize S3 client with credentials
             s3 = boto3.client(
-                "s3",
-                aws_access_key_id=aws_access_key_id,
-                aws_secret_access_key=aws_secret_access_key,
+                "s3"
             )
 
             try:
@@ -58,12 +61,12 @@ def read_file(path: str, debug: bool = False, aws_access_key_id: str = None, aws
                     "binary": is_binary,
                     "debug": debug_info,
                 }
-            except Exception as e:
-                debug_info["exception"] = str(e)
+            except Exception as exception:
+                debug_info["exception"] = str(exception)
                 if debug:
                     return {
                         "status": 500,
-                        "message": f"Failed to read file from S3: {str(e)}",
+                        "message": f"Failed to read file from S3: {str(exception)}",
                         "content": None,
                         "is_binary": None,
                         "debug": debug_info,
@@ -90,12 +93,12 @@ def read_file(path: str, debug: bool = False, aws_access_key_id: str = None, aws
                 "binary": is_binary,
                 "debug": debug_info,
             }
-    except Exception as e:
-        debug_info["exception"] = str(e)
+    except Exception as exception:
+        debug_info["exception"] = str(exception)
         if debug:
             return {
                 "status": 500,
-                "message": f"Failed to read file: {str(e)}",
+                "message": f"Failed to read file: {str(exception)}",
                 "content": None,
                 "binary": None,
                 "debug": debug_info,
@@ -108,7 +111,7 @@ def read_file(path: str, debug: bool = False, aws_access_key_id: str = None, aws
             "debug": debug_info,
         }
 
-def write_file(path: str, content: Union[str, bytes], debug: bool = False, aws_access_key_id: str = None, aws_secret_access_key: str = None) -> Dict[str, Union[int, str, Dict[str, str]]]:
+def write_file(path: str, content: Union[str, bytes], debug: bool = False) -> Dict[str, Union[int, str, Dict[str, str]]]:
     """
     Writes content to a file at a given path, which can be either a local file or an S3 object.
     
@@ -116,9 +119,7 @@ def write_file(path: str, content: Union[str, bytes], debug: bool = False, aws_a
         path (str): The path where the file should be written. Can be a local path or an S3 URI (e.g., 's3://bucket/key').
         content (Union[str, bytes]): The content to write to the file.
         debug (bool, optional): Flag to enable debugging. Defaults to False.
-        aws_access_key_id (str, optional): AWS Access Key ID. Defaults to None.
-        aws_secret_access_key (str, optional): AWS Secret Access Key. Defaults to None.
-        
+
     Returns:
         dict: A dictionary containing the status of the write operation.
     """
@@ -126,28 +127,35 @@ def write_file(path: str, content: Union[str, bytes], debug: bool = False, aws_a
         debug_info = {}
 
         if path.startswith("s3://"):
+            AWS_ACCESS_KEY_ID  = os.environ.get("AWS_ACCESS_KEY_ID")
+            AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
             # Write to S3 if the path is an S3 URI
-            if aws_access_key_id is None or aws_secret_access_key is None:
+            if AWS_ACCESS_KEY_ID is None or AWS_SECRET_ACCESS_KEY is None:
                 aws_credentials = get_aws_credentials()
                 if aws_credentials["status"] != 200:
                     return {
                         "status": 403,
                         "message": "AWS credentials not found",
+                        "content": None,
+                        "is_binary": None,
                         "debug": {"error": "AWS credentials not found"},
                     }
-                aws_access_key_id = aws_credentials["credentials"]["aws_access_key_id"]
-                aws_secret_access_key = aws_credentials["credentials"]["aws_secret_access_key"]
+                AWS_ACCESS_KEY_ID = aws_credentials["credentials"]["AWS_ACCESS_KEY_ID"]
+                AWS_SECRET_ACCESS_KEY = aws_credentials["credentials"]["AWS_SECRET_ACCESS_KEY"]
 
             # Extract S3 bucket and key from the path
             s3_uri_parts = path[5:].split("/", 1)
             bucket_name = s3_uri_parts[0]
             key = s3_uri_parts[1]
 
+            # Add s3_uri_parts, bucket_name, and key to debug_info
+            debug_info["s3_uri_parts"] = s3_uri_parts
+            debug_info["bucket_name"] = bucket_name
+            debug_info["key"] = key
+            
             # Initialize S3 client with credentials
             s3 = boto3.client(
-                "s3",
-                aws_access_key_id=aws_access_key_id,
-                aws_secret_access_key=aws_secret_access_key,
+                "s3"
             )
 
             try:
@@ -159,12 +167,12 @@ def write_file(path: str, content: Union[str, bytes], debug: bool = False, aws_a
                     "message": "File written successfully to S3.",
                     "debug": debug_info,
                 }
-            except Exception as e:
-                debug_info["exception"] = str(e)
+            except Exception as exception:
+                debug_info["exception"] = str(exception)
                 if debug:
                     return {
                         "status": 500,
-                        "message": f"Failed to write file to S3: {str(e)}",
+                        "message": f"Failed to write file to S3: {str(exception)}",
                         "debug": debug_info,
                     }
                 return {
@@ -182,12 +190,12 @@ def write_file(path: str, content: Union[str, bytes], debug: bool = False, aws_a
                 "message": "File written successfully.",
                 "debug": debug_info,
             }
-    except Exception as e:
-        debug_info["exception"] = str(e)
+    except Exception as exception:
+        debug_info["exception"] = str(exception)
         if debug:
             return {
                 "status": 500,
-                "message": f"Failed to write file: {str(e)}",
+                "message": f"Failed to write file: {str(exception)}",
                 "debug": debug_info,
             }
         return {
@@ -196,57 +204,39 @@ def write_file(path: str, content: Union[str, bytes], debug: bool = False, aws_a
             "debug": debug_info,
         }
 
-def get_aws_credentials(AWS_ACCESS_KEY_ID: str = None, AWS_SECRET_ACCESS_KEY: str = None, debug: bool = False) -> dict:
+def get_aws_credentials(debug: bool = False) -> dict:
     """
     Fetches AWS credentials from environment variables or provided arguments.
     
     Args:
-        AWS_ACCESS_KEY_ID (str, optional): AWS Access Key ID. Defaults to None.
-        AWS_SECRET_ACCESS_KEY (str, optional): AWS Secret Access Key. Defaults to None.
         debug (bool, optional): Flag to enable debugging. Defaults to False.
         
     Returns:
         dict: A dictionary containing AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.
     """
-    try:
-        if AWS_ACCESS_KEY_ID is None or AWS_SECRET_ACCESS_KEY is None:
-            aws_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID")
-            aws_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
-        else:
-            aws_access_key_id = AWS_ACCESS_KEY_ID
-            aws_secret_access_key = AWS_SECRET_ACCESS_KEY
-
-        if aws_access_key_id is None or aws_secret_access_key is None:
-            if debug:
-                return {
-                    "status": 403,
-                    "message": "AWS credentials not found",
-                    "debug": {"error": "AWS credentials not found"},
-                }
+    AWS_ACCESS_KEY_ID  = os.environ.get("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+    if AWS_ACCESS_KEY_ID is None or AWS_SECRET_ACCESS_KEY is None:
+        if debug:
             return {
                 "status": 403,
                 "message": "AWS credentials not found",
+                "debug": {"error": "AWS credentials not found"},
             }
+        return {
+            "status": 403,
+            "message": "AWS credentials not found",
+        }
 
-        return {
-            "status": 200,
-            "message": "AWS credentials retrieved successfully.",
-            "credentials": {
-                "AWS_ACCESS_KEY_ID": aws_access_key_id,
-                "AWS_SECRET_ACCESS_KEY": aws_secret_access_key,
-            },
-        }
-    except Exception as e:
-        if debug:
-            return {
-                "status": 500,
-                "message": f"Failed to retrieve AWS credentials: {str(e)}",
-                "debug": {"exception": str(e)},
-            }
-        return {
-            "status": 500,
-            "message": "Failed to retrieve AWS credentials.",
-        }
+    return {
+        "status": 200,
+        "message": "AWS credentials retrieved successfully.",
+        "credentials": {
+            "AWS_ACCESS_KEY_ID": AWS_ACCESS_KEY_ID,
+            "AWS_SECRET_ACCESS_KEY": AWS_SECRET_ACCESS_KEY,
+        },
+    }
+
 
 def is_binary_file(file_path: str, debug: bool = False) -> bool:
     """

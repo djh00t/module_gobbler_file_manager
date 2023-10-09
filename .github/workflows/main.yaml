@@ -1,0 +1,134 @@
+###
+### gobbler-file-manager Build & Push Script
+###
+### This script is used to build and push the gobbler-file-manager package to PyPI and TestPyPI.
+### It is intended to be run as a GitHub Action. The high level workflow is as follows:
+###
+###   1. Increment the version number in the VERSION file. Only the 3rd digit (patch) should
+###      be incremented. The 1st (major) and 2nd (minor) digits should only be incremented
+###      when a backwards incompatible change is made.
+###   2. Build the package and run tests. If the tests fail, the script will exit.
+###   3. Push the package to TestPyPI and run tests. If the tests fail, the script will exit.
+###   4. Push the package to PyPI and run tests. If the tests fail, the script will exit.
+###   5. If the tests pass, push the updated VERSION file back to the repository.
+###
+### The script uses the Makefile to perform the build and test steps. The Makefile is also
+### used to increment the version number in the VERSION file.
+###
+
+name: CI
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events but only for the main
+  # branch and not for VERSION file changes
+  push:
+    branches: [ main ]
+    paths-ignore: [ VERSION ]
+  pull_request:
+    branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a job called "build-test" and "build-production"
+  build-test:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      # Setup python environment
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          make check-packages
+      
+      # Increment the version number in the VERSION file and set the VERSION
+      # environment variable
+      - name: Increment version number
+        run: |
+          make update-version
+          export VERSION=$(cat VERSION)
+
+      # Builds the package and runs tests
+      - name: Build and test
+        run: |
+          make sdist
+          make wheel
+          make test
+
+      # If tests pass, push the package to TestPyPI
+      - name: Push to TestPyPI
+        run: |
+          make upload-test TEST_PYPI_USER_AGENT=${{ secrets.TEST_PYPI_USER_AGENT }}
+
+      # Pull the package from TestPyPI and run tests
+      - name: Pull from TestPyPI and test
+        run: |
+          pip install --index-url https://test.pypi.org/simple/ gobbler-file-manager
+          python -m unittest discover
+
+  build-production:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    needs: build-test
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      # Setup python environment
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          make check-packages
+      
+      # Increment the version number in the VERSION file and set the VERSION
+      # environment variable
+      - name: Increment version number
+        run: |
+          make update-version
+          export VERSION=$(cat VERSION)
+
+      # Builds the package and runs tests
+      - name: Build and test
+        run: |
+          make sdist
+          make wheel
+          make test
+
+      # If tests pass, pushes the package to PyPI and runs tests
+      - name: Push to PyPI
+        run: |
+          make upload PYPI_USER_AGENT=${{ secrets.PYPI_USER_AGENT }}
+
+      # Pulls the package from PyPI and runs tests
+      - name: Pull from PyPI and test
+        run: |
+          pip install gobbler-file-manager
+          python -m unittest discover
+
+      # If uploads are successful, and the VERSION file has changed push the
+      # updated VERSION file back to the repository
+      - name: Push updated VERSION to repository
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'github-actions@github.com'
+          git diff --quiet VERSION || (git add VERSION && git commit -m "Update version number - $VERSION" && git push) || echo "VERSION file not updated"
