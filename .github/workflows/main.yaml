@@ -128,7 +128,7 @@ jobs:
           git pull || true
           export FILE_VERSION=$(cat VERSION)
           echo "FILE_VERSION:          $FILE_VERSION"
-          echo "VERSION:                ${{ VERSION }}"
+          echo "VERSION:                ${VERSION}"
           sleep 5
 
       # Install dependencies
