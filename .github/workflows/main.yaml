@@ -71,6 +71,7 @@ jobs:
           echo "AWS_ACCESS_KEY_ID:      ${{ secrets.AWS_ACCESS_KEY_ID }}"
           echo "AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}"
           echo "AWS_DEFAULT_REGION:     ${{ env.AWS_DEFAULT_REGION }}"
+          echo "GITHUB_ENV:             ${{GITHUB_ENV[@]}}"
 
       # Builds the package and runs tests
       - name: Build and test
@@ -125,10 +126,11 @@ jobs:
         run: |
           echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
-          echo "AWS_DEFAULT_REGION=${{ env.AWS_DEFAULT_REGION }}" >> $GITHUB_ENV
+          echo "AWS_DEFAULT_REGION=${{ AWS_DEFAULT_REGION }}" >> $GITHUB_ENV
           echo "AWS_ACCESS_KEY_ID:      ${{ secrets.AWS_ACCESS_KEY_ID }}"
           echo "AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}"
           echo "AWS_DEFAULT_REGION:     ${{ env.AWS_DEFAULT_REGION }}"
+          echo "GITHUB_ENV:             ${{GITHUB_ENV[@]}}"
 
       # Builds the package and runs tests
       - name: Build and test
