@@ -128,11 +128,10 @@ jobs:
           python -m pip install --upgrade pip
           make check-packages
       
-      # Increment the version number in the VERSION file and set the VERSION
+      # Get the version number in the VERSION file and set the VERSION
       # environment variable
-      - name: Increment version number
+      - name: Get version number
         run: |
-          make update-version
           export VERSION=$(cat VERSION)
           echo "VERSION:                $VERSION"
 
@@ -194,11 +193,10 @@ jobs:
           export APP_NAME=$(grep APP_NAME Makefile | cut -d'=' -f2)
           echo "APP_NAME:               $APP_NAME"
 
-      # Increment the version number in the VERSION file and set the VERSION
+      # Get the version number in the VERSION file and set the VERSION
       # environment variable
       - name: Increment version number
         run: |
-          make update-version
           export VERSION=$(cat VERSION)
           echo "VERSION:                $VERSION"
 
