@@ -267,6 +267,7 @@ jobs:
           export VERSION=$(cat VERSION)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "VERSION:                        $VERSION"
+          echo "env.VERSION:                    ${{ env.VERSION }}"
 
       - name: Build Changelog
         id: github_release
@@ -286,3 +287,4 @@ jobs:
         with:
           body: ${{steps.github_release.outputs.changelog}}
           generate_release_notes: true
+          tag_name: v${{ env.VERSION }}
