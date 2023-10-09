@@ -62,16 +62,19 @@ test:
 	pytest -v  --disable-warnings tests
 
 
-## update-version: Read the version number from VERSION file, it will look like A.B.C Increment the third (C) number by 1 and write it back to the VERSION file
+## update-version: Read the version number from VERSION file and save it as 
+## CURRENT_VERSION variable it will look like A.B.C Increment the third (C) 
+## number by 1 and write it back to the VERSION file. Validate that the new
+## version number is valid and echo it to console then commit it to git and
+## push to origin
 update-version:
-	@echo "Updating version number..."
-	@NEW_VERSION=$$(awk -F. '{print $$1"."$$2"."$$3+1}' VERSION) \
-	echo $$NEW_VERSION > VERSION
-	git add VERSION
-	git commit -m "Update version number to NEW_VERSION"
-	git pull
-	git push
-	echo "New version number is $$NEW_VERSION"
+	@CURRENT_VERSION=$$(cat VERSION); \
+	NEW_VERSION=$$(awk -F. '{print $$1"."$$2"."$$3+1}' VERSION); \
+	echo $$NEW_VERSION > VERSION; \
+	echo "New version $$NEW_VERSION created"; \
+	git add VERSION; \
+	git commit -m "Bump version to $$NEW_VERSION"; \
+	git push origin master
 
 ## generate-pyproject: Generate a pyproject.toml file
 generate-pyproject:
