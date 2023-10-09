@@ -126,7 +126,7 @@ jobs:
       - name: Get version number
         run: |
           git pull || true
-          export FILE_VERSION=$(cat VERSION)
+          export VERSION=$(cat VERSION)
           echo "VERSION:          $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           sleep 5
@@ -208,7 +208,7 @@ jobs:
       - name: Get version number
         run: |
           git pull || true
-          export FILE_VERSION=$(cat VERSION)
+          export VERSION=$(cat VERSION)
           echo "VERSION:          $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           sleep 5
