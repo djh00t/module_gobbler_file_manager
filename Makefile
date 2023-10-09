@@ -74,7 +74,7 @@ update-version:
 	echo "New version $$NEW_VERSION created"; \
 	git add VERSION; \
 	git commit -m "Bump version to $$NEW_VERSION"; \
-	git push origin master
+	git push origin main
 
 ## generate-pyproject: Generate a pyproject.toml file
 generate-pyproject:
