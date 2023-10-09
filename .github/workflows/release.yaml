@@ -8,29 +8,30 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Generate release notes
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const currentTag = '${{ github.ref }}'
-            const previousTag = await github.getPreviousTag()
-
-            const changelog = await github.generateReleaseChangelog({
-              fromCommit: previousTag.sha,
-              toCommit: currentTag.sha,
-            })
-
-            github.outputs.changelog = changelog
-
-      - name: Create GitHub release
-        uses: actions/create-release@v3
-        with:
-          tag_name: "${{ github.ref }}"
-          name: "${{ github.ref }}"
-          body: "${{ steps.generate_release_notes.outputs.changelog }}"
+	checkout:
+		runs-on: ubuntu-latest
+		steps:
+		  - uses: actions/checkout@v3
+	
+	  build:
+		runs-on: ubuntu-latest
+		needs: checkout
+		steps:
+		  - uses: actions/github-script@v6
+			with:
+			  script: |
+				const currentTag = '${{ github.ref }}'
+				const previousTag = await github.getPreviousTag()
+	
+				const changelog = await github.generateReleaseChangelog({
+				  fromCommit: previousTag.sha,
+				  toCommit: currentTag.sha,
+				})
+	
+				github.outputs.changelog = changelog
+	
+		  - uses: actions/create-release@v3
+			with:
+			  tag_name: '${{ github.ref }}'
+			  name: '${{ github.ref }}'
+			  body: '${{ steps.generate_release_notes.outputs.changelog }}'
