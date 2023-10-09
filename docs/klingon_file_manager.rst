@@ -1,8 +1,8 @@
 
-Gobbler File Manager Module
+Klingon File Manager Module
 ===========================
 
-.. automodule:: gobbler_file_manager
+.. automodule:: klingon_file_manager
     :members:
     :undoc-members:
     :show-inheritance:

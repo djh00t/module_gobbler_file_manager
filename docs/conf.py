@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath('../'))  # Source code dir relative to this f
 
 # -- Project information -----------------------------------------------------
 
-project = 'gobbler-file-manager'
+project = 'klingon-file-manager'
 author = 'David Hooton'
 
 # The full version, including alpha/beta/rc tags

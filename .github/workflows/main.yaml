@@ -1,7 +1,7 @@
 ###
-### gobbler-file-manager Build & Push Script
+### klingon_file_manager Build & Push Script
 ###
-### This script is used to build and push the gobbler-file-manager package to PyPI and TestPyPI.
+### This script is used to build and push the klingon_file_manager package to PyPI and TestPyPI.
 ### It is intended to be run as a GitHub Action. The high level workflow is as follows:
 ###
 ###   1. Increment the version number in the VERSION file. Only the 3rd digit (patch) should
@@ -64,6 +64,7 @@ jobs:
       # Builds the package and runs tests
       - name: Build and test
         run: |
+          pip install .
           make sdist
           make wheel
           make test
@@ -76,7 +77,7 @@ jobs:
       # Pull the package from TestPyPI and run tests
       - name: Pull from TestPyPI and test
         run: |
-          pip install --index-url https://test.pypi.org/simple/ gobbler-file-manager
+          pip install --index-url https://test.pypi.org/simple/ klingon-serial
           python -m unittest discover
 
   build-production:
@@ -110,6 +111,7 @@ jobs:
       # Builds the package and runs tests
       - name: Build and test
         run: |
+          pip install .
           make sdist
           make wheel
           make test
@@ -122,7 +124,7 @@ jobs:
       # Pulls the package from PyPI and runs tests
       - name: Pull from PyPI and test
         run: |
-          pip install gobbler-file-manager
+          pip install klingon-serial
           python -m unittest discover
 
       # If uploads are successful, and the VERSION file has changed push the

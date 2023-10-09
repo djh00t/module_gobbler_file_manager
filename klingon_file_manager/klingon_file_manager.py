@@ -1,5 +1,5 @@
-# gobbler_file_manager.py
-"""Gobbler File Manager
+# klingon_file_manager.py
+"""Klingon File Manager
 
 Manage file operations like 'get' and 'post' for both local and AWS S3 storage.
 

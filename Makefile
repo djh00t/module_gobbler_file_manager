@@ -1,13 +1,6 @@
-# Variables
-TWINE_USERNAME ?= __token__
-TEST_TWINE_PASSWORD ?= $(TEST_PYPI_USER_AGENT)
-PYPI_TWINE_PASSWORD ?= $(PYPI_USER_AGENT)
-
-all: build test docs
-
-build:
-	@echo "Building Docker images..."
-	docker-compose build
+# Clean up build files
+clean:
+	rm -rf build dist klingon_file_manager.egg-info .mypy_cache .pytest_cache klingon_file_manager/__pycache__ tests/__pycache__
 
 ## check-packages: Check for required pip packages and requirements.txt, install if missing
 check-packages:
@@ -21,10 +14,6 @@ check-packages:
 	@echo "Installing twine and wheel..."
 	@pip install twine wheel
 
-## clean: Remove build artifacts
-clean:
-	rm -rf build/ dist/ *.egg-info/
-
 ## sdist: Create a source distribution package
 sdist: clean
 	python setup.py sdist
@@ -35,41 +24,42 @@ wheel: clean
 
 ## upload-test: Run tests, if they pass update version number, echo it to console and upload the distribution package to TestPyPI
 upload-test: test wheel
-	@echo "Uploading Version $NEW_VERSION to TestPyPI..."
+	@echo "Uploading Version $$NEW_VERSION to TestPyPI..."
 	twine upload --repository-url https://test.pypi.org/legacy/ --username $(TWINE_USERNAME) --password $(TEST_TWINE_PASSWORD) dist/*
 
 ## upload: Run tests, if they pass update version number and upload the distribution package to PyPI
 upload: test wheel
-	@echo "Uploading Version $NEW_VERSION to PyPI..."
+	@echo "Uploading Version $$NEW_VERSION to PyPI..."
 	twine upload --username $(TWINE_USERNAME) --password $(PYPI_TWINE_PASSWORD) dist/*
 
-
-test:
-	@echo "Running tests..."
-	pytest -v -p no:warnings tests/
-
+## install: Install the package locally
 install:
-	@echo "Installing package..."
 	pip install -e .
+
 
 ## uninstall: Uninstall the local package
 uninstall:
-	pip uninstall gobbler-file-manager
+	pip uninstall get-user-agent
 
-docs:
-	@echo "Generating documentation..."
-	sphinx-build -b html docs/ build/
+# Run tests
+test:
+	@echo "Running unit tests..."
+	pytest tests
 
-clean:
-	@echo "Cleaning up..."
-	docker-compose down
-	rm -rf build/
+
 
 ## update-version: Read the version number from VERSION file, it will look like A.B.C Increment the third (C) number by 1 and write it back to the VERSION file
 update-version:
 	@echo "Updating version number..."
 	@NEW_VERSION=$$(awk -F. '{print $$1"."$$2"."$$3+1}' VERSION); \
 	echo $$NEW_VERSION > VERSION; \
+	sed -i '' "s/version='[0-9]*\.[0-9]*\.[0-9]*'/version='$$NEW_VERSION'/g" setup.py; \
 	echo "New version number is $$NEW_VERSION"
 
-.PHONY: all build check-packages test docs clean sdist wheel upload-test upload install uninstall update-version
+## generate-pyproject: Generate a pyproject.toml file
+generate-pyproject:
+	@echo "[build-system]" > pyproject.toml
+	@echo "requires = ['setuptools', 'wheel']" >> pyproject.toml
+	@echo "build-backend = 'setuptools.build_meta'" >> pyproject.toml
+
+.PHONY: clean check-packages sdist wheel upload-test upload install uninstall test update-version generate-pyproject

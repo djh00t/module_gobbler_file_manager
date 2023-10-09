@@ -1,5 +1,5 @@
 import json
-from gobbler_file_manager import manage_file
+from klingon_file_manager import manage_file
 
 # Set file names for testing
 TEST_GET_LOCAL_TXT_FILE='tests/manual.txt'
