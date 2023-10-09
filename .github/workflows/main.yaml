@@ -121,18 +121,23 @@ jobs:
         run: |
           echo "APP_NAME:               ${{ vars.APP_NAME }}"
 
+      # Get the version number in the VERSION file and set the VERSION
+      # environment variable
+      - name: Get version number
+        run: |
+          git pull || true
+          export FILE_VERSION=$(cat VERSION)
+          echo "FILE_VERSION:          $FILE_VERSION"
+          echo "VERSION:                ${{ VERSION }}"
+          sleep 5
+
       # Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           make check-packages
       
-      # Get the version number in the VERSION file and set the VERSION
-      # environment variable
-      - name: Get version number
-        run: |
-          echo "VERSION:                ${{ vars.VERSION }}"
-          sleep 5
+
 
       # Add AWS Credentials to environment variables
       - name: Add AWS Credentials
