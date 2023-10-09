@@ -131,8 +131,8 @@ jobs:
       # environment variable
       - name: Get version number
         run: |
-          export VERSION=$(cat VERSION)
-          echo "VERSION:                $VERSION"
+          echo "VERSION:                ${{ vars.VERSION }}"
+          sleep 5
 
       # Add AWS Credentials to environment variables
       - name: Add AWS Credentials
