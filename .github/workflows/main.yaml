@@ -89,9 +89,9 @@ jobs:
           echo "NEW VERSION:                    $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo $VERSION > VERSION
-          git add VERSION
-          git commit -m "Update version number - $VERSION"
-          git push
+          git add VERSION || true
+          git commit -m "Update version number - $VERSION" || true
+          git push || true
           sleep 5
 
   # build-test workflow
