@@ -126,13 +126,13 @@ jobs:
         run: |
           echo "APP_NAME:               ${{ vars.APP_NAME }}"
 
-      # Echo the new version number ${{ env.VERSION }}
+      # Echo the new version number
       - name: Echo the version number
         run: |
-          echo "env.VERSION:                    ${{ env.VERSION }}"
-          echo "env.VERSION:                    ${{ env.VERSION }}"
-          echo "env.VERSION:                    ${{ env.VERSION }}"
-          echo "env.VERSION:                    ${{ env.VERSION }}"
+          git pull || true
+          export VERSION=$(cat VERSION)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "VERSION:                        $VERSION"
           echo "env.VERSION:                    ${{ env.VERSION }}"
 
       # Install dependencies
@@ -203,12 +203,14 @@ jobs:
         run: |
           echo "APP_NAME:               ${{ vars.APP_NAME }}"
 
-      # Get the version number in the VERSION file and set the VERSION
-      # environment variable
-      - name: Get version number
+      # Echo the new version number
+      - name: Echo the version number
         run: |
           git pull || true
-          echo "VERSION:                ${{ env.VERSION }}"
+          export VERSION=$(cat VERSION)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "VERSION:                        $VERSION"
+          echo "env.VERSION:                    ${{ env.VERSION }}"
 
       # Add AWS Credentials to environment variables
       - name: Add AWS Credentials
