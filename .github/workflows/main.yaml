@@ -60,6 +60,17 @@ jobs:
         run: |
           make update-version
           export VERSION=$(cat VERSION)
+          echo "VERSION:                $VERSION"
+
+      # Add AWS Credentials to environment variables
+      - name: Add AWS Credentials
+        run: |
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+          echo "AWS_DEFAULT_REGION=${{ variables.AWS_DEFAULT_REGION }}" >> $GITHUB_ENV
+          echo "AWS_ACCESS_KEY_ID:      ${{ secrets.AWS_ACCESS_KEY_ID }}"
+          echo "AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+          echo "AWS_DEFAULT_REGION:     ${{ variables.AWS_DEFAULT_REGION }}"
 
       # Builds the package and runs tests
       - name: Build and test
@@ -107,6 +118,17 @@ jobs:
         run: |
           make update-version
           export VERSION=$(cat VERSION)
+          echo "VERSION:                $VERSION"
+
+      # Add AWS Credentials to environment variables
+      - name: Add AWS Credentials
+        run: |
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+          echo "AWS_DEFAULT_REGION=${{ variables.AWS_DEFAULT_REGION }}" >> $GITHUB_ENV
+          echo "AWS_ACCESS_KEY_ID:      ${{ secrets.AWS_ACCESS_KEY_ID }}"
+          echo "AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+          echo "AWS_DEFAULT_REGION:     ${{ variables.AWS_DEFAULT_REGION }}"
 
       # Builds the package and runs tests
       - name: Build and test
