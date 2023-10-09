@@ -231,24 +231,51 @@ jobs:
         run: |
           make upload PYPI_USER_AGENT=${{ secrets.PYPI_USER_AGENT }}
 
-      # If uploads are successful, and the VERSION file has changed, tag the
-      # codebase and push the code and tags to the repository
-      - name: Tag and push
-        run: |
-          git pull || true
-          git tag -a v${{ env.VERSION }} -m "Version v${{ env.VERSION }}"
-          git push origin v${{ env.VERSION }}
-          git push || true
-          sleep 5
+#       # If uploads are successful, and the VERSION file has changed, tag the
+#       # codebase and push the code and tags to the repository
+#       - name: Tag and push
+#         run: |
+#           git pull || true
+#           git tag -a v${{ env.VERSION }} -m "Version v${{ env.VERSION }}"
+#           git push origin v${{ env.VERSION }}
+#           git push || true
+#           sleep 5
   create-release:
     runs-on: ubuntu-latest
     needs: build-production
     steps:
+      # Set git user and email
+      - name: Set git user and email
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'david@hooton.org'
+
+      # Get APP_NAME from Variables
+      - name: Get APP_NAME from Variables
+        run: |
+          echo "APP_NAME:               ${{ vars.APP_NAME }}"
+
+      # Echo the new version number
+      - name: Echo the version number
+        run: |
+          git pull || true
+          export VERSION=$(cat VERSION)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "VERSION:                        $VERSION"
+
       - name: Build Changelog
         id: github_release
         uses: mikepenz/release-changelog-builder-action@v4.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create and Push Tag
+        run: |
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+          git tag -a v${{ env.VERSION }} -m "Release version v${{ env.VERSION }}"
+          git push origin v${{ env.VERSION }}
+
       - name: Create Release
         uses: mikepenz/action-gh-release@v0.4.0
         with:
