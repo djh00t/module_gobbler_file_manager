@@ -1,10 +1,10 @@
 # klingon_file_manager.py
 """Klingon File Manager
 
-Manage file operations like 'get' and 'post' for both local and AWS S3 storage.
+Manage file operations like 'get', 'post' and 'delete' for both local and AWS S3 storage.
 
 Args:
-    action (str): The action to be performed ('get' or 'post').
+    action (str): The action to be performed ('get', 'post' or 'delete').
     path (str): The path for the file operation.
     content (str): The file content.
     debug (bool, optional): Flag to enable debugging. Defaults to False.
@@ -13,7 +13,7 @@ Returns:
     dict: A dictionary containing status, action, binary, file, path, and debug information.
 """
 
-from .utils import read_file, write_file, is_binary_file, get_aws_credentials
+from .utils import read_file, write_file, delete_file, is_binary_file, get_aws_credentials
 
 # Use the get_aws_credentials function to get AWS credentials returned as a
 # json object containing the following keys:
