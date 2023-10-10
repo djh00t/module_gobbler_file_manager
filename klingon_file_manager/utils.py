@@ -204,40 +204,6 @@ def write_file(path: str, content: Union[str, bytes], debug: bool = False) -> Di
             "debug": debug_info,
         }
 
-def get_aws_credentials(debug: bool = False) -> dict:
-    """
-    Fetches AWS credentials from environment variables or provided arguments.
-    
-    Args:
-        debug (bool, optional): Flag to enable debugging. Defaults to False.
-        
-    Returns:
-        dict: A dictionary containing AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.
-    """
-    AWS_ACCESS_KEY_ID  = os.environ.get("AWS_ACCESS_KEY_ID")
-    AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
-    if AWS_ACCESS_KEY_ID is None or AWS_SECRET_ACCESS_KEY is None:
-        if debug:
-            return {
-                "status": 403,
-                "message": "AWS credentials not found",
-                "debug": {"error": "AWS credentials not found"},
-            }
-        return {
-            "status": 403,
-            "message": "AWS credentials not found",
-        }
-
-    return {
-        "status": 200,
-        "message": "AWS credentials retrieved successfully.",
-        "credentials": {
-            "AWS_ACCESS_KEY_ID": AWS_ACCESS_KEY_ID,
-            "AWS_SECRET_ACCESS_KEY": AWS_SECRET_ACCESS_KEY,
-        },
-    }
-
-
 def delete_file(path: str, debug: bool = False) -> Dict[str, Union[int, str, Dict[str, str]]]:
     """
     Deletes a file at a given path, which can be either a local file or an S3 object.
@@ -340,3 +306,68 @@ def delete_file(path: str, debug: bool = False) -> Dict[str, Union[int, str, Dic
             "message": "Failed to delete file.",
             "debug": debug_info,
         }
+
+def get_aws_credentials(debug: bool = False) -> dict:
+    """
+    Fetches AWS credentials from environment variables or provided arguments.
+    
+    Args:
+        debug (bool, optional): Flag to enable debugging. Defaults to False.
+        
+    Returns:
+        dict: A dictionary containing AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.
+    """
+    AWS_ACCESS_KEY_ID  = os.environ.get("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+    if AWS_ACCESS_KEY_ID is None or AWS_SECRET_ACCESS_KEY is None:
+        if debug:
+            return {
+                "status": 403,
+                "message": "AWS credentials not found",
+                "debug": {"error": "AWS credentials not found"},
+            }
+        return {
+            "status": 403,
+            "message": "AWS credentials not found",
+        }
+
+    return {
+        "status": 200,
+        "message": "AWS credentials retrieved successfully.",
+        "credentials": {
+            "AWS_ACCESS_KEY_ID": AWS_ACCESS_KEY_ID,
+            "AWS_SECRET_ACCESS_KEY": AWS_SECRET_ACCESS_KEY,
+        },
+    }
+
+
+def is_binary_file(file_path: str, debug: bool = False) -> bool:
+    """
+    Checks if a file is binary or text.
+    
+    Args:
+        file_path (str): The path to the file.
+        debug (bool, optional): Flag to enable debugging. Defaults to False.
+        
+    Returns:
+        bool: True if the file is binary, False otherwise.
+    """
+
+    try:
+        with open(file_path, "rb") as file:
+            # Read the first few bytes from the file
+            num_bytes_to_check = 1024  # You can adjust this value
+            content = file.read(num_bytes_to_check)
+            
+            # Check for null bytes (often found in binary files)
+            if b'\x00' in content:
+                return True
+            
+            # Check for non-printable characters (common in binary files)
+            if not content.isascii():
+                return True
+            
+            # If none of the above conditions matched, it's likely a text file
+            return False
+    except:
+        return False
