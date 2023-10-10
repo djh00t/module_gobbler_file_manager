@@ -7,7 +7,7 @@ It provides functionalities to 'get' and 'post' files using a unified interface.
 ## Installation
 Run the following command to install the package:
 ```bash
-pip install klingon_file_manager
+pip install klingon-file-manager
 ```
 
 ## Features
