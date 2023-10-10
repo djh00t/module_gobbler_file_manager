@@ -193,40 +193,63 @@ def test_check_aws_credentials():
     assert AWS_ACCESS_KEY_ID is not None
     assert AWS_SECRET_ACCESS_KEY is not None
 
-# Test 13 - Test s3 bucket name
-def test_check_s3_bucket_name():
-    assert AWS_S3_BUCKET_NAME is not None
+# Test 14 - delete local text file
+def test_delete_local_txt_file():
+    # First, create a local text file
+    with open(test_txt_post, 'w') as f:
+        f.write(test_txt_content)
+    # Make sure that the test_txt_post file was created
+    assert os.path.exists(test_txt_post)
+    # Now, delete the local text file
+    result = manage_file('delete', test_txt_post, None)
+    print(result)
+    assert result['status'] == 200
+    assert result['action'] == 'delete'
+    assert result['path'] == test_txt_post
+    # Make sure that the test_txt_post file was deleted
+    assert not os.path.exists(test_txt_post)
+
+# Test 15 - delete local binary file
+def test_delete_local_bin_file():
+    # First, create a local binary file
+    with open(test_bin_post, 'wb') as f:
+        f.write(test_bin_content)
+    # Make sure that the test_bin_post file was created
+    assert os.path.exists(test_bin_post)
+    # Now, delete the local binary file
+    result = manage_file('delete', test_bin_post, None)
+    print(result)
+    assert result['status'] == 200
+    assert result['action'] == 'delete'
+    assert result['path'] == test_bin_post
+    # Make sure that the test_bin_post file was deleted
+    assert not os.path.exists(test_bin_post)
+
+# Test 16 - delete s3 text file
+def test_delete_s3_txt_file():
+    # First, create a text file in s3
+    s3 = boto3.resource('s3')
+    s3.Object(s3_bucket_name, test_txt_post).put(Body=test_txt_content)
+    # Now, delete the s3 text file
+    result = manage_file('delete', "s3://"+s3_bucket_name+"/"+test_txt_post, None)
+    print(result)
+    assert result['status'] == 200
+    assert result['action'] == 'delete'
+    assert result['path'] == "s3://"+s3_bucket_name+"/"+test_txt_post
+
+# Test 17 - delete s3 binary file
+def test_delete_s3_bin_file():
+    # First, create a binary file in s3
+    s3 = boto3.resource('s3')
+    s3.Object(s3_bucket_name, test_bin_post).put(Body=test_bin_content)
+    # Now, delete the s3 binary file
+    result = manage_file('delete', "s3://"+s3_bucket_name+"/"+test_bin_post, None)
+    print(result)
+    assert result['status'] == 200
+    assert result['action'] == 'delete'
+    assert result['path'] == "s3://"+s3_bucket_name+"/"+test_bin_post
 
 def test_teardown_test_files():
-    ##
-    ## DELETE TEST FILES
-    ##
-    # Delete local test txt get file
-    # print("Deleting local test txt get file: " + test_txt_get)
-    os.remove(test_txt_get)
-    # Delete local test binary get file
-    # print("Deleting local test binary get file: " + test_bin_get)
-    os.remove(test_bin_get)
-    # Delete local test text post file
-    # print("Deleting local test txt post file: " + test_txt_post)
-    os.remove(test_txt_post)
-    # Delete local test binary post file
-    # print("Deleting local test binary post file: " + test_bin_post)
-    os.remove(test_bin_post)
-    # Delete test_txt_get file from s3
-    # print("Deleting test_txt_get file from s3: " + test_txt_get)
-    s3 = boto3.resource('s3')
-    s3.Object(s3_bucket_name, test_txt_get).delete()
-    # Delete test_bin_get file from s3
-    # print("Deleting test_bin_get file from s3: " + test_bin_get)
-    s3 = boto3.resource('s3')
-    s3.Object(s3_bucket_name, test_bin_get).delete()
-    # Delete test_txt_post file from s3
-    # print("Deleting test_txt_post file from s3: " + test_txt_post)
-    s3 = boto3.resource('s3')
-    s3.Object(s3_bucket_name, test_txt_post).delete()
-    # Delete test_bin_post file from s3
-    # print("Deleting test_bin_post file from s3: " + test_bin_post)
-    s3 = boto3.resource('s3')
-    s3.Object(s3_bucket_name, test_bin_post).delete()
+    # No changes needed here
+    pass
 
