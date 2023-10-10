@@ -1,2 +1,6 @@
-include README.md
 include LICENSE
+include README.md
+include requirements.txt
+include VERSION
+recursive-include klingon_file_manager/
+recursive_include tests/

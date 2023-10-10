@@ -1,7 +1,0 @@
-#!/bin/bash
-MESSAGE=$@
-
-git add -A
-git commit -m "$MESSAGE"
-git pull
-git push
