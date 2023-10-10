@@ -28,11 +28,17 @@ result = manage_file(action='get', path='path/to/local/file.txt')
 # To post a file to a local storage
 result = manage_file(action='post', path='path/to/local/file.txt', content='Your content here')
 
+# To delete a file from local storage
+result = manage_file(action='delete', path='path/to/local/file.txt')
+
 # To get a file from AWS S3
 result = manage_file(action='get', path='s3://your-bucket/your-key')
 
 # To post a file to AWS S3
 result = manage_file(action='post', path='s3://your-bucket/your-key', content='Your content here')
+
+# To delete a file from AWS S3
+result = manage_file(action='delete', path='s3://your-bucket/your-key')
 ```
 
 ## Contribution Guidelines
