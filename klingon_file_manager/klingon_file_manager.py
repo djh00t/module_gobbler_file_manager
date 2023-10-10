@@ -76,6 +76,12 @@ def manage_file(
             # Add the debug info for the write_file() function
             if debug or result['status'] == 500:
                 debug_info['write_file'] = write_result['debug']
+        elif action == 'delete':
+            delete_result = delete_file(path, debug)
+            result['status'] = delete_result['status']
+            # Add the debug info for the delete_file() function
+            if debug or result['status'] == 500:
+                debug_info['delete_file'] = delete_result['debug']
         else:
             result['status'] = 500
             debug_info['error'] = 'Invalid action'
