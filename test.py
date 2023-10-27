@@ -59,17 +59,16 @@ def cleanup_test_files():
     # existed or not, and if they were deleted or not
     for test_file in test_files:
         # Check if the test file exists
-        try:
-            if manage_file('get', test_file, None)['status'] == 200:
-                # If the test file exists, delete it
-                result = manage_file('delete', test_file, None)
-                print(result)
-                assert result['status'] == 200
-                assert result['action'] == 'delete'
-                assert result['path'] == test_file
-                # Make sure that the test file was deleted
-                assert manage_file('get', test_file, None)['status'] == 404
-        except FileNotFoundError:
+        if manage_file('get', test_file, None)['status'] == 200:
+            # If the test file exists, delete it
+            result = manage_file('delete', test_file, None)
+            print(result)
+            assert result['status'] == 200
+            assert result['action'] == 'delete'
+            assert result['path'] == test_file
+            # Make sure that the test file was deleted
+            assert manage_file('get', test_file, None)['status'] == 404
+        else:
             # If the test file does not exist, log that it did not exist
             print("Test file did not exist: " + test_file)
 
@@ -104,7 +103,7 @@ def setup_test_files():
     # Make sure that the test_bin_get_s3 file was created
     compare_s3_local_file(test_bin_get, test_bin_get)
 
-setup_test_files()
+#setup_test_files()
 
 # Test 12 - Test aws credentials
 def test_check_aws_access_key_id():
@@ -117,19 +116,36 @@ def test_check_aws_secret_access_key():
 
 # Test 7 - post s3 text file
 def test_post_s3_txt_file():
-    result = manage_file(action='post', path="s3://"+s3_bucket_name+"/"+test_txt_post, 
-                         content=test_txt_content, debug=True)
+    result = manage_file(action='post', path="s3://"+s3_bucket_name+"/"+test_txt_post, content=test_txt_content, debug=True)
     print(result)
     assert result['status'] == 200
     assert result['action'] == 'post'
     assert result['path'] == "s3://"+s3_bucket_name+"/"+test_txt_post
     assert result['binary'] is False
-    # Additional check: Read the file from s3 to make sure content was written correctly
+    # Additional check: Read the file from s3 to make sure content was written
+    # correctly
     validate = manage_file('get', "s3://"+s3_bucket_name+"/"+test_txt_post, None, debug=True)
     print(validate)
     assert validate['status'] == 200
     assert validate['action'] == 'get'
     assert validate['content'].decode() == test_txt_content
     assert validate['path'] == "s3://"+s3_bucket_name+"/"+test_txt_post
+
+#test_post_s3_txt_file()
+
+# Basic manage_file test - write test_txt_content text to tests/text.txt
+def test_post_local_txt_file():
+    result = manage_file(action='post', path=test_txt_post, content=test_txt_content, debug=True)
+    print(result)
+
+#test_post_local_txt_file()
+
+# Basic manage_file test - write test_txt_content text to s3
+# fsg-gobbler/tests/test_post_txt_file.txt
+def test_post_s3_txt_file():
+    print(f"Posting to: path="s3://fsg-gobbler/"+test_txt_post")
+    result = manage_file(action='post', path="s3://fsg-gobbler/"+test_txt_post, content=test_txt_content, debug=True)
+    
+    print(result)
 
 test_post_s3_txt_file()
