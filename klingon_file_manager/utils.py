@@ -50,9 +50,15 @@ def read_file(path: str, debug: bool = False) -> Dict[str, Union[int, str, bytes
             )
 
             try:
-                # Read the file from S3
-                response = s3.get_object(Bucket=bucket_name, Key=key)
-                content = response["Body"].read()
+                # Read the file from S3 with progress callback
+                s3 = boto3.resource('s3')
+                s3_object = s3.Object(bucket_name, key)
+                file_size = s3_object.content_length
+                progress = ProgressPercentage(file_size)
+                s3.download_file(bucket_name, key, '/tmp/temp_file', Callback=progress)
+                with open('/tmp/temp_file', 'rb') as file:
+                    content = file.read()
+                os.remove('/tmp/temp_file')
                 is_binary = True  # S3 returns bytes
                 return {
                     "status": 200,
@@ -159,8 +165,12 @@ def write_file(path: str, content: Union[str, bytes], debug: bool = False) -> Di
             )
 
             try:
-                # Write the content to S3
-                s3.put_object(Bucket=bucket_name, Key=key, Body=content)
+                # Write the content to S3 with progress callback
+                s3 = boto3.resource('s3')
+                file_size = len(content)
+                progress = ProgressPercentage(file_size)
+                s3.Bucket(bucket_name).upload_file('/tmp/temp_file', key, Callback=progress)
+                os.remove('/tmp/temp_file')
 
                 return {
                     "status": 200,
@@ -371,3 +381,21 @@ def is_binary_file(file_path: str, debug: bool = False) -> bool:
             return False
     except:
         return False
+import threading
+
+class ProgressPercentage(object):
+    def __init__(self, total_size):
+        self._total_size = total_size
+        self._seen_so_far = 0
+        self._lock = threading.Lock()
+
+    def __call__(self, bytes_amount):
+        # To simplify, assume this is hooked up to a single filename
+        with self._lock:
+            self._seen_so_far += bytes_amount
+            percentage = (self._seen_so_far / self._total_size) * 100
+            sys.stdout.write(
+                "\r%s  %s / %s  (%.2f%%)" % (
+                    filename, self._seen_so_far, self._total_size,
+                    percentage))
+            sys.stdout.flush()
