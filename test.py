@@ -114,7 +114,7 @@ def test_check_aws_secret_access_key():
 
 # Test 7 - post s3 text file
 def test_post_s3_txt_file():
-    result = manage_file('post', "s3://"+s3_bucket_name+"/"+test_txt_post, test_txt_content, True)
+    result = manage_file('post', "s3://"+s3_bucket_name+"/"+test_txt_post, test_txt_content, debug=True)
     print(result)
     assert result['status'] == 200
     assert result['action'] == 'post'
