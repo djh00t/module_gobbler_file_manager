@@ -59,16 +59,17 @@ def cleanup_test_files():
     # existed or not, and if they were deleted or not
     for test_file in test_files:
         # Check if the test file exists
-        if manage_file('get', test_file, None)['status'] == 200:
-            # If the test file exists, delete it
-            result = manage_file('delete', test_file, None)
-            print(result)
-            assert result['status'] == 200
-            assert result['action'] == 'delete'
-            assert result['path'] == test_file
-            # Make sure that the test file was deleted
-            assert manage_file('get', test_file, None)['status'] == 404
-        else:
+        try:
+            if manage_file('get', test_file, None)['status'] == 200:
+                # If the test file exists, delete it
+                result = manage_file('delete', test_file, None)
+                print(result)
+                assert result['status'] == 200
+                assert result['action'] == 'delete'
+                assert result['path'] == test_file
+                # Make sure that the test file was deleted
+                assert manage_file('get', test_file, None)['status'] == 404
+        except FileNotFoundError:
             # If the test file does not exist, log that it did not exist
             print("Test file did not exist: " + test_file)
 
