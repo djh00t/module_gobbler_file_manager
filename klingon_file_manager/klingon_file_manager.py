@@ -26,7 +26,7 @@ aws_credentials = get_aws_credentials()
 def manage_file(
     action: str,
     path: str,
-    content: str,
+    content: str = None,
     debug: bool = False,
 ) -> dict:
 
