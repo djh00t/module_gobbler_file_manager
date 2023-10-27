@@ -146,15 +146,23 @@ def test_post_s3_txt_file():
     print(f"Posting to: path=s3://fsg-gobbler/{test_txt_post}")
     result = manage_file(action='post', path="s3://fsg-gobbler/"+test_txt_post, content=test_txt_content, debug=True)
     
-    print(result)
+#    print(result)
+
+
 import subprocess
 
 def test_large_upload_progress():
     # Generate a 100MB file using dd command
     subprocess.run(['dd', 'if=/dev/zero', 'of=./large_file', 'bs=1M', 'count=100'])
 
+    # Get md5 hash of the generated file
+    md5_hash = subprocess.run(['md5sum', './large_file'], stdout=subprocess.PIPE).stdout.decode('utf-8').split(' ')[0]
+
     # Upload the generated file to the fsg-gobbler/tests directory on S3
     result = manage_file(action='post', path="s3://fsg-gobbler/tests/large_file", content=open('./large_file', 'rb').read(), debug=True)
-    print(result)
+
+    # Get md5 hash of the uploaded file from S3
+    
+    
 
 test_large_upload_progress()
