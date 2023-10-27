@@ -57,6 +57,9 @@ def write_file(path: str, content: Union[str, bytes], debug: bool = False) -> Di
             )
 
             try:
+                # Write the content to a temporary file
+                with open('/tmp/temp_file', 'wb') as temp_file:
+                    temp_file.write(content)
                 # Write the content to S3 with progress callback
                 s3 = boto3.resource('s3')
                 file_size = len(content)
