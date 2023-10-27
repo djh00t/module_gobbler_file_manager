@@ -65,8 +65,7 @@ def write_file(path: str, content: Union[str, bytes], debug: bool = False) -> Di
                     temp_file.write(content)
                 # Write the content to S3 with progress callback
                 s3 = boto3.resource('s3')
-                file_size = len(content)
-                progress = ProgressPercentage(file_size)
+                progress = ProgressPercentage(len(content), key)
                 s3.Bucket(bucket_name).upload_file('/tmp/temp_file', key, Callback=progress)
                 os.remove('/tmp/temp_file')
 
