@@ -143,7 +143,7 @@ def test_post_local_txt_file():
 # Basic manage_file test - write test_txt_content text to s3
 # fsg-gobbler/tests/test_post_txt_file.txt
 def test_post_s3_txt_file():
-    print(f"Posting to: path="s3://fsg-gobbler/"+test_txt_post")
+    print(f"Posting to: path=s3://fsg-gobbler/{test_txt_post}")
     result = manage_file(action='post', path="s3://fsg-gobbler/"+test_txt_post, content=test_txt_content, debug=True)
     
     print(result)
