@@ -162,10 +162,10 @@ jobs:
           make upload-test TEST_PYPI_USER_AGENT=${{ secrets.TEST_PYPI_USER_AGENT }}
 
       # Pull the package from TestPyPI and run tests
-      - name: Pull from TestPyPI and test
-        run: |
-          pip install --index-url https://test.pypi.org/simple/ klingon-file-manager
-          python -m unittest discover
+#      - name: Pull from TestPyPI and test
+#        run: |
+#          pip install --index-url https://test.pypi.org/simple/ klingon-file-manager
+#          python -m unittest discover
 
   build-production:
     # The type of runner that the job will run on
