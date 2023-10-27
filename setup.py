@@ -21,9 +21,9 @@ setup(
     include_package_data=True,
     packages=find_packages(),
     install_requires=[
-        'boto3>=1.18,<2.0',
-        'pytest>=6.2,<7.0',
-        'python-dotenv>=0.19,<1.0',
+        'boto3>=1.18',
+        'pytest>=6.2',
+        'python-dotenv>=0.19',
         'datetime',
         'uuid',
     ],

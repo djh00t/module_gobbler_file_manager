@@ -1,6 +1,6 @@
 # File Content
-boto3>=1.18,<2.0
-pytest>=6.2,<7.0
+boto3>=1.18
+pytest>=6.2
 lorem
 sphinx
 pydantic
