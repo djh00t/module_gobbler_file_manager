@@ -1,19 +1,30 @@
 # klingon_file_manager.py
-"""Klingon File Manager
-
-Manage file operations like 'get', 'post' and 'delete' for both local and AWS S3 storage.
+"""
+Manages file operations like 'get', 'post', and 'delete' for both local and AWS S3 storage.
 
 Args:
-    action (str): The action to be performed ('get', 'post' or 'delete').
+    action (str): The action to be performed ('get', 'post', or 'delete').
     path (str): The path for the file operation.
-    content (str): The file content.
+    content (Union[str, bytes], optional): The file content for 'post' action.
     debug (bool, optional): Flag to enable debugging. Defaults to False.
-
+    
 Returns:
-    dict: A dictionary containing status, action, binary, file, path, and debug information.
+    dict: A dictionary containing the result of the file operation with the following schema:
+        {
+            'action': str,         # Action performed ('get', 'post', or 'delete')
+            'path': str,           # Path for the file operation
+            'content': Union[str, bytes],  # File content for 'get' and 'post' actions
+            'content_size_mb': float,  # Size of the content in megabytes
+            'binary': bool,        # Flag indicating if the content is binary
+            'status': int,         # HTTP-like status code (e.g., 200 for success, 500 for failure)
+            'debug': Dict[str, str]  # Debug information (only included if 'debug' flag is True)
+        }
 """
-
-from .utils import read_file, write_file, delete_file, is_binary_file, get_aws_credentials
+from typing import Union, Dict
+from .utils import is_binary_file, get_aws_credentials, ProgressPercentage
+from .delete import delete_file
+from .write import write_file
+from .read import read_file
 
 # Use the get_aws_credentials function to get AWS credentials returned as a
 # json object containing the following keys:
@@ -34,7 +45,7 @@ def manage_file(
     AWS S3 storage.
 
     Args:
-        action (str): The action to be performed ('get' or 'post').
+        action (str): The action to be performed ('get', 'post' or 'delete').
         path (str): The path for the file operation.
         content (str): The file content.
         content_size_mb (int): The size of the content in megabytes.

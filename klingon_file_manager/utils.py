@@ -2,320 +2,9 @@
 import os
 import boto3
 from typing import Union, Dict
+import threading
+import sys
 
-def read_file(path: str, debug: bool = False) -> Dict[str, Union[int, str, bytes, bool, Dict[str, str]]]:
-    """
-    Reads a file from a given path, which can be either a local file or an S3 object.
-    
-    Args:
-        path (str): The path of the file to read. Can be a local path or an S3 URI (e.g., 's3://bucket/key').
-        debug (bool, optional): Flag to enable debugging. Defaults to False.
-        
-    Returns:
-        dict: A dictionary containing the file content and type.
-    """
-    try:
-        debug_info = {}
-        
-        if path.startswith("s3://"):
-            AWS_ACCESS_KEY_ID  = os.environ.get("AWS_ACCESS_KEY_ID")
-            AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
-            # Read from S3 if the path is an S3 URI
-            if AWS_ACCESS_KEY_ID is None or AWS_SECRET_ACCESS_KEY is None:
-                aws_credentials = get_aws_credentials()
-                if aws_credentials["status"] != 200:
-                    return {
-                        "status": 403,
-                        "message": "AWS credentials not found",
-                        "content": None,
-                        "is_binary": None,
-                        "debug": {"error": "AWS credentials not found"},
-                    }
-                AWS_ACCESS_KEY_ID = aws_credentials["credentials"]["AWS_ACCESS_KEY_ID"]
-                AWS_SECRET_ACCESS_KEY = aws_credentials["credentials"]["AWS_SECRET_ACCESS_KEY"]
-
-            # Extract S3 bucket and key from the path
-            s3_uri_parts = path[5:].split("/", 1)
-            bucket_name = s3_uri_parts[0]
-            key = s3_uri_parts[1]
-
-            # Add s3_uri_parts, bucket_name, and key to debug_info
-            debug_info["s3_uri_parts"] = s3_uri_parts
-            debug_info["bucket_name"] = bucket_name
-            debug_info["key"] = key
-
-            # Initialize S3 client with credentials
-            s3 = boto3.client(
-                "s3"
-            )
-
-            try:
-                # Read the file from S3 with progress callback
-                s3 = boto3.resource('s3')
-                s3_object = s3.Object(bucket_name, key)
-                file_size = s3_object.content_length
-                progress = ProgressPercentage(file_size)
-                s3.download_file(bucket_name, key, '/tmp/temp_file', Callback=progress)
-                with open('/tmp/temp_file', 'rb') as file:
-                    content = file.read()
-                os.remove('/tmp/temp_file')
-                is_binary = True  # S3 returns bytes
-                return {
-                    "status": 200,
-                    "message": "File read successfully from S3.",
-                    "content": content,
-                    "binary": is_binary,
-                    "debug": debug_info,
-                }
-            except Exception as exception:
-                debug_info["exception"] = str(exception)
-                if debug:
-                    return {
-                        "status": 500,
-                        "message": f"Failed to read file from S3: {str(exception)}",
-                        "content": None,
-                        "is_binary": None,
-                        "debug": debug_info,
-                    }
-                return {
-                    "status": 500,
-                    "message": "Failed to read file from S3.",
-                    "content": None,
-                    "is_binary": None,
-                    "debug": debug_info,
-                }
-        else:
-            # Read from the local file system
-            with open(path, "rb") as file:
-                content = file.read()
-
-            # Determine if the file is binary or text
-            is_binary = is_binary_file(content)
-
-            return {
-                "status": 200,
-                "message": "File read successfully.",
-                "content": content,
-                "binary": is_binary,
-                "debug": debug_info,
-            }
-    except Exception as exception:
-        debug_info["exception"] = str(exception)
-        if debug:
-            return {
-                "status": 500,
-                "message": f"Failed to read file: {str(exception)}",
-                "content": None,
-                "binary": None,
-                "debug": debug_info,
-            }
-        return {
-            "status": 500,
-            "message": "Failed to read file.",
-            "content": None,
-            "binary": None,
-            "debug": debug_info,
-        }
-
-def write_file(path: str, content: Union[str, bytes], debug: bool = False) -> Dict[str, Union[int, str, Dict[str, str]]]:
-    """
-    Writes content to a file at a given path, which can be either a local file or an S3 object.
-    
-    Args:
-        path (str): The path where the file should be written. Can be a local path or an S3 URI (e.g., 's3://bucket/key').
-        content (Union[str, bytes]): The content to write to the file.
-        debug (bool, optional): Flag to enable debugging. Defaults to False.
-
-    Returns:
-        dict: A dictionary containing the status of the write operation.
-    """
-    try:
-        debug_info = {}
-
-        if path.startswith("s3://"):
-            AWS_ACCESS_KEY_ID  = os.environ.get("AWS_ACCESS_KEY_ID")
-            AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
-            # Write to S3 if the path is an S3 URI
-            if AWS_ACCESS_KEY_ID is None or AWS_SECRET_ACCESS_KEY is None:
-                aws_credentials = get_aws_credentials()
-                if aws_credentials["status"] != 200:
-                    return {
-                        "status": 403,
-                        "message": "AWS credentials not found",
-                        "content": None,
-                        "is_binary": None,
-                        "debug": {"error": "AWS credentials not found"},
-                    }
-                AWS_ACCESS_KEY_ID = aws_credentials["credentials"]["AWS_ACCESS_KEY_ID"]
-                AWS_SECRET_ACCESS_KEY = aws_credentials["credentials"]["AWS_SECRET_ACCESS_KEY"]
-
-            # Extract S3 bucket and key from the path
-            s3_uri_parts = path[5:].split("/", 1)
-            bucket_name = s3_uri_parts[0]
-            key = s3_uri_parts[1]
-
-            # Add s3_uri_parts, bucket_name, and key to debug_info
-            debug_info["s3_uri_parts"] = s3_uri_parts
-            debug_info["bucket_name"] = bucket_name
-            debug_info["key"] = key
-            
-            # Initialize S3 client with credentials
-            s3 = boto3.client(
-                "s3"
-            )
-
-            try:
-                # Write the content to S3 with progress callback
-                s3 = boto3.resource('s3')
-                file_size = len(content)
-                progress = ProgressPercentage(file_size)
-                s3.Bucket(bucket_name).upload_file('/tmp/temp_file', key, Callback=progress)
-                os.remove('/tmp/temp_file')
-
-                return {
-                    "status": 200,
-                    "message": "File written successfully to S3.",
-                    "debug": debug_info,
-                }
-            except Exception as exception:
-                debug_info["exception"] = str(exception)
-                if debug:
-                    return {
-                        "status": 500,
-                        "message": f"Failed to write file to S3: {str(exception)}",
-                        "debug": debug_info,
-                    }
-                return {
-                    "status": 500,
-                    "message": "Failed to write file to S3.",
-                    "debug": debug_info,
-                }
-        else:
-            # Write to the local file system
-            with open(path, "wb" if isinstance(content, bytes) else "w") as file:
-                file.write(content)
-
-            return {
-                "status": 200,
-                "message": "File written successfully.",
-                "debug": debug_info,
-            }
-    except Exception as exception:
-        debug_info["exception"] = str(exception)
-        if debug:
-            return {
-                "status": 500,
-                "message": f"Failed to write file: {str(exception)}",
-                "debug": debug_info,
-            }
-        return {
-            "status": 500,
-            "message": "Failed to write file.",
-            "debug": debug_info,
-        }
-
-def delete_file(path: str, debug: bool = False) -> Dict[str, Union[int, str, Dict[str, str]]]:
-    """
-    Deletes a file at a given path, which can be either a local file or an S3 object.
-    
-    Args:
-        path (str): The path where the file should be deleted. Can be a local path or an S3 URI (e.g., 's3://bucket/key').
-        debug (bool, optional): Flag to enable debugging. Defaults to False.
-
-    Returns:
-        dict: A dictionary containing the status of the delete operation.
-    """
-    try:
-        debug_info = {}
-
-        if path.startswith("s3://"):
-            AWS_ACCESS_KEY_ID  = os.environ.get("AWS_ACCESS_KEY_ID")
-            AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
-            # Delete from S3 if the path is an S3 URI
-            if AWS_ACCESS_KEY_ID is None or AWS_SECRET_ACCESS_KEY is None:
-                aws_credentials = get_aws_credentials()
-                if aws_credentials["status"] != 200:
-                    return {
-                        "status": 403,
-                        "message": "AWS credentials not found",
-                        "debug": {"error": "AWS credentials not found"},
-                    }
-                AWS_ACCESS_KEY_ID = aws_credentials["credentials"]["AWS_ACCESS_KEY_ID"]
-                AWS_SECRET_ACCESS_KEY = aws_credentials["credentials"]["AWS_SECRET_ACCESS_KEY"]
-
-            # Extract S3 bucket and key from the path
-            s3_uri_parts = path[5:].split("/", 1)
-            bucket_name = s3_uri_parts[0]
-            key = s3_uri_parts[1]
-
-            # Add s3_uri_parts, bucket_name, and key to debug_info
-            debug_info["s3_uri_parts"] = s3_uri_parts
-            debug_info["bucket_name"] = bucket_name
-            debug_info["key"] = key
-            
-            # Initialize S3 client with credentials
-            s3 = boto3.client(
-                "s3"
-            )
-
-            try:
-                # Delete the file from S3
-                s3.delete_object(Bucket=bucket_name, Key=key)
-
-                return {
-                    "status": 200,
-                    "message": "File deleted successfully from S3.",
-                    "debug": debug_info,
-                }
-            except Exception as exception:
-                debug_info["exception"] = str(exception)
-                if debug:
-                    return {
-                        "status": 500,
-                        "message": f"Failed to delete file from S3: {str(exception)}",
-                        "debug": debug_info,
-                    }
-                return {
-                    "status": 500,
-                    "message": "Failed to delete file from S3.",
-                    "debug": debug_info,
-                }
-        else:
-            # Delete from the local file system
-            try:
-                os.remove(path)
-
-                return {
-                    "status": 200,
-                    "message": "File deleted successfully.",
-                    "debug": debug_info,
-                }
-            except Exception as exception:
-                debug_info["exception"] = str(exception)
-                if debug:
-                    return {
-                        "status": 500,
-                        "message": f"Failed to delete file: {str(exception)}",
-                        "debug": debug_info,
-                    }
-                return {
-                    "status": 500,
-                    "message": "Failed to delete file.",
-                    "debug": debug_info,
-                }
-    except Exception as exception:
-        debug_info["exception"] = str(exception)
-        if debug:
-            return {
-                "status": 500,
-                "message": f"Failed to delete file: {str(exception)}",
-                "debug": debug_info,
-            }
-        return {
-            "status": 500,
-            "message": "Failed to delete file.",
-            "debug": debug_info,
-        }
 
 def get_aws_credentials(debug: bool = False) -> dict:
     """
@@ -381,15 +70,45 @@ def is_binary_file(file_path: str, debug: bool = False) -> bool:
             return False
     except:
         return False
-import threading
 
 class ProgressPercentage(object):
-    def __init__(self, total_size):
+    """
+    A utility class to show the upload/download progress in percentage.
+    
+    Attributes:
+        total_size (int): The total size of the file being transferred.
+        
+    Input Schema:
+        total_size: int
+    """
+    
+    def __init__(self, total_size: int):
+        """
+        Initializes the ProgressPercentage class.
+        
+        Args:
+            total_size (int): The total size of the file being transferred.
+            
+        Input Schema:
+            total_size: int
+        """
         self._total_size = total_size
         self._seen_so_far = 0
         self._lock = threading.Lock()
 
-    def __call__(self, bytes_amount):
+    def __call__(self, bytes_amount: int):
+        """
+        Callable method to update the progress percentage.
+        
+        Args:
+            bytes_amount (int): The amount of bytes transferred so far.
+            
+        Input Schema:
+            bytes_amount: int
+            
+        Output:
+            Writes the progress percentage to stdout.
+        """
         # To simplify, assume this is hooked up to a single filename
         with self._lock:
             self._seen_so_far += bytes_amount
@@ -399,3 +118,5 @@ class ProgressPercentage(object):
                     filename, self._seen_so_far, self._total_size,
                     percentage))
             sys.stdout.flush()
+
+
