@@ -164,7 +164,7 @@ jobs:
       # Pull the package from TestPyPI and run tests
       - name: Pull from TestPyPI and test
         run: |
-          pip install --index-url https://test.pypi.org/simple/ klingon-serial
+          pip install --index-url https://test.pypi.org/simple/ klingon-file-manager
           python -m unittest discover
 
   build-production:
