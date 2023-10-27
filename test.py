@@ -12,6 +12,7 @@ s3_bucket_name = AWS_S3_BUCKET_NAME
 
 # Generate a 100 word string of lorem ipsum text
 test_txt_content = lorem.text()
+
 # test_txt_content = 'Hello World!'
 test_bin_content = b'\x00\x00\x00\x00\x00\x00\x00\x00'
 
@@ -102,6 +103,7 @@ def setup_test_files():
     # Make sure that the test_bin_get_s3 file was created
     compare_s3_local_file(test_bin_get, test_bin_get)
 
+setup_test_files()
 
 # Test 12 - Test aws credentials
 def test_check_aws_access_key_id():
@@ -114,17 +116,19 @@ def test_check_aws_secret_access_key():
 
 # Test 7 - post s3 text file
 def test_post_s3_txt_file():
-    result = manage_file('post', "s3://"+s3_bucket_name+"/"+test_txt_post, test_txt_content, debug=True)
+    result = manage_file(action='post', path="s3://"+s3_bucket_name+"/"+test_txt_post, 
+                         content=test_txt_content, debug=True)
     print(result)
     assert result['status'] == 200
     assert result['action'] == 'post'
     assert result['path'] == "s3://"+s3_bucket_name+"/"+test_txt_post
     assert result['binary'] is False
-    # Additional check: Read the file from s3 to make sure content was written
-    # correctly
-    validate = manage_file('get', "s3://"+s3_bucket_name+"/"+test_txt_post, None)
+    # Additional check: Read the file from s3 to make sure content was written correctly
+    validate = manage_file('get', "s3://"+s3_bucket_name+"/"+test_txt_post, None, debug=True)
     print(validate)
     assert validate['status'] == 200
     assert validate['action'] == 'get'
     assert validate['content'].decode() == test_txt_content
     assert validate['path'] == "s3://"+s3_bucket_name+"/"+test_txt_post
+
+test_post_s3_txt_file()
