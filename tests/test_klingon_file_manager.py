@@ -66,19 +66,6 @@ def test_setup_test_files():
     compare_s3_local_file(test_bin_get, test_bin_get)
 
 
-# Test 1 - get local text file
-def test_get_local_txt_file():
-    result = manage_file('get', test_txt_get, None)
-    print(result)
-    assert result['status'] == 200
-    assert result['action'] == 'get'
-    assert result['content'].decode() == test_txt_content
-    assert result['path'] == test_txt_get
-    assert result['binary'] is False
-    # Additional check: Read the file to make sure content was written
-    # correctly
-    with open(test_txt_get, 'r') as file:
-        assert file.read() == test_txt_content
 
 
 # Test 2 - get local binary file

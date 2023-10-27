@@ -93,3 +93,16 @@ def test_get_invalid_s3_path():
     print(result)
     assert result['status'] == 500
     assert result['action'] == 'get'
+# Test 1 - get local text file
+def test_get_local_txt_file():
+    result = manage_file('get', test_txt_get, None)
+    print(result)
+    assert result['status'] == 200
+    assert result['action'] == 'get'
+    assert result['content'].decode() == test_txt_content
+    assert result['path'] == test_txt_get
+    assert result['binary'] is False
+    # Additional check: Read the file to make sure content was written
+    # correctly
+    with open(test_txt_get, 'r') as file:
+        assert file.read() == test_txt_content
