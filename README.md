@@ -9,6 +9,9 @@ Run the following command to install the package:
 ```bash
 pip install klingon-file-manager
 ```
+The module looks for the following environment variables:
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
 
 ## Features
 - Supports both local and AWS S3 storage
