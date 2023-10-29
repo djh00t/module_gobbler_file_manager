@@ -4,6 +4,14 @@ import boto3
 from typing import Union, Dict
 from .utils import get_aws_credentials, ProgressPercentage
 
+from typing import Union, Optional, Dict
+import os
+import hashlib
+import base64
+import boto3
+from botocore.config import Config
+
+
 def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None, debug: bool = False) -> Dict[str, Union[int, str, Dict[str, str]]]:
     """
     Writes content to a file at a given path, which can be either a local file or an S3 object.
@@ -11,6 +19,7 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
     Args:
         path (str): The path where the file should be written. Can be a local path or an S3 URI (e.g., 's3://bucket/key').
         content (Union[str, bytes]): The content to write to the file.
+        md5 (Optional[str]): The MD5 hash of the content. If provided, the function will check if the hash matches the content's MD5 hash before writing to the file.
         debug (bool, optional): Flag to enable debugging. Defaults to False.
         
     Returns:
@@ -21,9 +30,6 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                 "debug": Dict[str, str] # Debug information (only included if 'debug' flag is True)
             }
     """
-    import hashlib
-    import base64
-
     try:
         debug_info = {}
 
@@ -123,6 +129,23 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                     md5_file.write(md5)
 
             return {
+                "status": 200,
+                "message": "File written successfully.",
+                "debug": debug_info,
+            }
+    except Exception as exception:
+        debug_info["exception"] = str(exception)
+        if debug:
+            return {
+                "status": 500,
+                "message": f"Failed to write file: {str(exception)}",
+                "debug": debug_info,
+            }
+        return {
+            "status": 500,
+            "message": "Failed to write file.",
+            "debug": debug_info,
+        }
                 "status": 200,
                 "message": "File written successfully.",
                 "debug": debug_info,
