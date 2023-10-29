@@ -146,20 +146,3 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
             "message": "Failed to write file.",
             "debug": debug_info,
         }
-                "status": 200,
-                "message": "File written successfully.",
-                "debug": debug_info,
-            }
-    except Exception as exception:
-        debug_info["exception"] = str(exception)
-        if debug:
-            return {
-                "status": 500,
-                "message": f"Failed to write file: {str(exception)}",
-                "debug": debug_info,
-            }
-        return {
-            "status": 500,
-            "message": "Failed to write file.",
-            "debug": debug_info,
-        }
