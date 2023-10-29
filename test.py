@@ -160,7 +160,7 @@ def test_post_s3_txt_file():
 
 def test_large_upload_progress():
     # Generate a 100MB file using dd command
-    subprocess.run(['dd', 'if=/dev/zero', 'of=./large_file', 'bs=1M', 'count=100'])
+    subprocess.run(['dd', 'if=/dev/zero', 'of=./large_file', 'bs=1M', 'count=10'])
 
     # Get md5 hash of the generated file
     with open('./large_file', 'rb') as f:
@@ -169,11 +169,11 @@ def test_large_upload_progress():
         
         # Get the md5 hash of the file content
         md5_hash = hashlib.md5(file_content).digest()
-        print(f"md (binary):                    {md5_hash}")
+        # print(f"md (binary):                    {md5_hash}")
 
         # Encode the md5 hash of the file content to base64 to send to S3
         contents_md5 = base64.b64encode(md5_hash).decode('utf-8')
-        print(f"contents_md5 (base64):          {contents_md5}")
+        # print(f"contents_md5 (base64):          {contents_md5}")
         
         # Convert md5_hash to a hex string for metadata and logging
         md5_hash_hex = md5_hash.hex()
@@ -181,7 +181,21 @@ def test_large_upload_progress():
 
         # Get & announce the file size in bytes
         file_size = len(file_content)
-        print(f"The file size is: {file_size} bytes")
+        # print(f"The file size is: {file_size} bytes")
+
+        # Get the file size in either bytes, kilobytes, megabytes or gigabytes depending
+        # on how large it is, showing up to 6 decimal places, returning a
+        # string
+        def get_file_size(file_size, show_bytes=False):
+            if show_bytes:
+                return f"{file_size} B"
+            elif file_size < 1000000:
+                return f"{round(file_size / 1000, 6)} KB"
+            elif file_size < 1000000000:
+                return f"{round(file_size / 1000000, 6)} MB"
+            else:
+                return f"{round(file_size / 1000000000, 6)} GB"
+        print(f"The file size is: {get_file_size(file_size)}")
 
     # Create metadata
     metadata = {
@@ -203,7 +217,27 @@ def test_large_upload_progress():
     )
 
     # Delete the generated file
-    #
-    # os.remove('./large_file')
+    os.remove('./large_file')
+
+    # Retrieve the file information but not the actual file content
+    result = manage_file('get', "s3://fsg-gobbler/tests/large_file", None, debug=True)
+    print(result)
 
 test_large_upload_progress()
+
+def gimme_head():
+    import boto3
+
+    s3 = boto3.client('s3')
+
+    head_object_response = s3.head_object(Bucket='fsg-gobbler', Key='tests/large_file')
+
+    headers = head_object_response['Headers']
+    tags = head_object_response['Tagging']
+    metadata = head_object_response['Metadata']
+
+    print(headers)
+    print(tags)
+    print(metadata)
+
+gimme_head()
