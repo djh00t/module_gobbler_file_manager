@@ -38,6 +38,7 @@ def manage_file(
     action: str,
     path: str,
     content: str = None,
+    md5: Optional[str] = None,
     debug: bool = False,
 ) -> dict:
 
@@ -78,7 +79,7 @@ def manage_file(
             if debug or result['status'] == 500:
                 debug_info['read_file'] = read_result['debug']
         elif action == 'post':
-            write_result = write_file(path, content, debug)
+            write_result = write_file(path, content, md5, debug)
             result['status'] = write_result['status']
             # Calculate the size in megabytes rounded to 6 decimal places of
             # the file object
