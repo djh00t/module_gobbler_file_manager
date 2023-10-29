@@ -198,7 +198,6 @@ def test_large_upload_progress():
         Bucket='fsg-gobbler', 
         Key='tests/large_file', 
         Callback=progress,
-        ContentMD5=contents_md5,
         Metadata=metadata
     )
 
