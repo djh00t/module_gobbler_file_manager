@@ -12,7 +12,7 @@ import boto3
 from botocore.config import Config
 
 
-def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None, debug: bool = False) -> Dict[str, Union[int, str, Dict[str, str]]]:
+def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None, metadata: Optional[Dict] = None, debug: bool = False) -> Dict[str, Union[int, str, Dict[str, str]]]:
     """
     Writes content to a file at a given path, which can be either a local file or an S3 object.
     
@@ -97,6 +97,8 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                 # Write the content to S3 with progress callback
                 s3 = boto3.resource('s3')
                 progress = ProgressPercentage(len(content), key)
+                if metadata is not None:
+                    extra_args = {'Metadata': metadata}
                 s3.Bucket(bucket_name).upload_file('/tmp/temp_file', key, ExtraArgs=extra_args, Callback=progress)
                 os.remove('/tmp/temp_file')
 
@@ -122,6 +124,10 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
             # Write to the local file system
             with open(path, "wb" if isinstance(content, bytes) else "w") as file:
                 file.write(content)
+            if metadata is not None:
+                metadata_file_path = os.path.splitext(path)[0] + '.metadata.json'
+                with open(metadata_file_path, 'w') as metadata_file:
+                    json.dump(metadata, metadata_file)
             if md5 is not None:
                 # Save a file containing the MD5 hash next to the file
                 md5_file_path = os.path.splitext(path)[0] + '.md5'
