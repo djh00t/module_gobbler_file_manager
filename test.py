@@ -168,7 +168,7 @@ def test_large_upload_progress():
         file_content = f.read()
         
         # Get the md5 hash of the file content
-        md5_hash = hashlib.md5(file_content.encode('utf-8')).digest()
+        md5_hash = hashlib.md5(file_content).digest()
         print(f"md (binary):                    {md5_hash}")
 
         # Encode the md5 hash of the file content to base64 to send to S3
