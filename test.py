@@ -151,15 +151,22 @@ def test_post_s3_txt_file():
 
 import subprocess
 
+import hashlib
+import base64
+
 def test_large_upload_progress():
     # Generate a 100MB file using dd command
     subprocess.run(['dd', 'if=/dev/zero', 'of=./large_file', 'bs=1M', 'count=100'])
 
     # Get md5 hash of the generated file
-    md5_hash = subprocess.run(['md5sum', './large_file'], stdout=subprocess.PIPE).stdout.decode('utf-8').split(' ')[0]
+    with open('./large_file', 'rb') as f:
+        file_content = f.read()
+        md5_hash = hashlib.md5(file_content).digest()
+        base64_md5_hash = base64.b64encode(md5_hash).decode()
 
     # Upload the generated file to the fsg-gobbler/tests directory on S3
-    result = manage_file(action='post', path="s3://fsg-gobbler/tests/large_file", content=open('./large_file', 'rb').read(), debug=True)
+    s3 = boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+    s3.upload_file('./large_file', 'fsg-gobbler', 'tests/large_file', ExtraArgs={'ContentMD5': base64_md5_hash})
 
     # Get md5 hash of the uploaded file from S3
     
