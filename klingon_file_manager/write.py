@@ -4,7 +4,7 @@ import boto3
 from typing import Union, Dict
 from .utils import get_aws_credentials, ProgressPercentage
 
-def write_file(path: str, content: Union[str, bytes], debug: bool = False) -> Dict[str, Union[int, str, Dict[str, str]]]:
+def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None, debug: bool = False) -> Dict[str, Union[int, str, Dict[str, str]]]:
     """
     Writes content to a file at a given path, which can be either a local file or an S3 object.
     
@@ -21,8 +21,24 @@ def write_file(path: str, content: Union[str, bytes], debug: bool = False) -> Di
                 "debug": Dict[str, str] # Debug information (only included if 'debug' flag is True)
             }
     """
+    import hashlib
+    import base64
+
     try:
         debug_info = {}
+
+        # Check if md5 is provided and if it matches with the content's md5
+        if md5 is not None:
+            content_md5 = hashlib.md5(content.encode() if isinstance(content, str) else content).hexdigest()
+            if content_md5 != md5:
+                return {
+                    "status": 400,
+                    "message": "MD5 hash does not match the given file.",
+                    "debug": debug_info,
+                }
+            else:
+                # If md5 matches, add it to the debug_info
+                debug_info["md5"] = content_md5
 
         if path.startswith("s3://"):
             AWS_ACCESS_KEY_ID  = os.environ.get("AWS_ACCESS_KEY_ID")
@@ -53,8 +69,17 @@ def write_file(path: str, content: Union[str, bytes], debug: bool = False) -> Di
             
             # Initialize S3 client with credentials
             s3 = boto3.client(
-                "s3"
+                "s3",
+                aws_access_key_id=AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+                config=Config(s3={'addressing_style': 'path'})
             )
+            if md5 is not None:
+                # Add Content-MD5 header if md5 is provided
+                content_md5_base64 = base64.b64encode(hashlib.md5(content.encode() if isinstance(content, str) else content).digest()).decode()
+                extra_args = {'ContentMD5': content_md5_base64}
+            else:
+                extra_args = None
 
             try:
                 # Write the content to a temporary file
@@ -66,7 +91,7 @@ def write_file(path: str, content: Union[str, bytes], debug: bool = False) -> Di
                 # Write the content to S3 with progress callback
                 s3 = boto3.resource('s3')
                 progress = ProgressPercentage(len(content), key)
-                s3.Bucket(bucket_name).upload_file('/tmp/temp_file', key, Callback=progress)
+                s3.Bucket(bucket_name).upload_file('/tmp/temp_file', key, ExtraArgs=extra_args, Callback=progress)
                 os.remove('/tmp/temp_file')
 
                 return {
@@ -91,6 +116,11 @@ def write_file(path: str, content: Union[str, bytes], debug: bool = False) -> Di
             # Write to the local file system
             with open(path, "wb" if isinstance(content, bytes) else "w") as file:
                 file.write(content)
+            if md5 is not None:
+                # Save a file containing the MD5 hash next to the file
+                md5_file_path = os.path.splitext(path)[0] + '.md5'
+                with open(md5_file_path, 'w') as md5_file:
+                    md5_file.write(md5)
 
             return {
                 "status": 200,
