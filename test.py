@@ -161,8 +161,13 @@ def test_large_upload_progress():
 
     # Get md5 hash of the generated file
     with open('./large_file', 'rb') as f:
+        # Read the file content
         file_content = f.read()
+        # Get the md5 hash of the file content
         md5_hash = hashlib.md5(file_content).digest()
+        # Announce the md5 hash of the file content
+        print(f"The MD5 Hash of this file is: "+md5_hash)
+        # Encode the md5 hash of the file content to base64
         contents_md5 = base64.b64encode(md5_hash).decode('utf-8')
         
     boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY).put_object(
