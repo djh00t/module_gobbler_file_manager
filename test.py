@@ -168,12 +168,12 @@ def test_large_upload_progress():
         # Get the md5 hash of the file content
         md5_hash = hashlib.md5(file_content).digest()
         # Announce the md5 hash of the file content
-        print("The MD5 Hash of this file is: {md5_hash}")
+        print(f"The MD5 Hash of this file is: {md5_hash}")
         # Encode the md5 hash of the file content to base64
         contents_md5 = base64.b64encode(md5_hash).decode('utf-8')
 
     # Create a progress callback
-    progress = ProgressPercentage('./large_file')
+    progress = ProgressPercentage('./large_file', './large_file')
 
     # Upload the file with progress callback
     s3 = boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
