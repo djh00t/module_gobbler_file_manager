@@ -232,12 +232,12 @@ def gimme_head():
 
     head_object_response = s3.head_object(Bucket='fsg-gobbler', Key='tests/large_file')
 
-    headers = head_object_response['Headers']
-    tags = head_object_response['Tagging']
     metadata = head_object_response['Metadata']
+    content_length = head_object_response['ContentLength']
+    content_type = head_object_response['ContentType']
 
-    print(headers)
-    print(tags)
     print(metadata)
+    print(content_length)
+    print(content_type)
 
 gimme_head()
