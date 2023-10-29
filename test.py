@@ -194,7 +194,7 @@ def test_large_upload_progress():
     # Upload the file with progress callback
     s3 = boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
     s3.upload_file(
-        Body='./large_file', 
+        Filename='./large_file', 
         Bucket='fsg-gobbler', 
         Key='tests/large_file', 
         Callback=progress,
