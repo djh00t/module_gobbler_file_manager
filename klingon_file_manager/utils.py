@@ -71,15 +71,25 @@ def is_binary_file(file_path: str, debug: bool = False) -> bool:
     except:
         return False
 
+import threading
+import sys
+
+import threading
+import sys
+
 class ProgressPercentage(object):
     """
     A utility class to show the upload/download progress in percentage.
     
     Attributes:
-        total_size (int): The total size of the file being transferred.
+        _total_size (int): The total size of the file being transferred in bytes.
+        _seen_so_far (int): The amount of bytes transferred so far.
+        _filename (str): The name of the file being transferred.
+        _lock (threading.Lock): A lock to ensure thread safety.
         
     Input Schema:
         total_size: int
+        filename: str
     """
     
     def __init__(self, total_size: int, filename: str):
@@ -87,7 +97,7 @@ class ProgressPercentage(object):
         Initializes the ProgressPercentage class.
         
         Args:
-            total_size (int): The total size of the file being transferred.
+            total_size (int): The total size of the file being transferred in bytes.
             filename (str): The name of the file being transferred.
             
         Input Schema:
