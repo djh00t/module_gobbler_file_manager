@@ -155,6 +155,8 @@ def test_post_s3_txt_file():
 
 
 
+from klingon_file_manager.utils import ProgressPercentage
+
 def test_large_upload_progress():
     # Generate a 100MB file using dd command
     subprocess.run(['dd', 'if=/dev/zero', 'of=./large_file', 'bs=1M', 'count=100'])
@@ -169,13 +171,13 @@ def test_large_upload_progress():
         print(f"The MD5 Hash of this file is: "+md5_hash)
         # Encode the md5 hash of the file content to base64
         contents_md5 = base64.b64encode(md5_hash).decode('utf-8')
-        
-    boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY).put_object(
-        Bucket="fsg-gobbler",
-        Key="tests/large_file",
-        Body=file_content,
-        ContentMD5=contents_md5
-    )
+
+    # Create a progress callback
+    progress = ProgressPercentage('./large_file')
+
+    # Upload the file with progress callback
+    s3 = boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+    s3.upload_file('./large_file', 'fsg-gobbler', 'tests/large_file', Callback=progress)
 
 
     # Upload the generated file to the fsg-gobbler/tests directory on S3
