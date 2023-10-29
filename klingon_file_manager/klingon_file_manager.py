@@ -21,6 +21,7 @@ Returns:
         }
 """
 from typing import Union, Dict
+from typing import Optional
 from .utils import is_binary_file, get_aws_credentials, ProgressPercentage
 from .delete import delete_file
 from .write import write_file
