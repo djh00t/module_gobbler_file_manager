@@ -162,12 +162,20 @@ def test_large_upload_progress():
     # Get md5 hash of the generated file
     with open('./large_file', 'rb') as f:
         file_content = f.read()
-        md5_hash = hashlib.md5(file_content).digest()
-        base64_md5_hash = base64.b64encode(md5_hash).decode()
+        md5_hash = hashlib.md5(file_content.encode('utf-8')).digest()
+        contents_md5 = base64.b64encode(md5_hash).decode('utf-8')
+        
+    boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY).put_object(
+        Bucket="fsg-gobbler",
+        Key="tests/large_file",
+        Body=file_content,
+        ContentMD5=contents_md5
+    )
+
 
     # Upload the generated file to the fsg-gobbler/tests directory on S3
-    s3 = boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
-    s3.upload_file('./large_file', 'fsg-gobbler', 'tests/large_file')
+    #s3 = boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+    #s3.upload_file('./large_file', 'fsg-gobbler', 'tests/large_file')
 
     # Get md5 hash of the uploaded file from S3
     
