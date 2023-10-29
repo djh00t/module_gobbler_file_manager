@@ -1,4 +1,5 @@
 from klingon_file_manager import manage_file
+from klingon_file_manager.utils import ProgressPercentage
 import base64
 import boto3
 import hashlib
@@ -155,7 +156,7 @@ def test_post_s3_txt_file():
 
 
 
-from klingon_file_manager.utils import ProgressPercentage
+
 
 def test_large_upload_progress():
     # Generate a 100MB file using dd command
@@ -165,27 +166,44 @@ def test_large_upload_progress():
     with open('./large_file', 'rb') as f:
         # Read the file content
         file_content = f.read()
+        
         # Get the md5 hash of the file content
-        md5_hash = hashlib.md5(file_content).digest()
-        # Announce the md5 hash of the file content
-        print(f"The MD5 Hash of this file is: {md5_hash}")
-        # Encode the md5 hash of the file content to base64
+        md5_hash = hashlib.md5(file_content.encode('utf-8')).digest()
+        print(f"md (binary):                    {md5_hash}")
+
+        # Encode the md5 hash of the file content to base64 to send to S3
         contents_md5 = base64.b64encode(md5_hash).decode('utf-8')
+        print(f"contents_md5 (base64):          {contents_md5}")
+        
+        # Convert md5_hash to a hex string for metadata and logging
+        md5_hash_hex = md5_hash.hex()
+        print(f"The MD5 Hash of this file is:   {md5_hash_hex}")
+
+        # Get & announce the file size in bytes
+        file_size = len(file_content)
+        print(f"The file size is: {file_size} bytes")
+
+    # Create metadata
+    metadata = {
+        "md5chksum": md5_hash_hex
+    }
 
     # Create a progress callback
-    progress = ProgressPercentage('./large_file', './large_file')
+    progress = ProgressPercentage(file_size, './large_file')
 
     # Upload the file with progress callback
     s3 = boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
-    s3.upload_file('./large_file', 'fsg-gobbler', 'tests/large_file', Callback=progress)
+    s3.upload_file(
+        Body='./large_file', 
+        Bucket='fsg-gobbler', 
+        Key='tests/large_file', 
+        Callback=progress,
+        ContentMD5=contents_md5,
+        Metadata=metadata
+    )
 
-
-    # Upload the generated file to the fsg-gobbler/tests directory on S3
-    #s3 = boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
-    #s3.upload_file('./large_file', 'fsg-gobbler', 'tests/large_file')
-
-    # Get md5 hash of the uploaded file from S3
-    
-    
+    # Delete the generated file
+    #
+    # os.remove('./large_file')
 
 test_large_upload_progress()
