@@ -192,14 +192,14 @@ def test_large_upload_progress():
     progress = ProgressPercentage(file_size, './large_file')
 
     # Upload the file with progress callback
-    s3 = boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
-    s3.upload_file(
-        Filename='./large_file', 
-        Bucket='fsg-gobbler', 
-        Key='tests/large_file', 
-        Callback=progress,
-        md5=contents_md5,
-        Metadata=metadata
+    from klingon_file_manager import manage_file
+    manage_file(
+        action='post',
+        path="s3://fsg-gobbler/tests/large_file",
+        content=file_content,
+        md5=md5_hash_hex,
+        metadata=metadata,
+        debug=True
     )
 
     # Delete the generated file
