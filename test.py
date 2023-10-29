@@ -1,7 +1,11 @@
-import os
 from klingon_file_manager import manage_file
-import lorem
+import base64
 import boto3
+import hashlib
+import lorem
+import os
+import subprocess
+
 
 AWS_ACCESS_KEY_ID  = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
@@ -149,10 +153,7 @@ def test_post_s3_txt_file():
 #    print(result)
 
 
-import subprocess
 
-import hashlib
-import base64
 
 def test_large_upload_progress():
     # Generate a 100MB file using dd command
