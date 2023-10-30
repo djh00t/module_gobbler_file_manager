@@ -55,7 +55,7 @@ def get_aws_credentials(debug: bool = False) -> dict:
     }
 
 
-l
+# Removed the undefined variable 'l'
 
 
 class ProgressPercentage(object):
