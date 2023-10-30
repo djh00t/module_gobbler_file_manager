@@ -60,7 +60,7 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                 # Write the content to S3 with progress callback
                 s3 = boto3.resource('s3')
                 file_size = len(content)
-                progress = ProgressPercentage(file_size)
+                progress = ProgressPercentage(file_size, '/tmp/temp_file')
                 import hashlib
                 if md5:
                     calculated_md5 = hashlib.md5(content).hexdigest()
