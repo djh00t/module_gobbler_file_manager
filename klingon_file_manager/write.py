@@ -37,6 +37,7 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
 
         # Check if md5 is provided and if it matches with the content's md5
         if md5 is not None:
+            content = str(content) if isinstance(content, int) else content
             content_md5 = hashlib.md5(content.encode() if isinstance(content, str) else content).hexdigest()
             if content_md5 != md5:
                 return {
