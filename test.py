@@ -27,44 +27,115 @@ test_bin_get = 'tests/test_get_bin_file.wav'
 test_txt_post = 'tests/test_post_txt_file.txt'
 test_bin_post = 'tests/test_post_bin_file.wav'
 
+def file_size(file_content):
+    # Get the file size in bytes
+    file_size = len(file_content)
+    return file_size
+
+# Get the file size in either bytes, kilobytes, megabytes or gigabytes depending
+# on how large it is, showing up to 6 decimal places, returning a
+# string
+def get_file_size(file_size, show_bytes=False):
+    if show_bytes:
+        return f"{file_size} B"
+    elif file_size < 1000000:
+        return f"{round(file_size / 1000, 6)} KB"
+    elif file_size < 1000000000:
+        return f"{round(file_size / 1000000, 6)} MB"
+    else:
+        return f"{round(file_size / 1000000000, 6)} GB"
+
+# Generate Test Binary Files
+def create_test_binary_file(file_name, file_size):
+    # Generate a 100MB file using dd command
+    subprocess.run(['dd', 'if=/dev/zero', 'of=./' + file_name, 'bs=1M', 'count=' + file_size])
+
+# File Upload Function
+def file_upload(action, path, content, md5=None, metadata={}, debug=False):
+    # Upload the file and dump the full response from
+    # klingon-file-manager to console
+    result = manage_file(
+        action=action,
+        path=path,
+        content=content,
+        md5=md5,
+        metadata=metadata,
+        debug=debug,
+    )
+    return result
+
+# Get MD5 hash of the generated file
+def get_md5_hash(file_content):
+    # Get the md5 hash of the file content
+    md5_hash = hashlib.md5(file_content).digest()
+    # Convert md5_hash to a hex string for metadata and logging
+    md5_hash_hex = md5_hash.hex()
+    return md5_hash_hex
+
+
+def test_small_upload_progress():
+    # Set test files name
+    file_name = 'small_file'
+
+    # Set file size in Mb
+    create_size = '1'
+
+    # Generate the file
+    create_test_binary_file(file_name, create_size)
+
+    # Get md5 hash of the generated file
+    with open(file_name, 'rb') as f:
+        # Read the file content
+        file_content = f.read()
+
+    # Get the file size in bytes
+    file_size = len(file_content)
+
+    # Create metadata dictionary
+    metadata = {
+        "md5": get_md5_hash(file_content),
+        "filesize": file_size
+    }
+
+    # Print the file size
+    print(f"File size: {get_file_size(file_size)}")
+
+    # Upload file
+    result = file_upload(
+        action='post',
+        path="s3://fsg-gobbler/tests/" + file_name,
+        content=file_content,
+        metadata=metadata,
+        debug=False
+    )
+
+    # Announce the upload result
+    print("Upload result: ", result)
+
+test_small_upload_progress()
+
+
 
 def test_large_upload_progress():
     # Set test files name
+    #file_name = 'small_file'
+    #file_name = 'medium_file'
     file_name = 'large_file'
     
-    # Generate a 100MB file using dd command
-    subprocess.run(['dd', 'if=/dev/zero', 'of=./' + file_name, 'bs=1M', 'count=100'])
+
 
     # Get md5 hash of the generated file
     with open(file_name, 'rb') as f:
         # Read the file content
         file_content = f.read()
         
-        # Get the md5 hash of the file content
-        md5_hash = hashlib.md5(file_content).digest()
 
-        # Encode the md5 hash of the file content to base64 to send to S3
-        contents_md5 = base64.b64encode(md5_hash).decode('utf-8')
-        
-        # Convert md5_hash to a hex string for metadata and logging
-        md5_hash_hex = md5_hash.hex()
 
         # Get & announce the file size in bytes
         file_size = len(file_content)
         print(f"File size: {file_size} bytes")
 
-        # Get the file size in either bytes, kilobytes, megabytes or gigabytes depending
-        # on how large it is, showing up to 6 decimal places, returning a
-        # string
-        def get_file_size(file_size, show_bytes=False):
-            if show_bytes:
-                return f"{file_size} B"
-            elif file_size < 1000000:
-                return f"{round(file_size / 1000, 6)} KB"
-            elif file_size < 1000000000:
-                return f"{round(file_size / 1000000, 6)} MB"
-            else:
-                return f"{round(file_size / 1000000000, 6)} GB"
+
         print(f"File size: {get_file_size(file_size)}")
 
     # Create metadata
@@ -83,7 +154,7 @@ def test_large_upload_progress():
         content=file_content,
         md5=md5_hash_hex,
         metadata=metadata,
-        debug=True,
+        debug=False,
     )
 
     # Remove the test file
@@ -91,4 +162,4 @@ def test_large_upload_progress():
 
     print("Upload result: ", result)
 
-test_large_upload_progress()
+#test_large_upload_progress()

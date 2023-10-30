@@ -99,7 +99,7 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                         metadata = {}
 
                     # Store the calculated MD5 in the metadata
-                    metadata["md5"] = calculated_md5
+                    metadata["ContentMD5"] = calculated_md5
 
                 # Determine if the content is binary or text
                 is_binary = is_binary_file(content)
