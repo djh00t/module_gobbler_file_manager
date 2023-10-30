@@ -43,8 +43,8 @@ def manage_file(
     content_size: int = None,
     md5: Optional[str] = None,
     metadata: Optional[Dict[str, str]] = None,
-    progress: bool(content_size),
     debug: bool = False,
+    progress: bool = False,
 ) -> dict:
 
     debug_info = {}
