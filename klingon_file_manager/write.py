@@ -4,7 +4,7 @@ import os
 import boto3
 import hashlib
 from typing import Union, Dict, Optional, Callable
-from .utils import get_aws_credentials
+from .utils import get_aws_credentials, is_binary_file
 import hashlib
 
 
