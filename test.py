@@ -172,19 +172,19 @@ def test_large_upload_progress():
         
         # Get the md5 hash of the file content
         md5_hash = hashlib.md5(file_content).digest()
-        # print(f"md (binary):                    {md5_hash}")
+        print(f"md (binary):                    {md5_hash}")
 
         # Encode the md5 hash of the file content to base64 to send to S3
         contents_md5 = base64.b64encode(md5_hash).decode('utf-8')
-        # print(f"contents_md5 (base64):          {contents_md5}")
+        print(f"contents_md5 (base64):          {contents_md5}")
         
         # Convert md5_hash to a hex string for metadata and logging
         md5_hash_hex = md5_hash.hex()
-        #print(f"The MD5 Hash of this file is:   {md5_hash_hex}")
+        print(f"The MD5 Hash of this file is:   {md5_hash_hex}")
 
         # Get & announce the file size in bytes
         file_size = len(file_content)
-        # print(f"The file size is: {file_size} bytes")
+        print(f"The file size is: {file_size} bytes")
 
         # Get the file size in either bytes, kilobytes, megabytes or gigabytes depending
         # on how large it is, showing up to 6 decimal places, returning a
@@ -214,8 +214,10 @@ def test_large_upload_progress():
         content=file_content,
         md5=md5_hash_hex,
         metadata=metadata,
-        debug=False
+        debug=True
     )
+
+    print(f"Upload result: {result}")
 
     # Delete the generated file
     #os.remove('./large_file')
