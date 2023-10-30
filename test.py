@@ -199,7 +199,8 @@ def test_large_upload_progress():
 
     # Create metadata
     metadata = {
-        "md5chksum": md5_hash_hex
+        "md5chksum": md5_hash_hex,
+        "filesize": file_size
     }
 
     # Create a progress callback
@@ -217,27 +218,22 @@ def test_large_upload_progress():
     )
 
     # Delete the generated file
-    os.remove('./large_file')
+    #os.remove('./large_file')
 
-    # Retrieve the file information but not the actual file content
-    result = manage_file('get', "s3://fsg-gobbler/tests/large_file", None, debug=True)
-    print(result)
+    # Sleep for 5 seconds to allow the file to sync within s3's systems
+    import time
+    time.sleep(5)
 
-test_large_upload_progress()
-
-def gimme_head():
-    import boto3
-
+    # Get file metadata
     s3 = boto3.client('s3')
-
     head_object_response = s3.head_object(Bucket='fsg-gobbler', Key='tests/large_file')
-
     metadata = head_object_response['Metadata']
     content_length = head_object_response['ContentLength']
     content_type = head_object_response['ContentType']
 
-    print(metadata)
-    print(content_length)
-    print(content_type)
+    print(f"metadata:           {metadata}")
+    print(f"content_length:     {content_length}")
+    print(f"content_type:       {content_type}")
 
-gimme_head()
+test_large_upload_progress()
+
