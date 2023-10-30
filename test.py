@@ -65,7 +65,7 @@ def test_large_upload_progress():
                 return f"{round(file_size / 1000000, 6)} MB"
             else:
                 return f"{round(file_size / 1000000000, 6)} GB"
-
+        print(f"File size: {get_file_size(file_size)}")
 
     # Create metadata
     metadata = {
@@ -74,11 +74,11 @@ def test_large_upload_progress():
     }
 
     # Create a progress callback
-    with open(file_name, 'rb') as f:
-        progress_callback = ProgressPercentage(f, file_size)
+    #with open(file_name, 'rb') as f:
+    progress_callback = ProgressPercentage(file_name, file_size)
 
     # Call the progress callback with a dummy value for bytes_amount
-    progress_callback(0)
+    #progress_callback(file_name, file_size)
 
     # Upload the file and dump the full response from
     # klingon-file-manager to console

@@ -33,8 +33,7 @@ from .read import read_file
 # - AWS_ACCESS_KEY_ID
 # - AWS_SECRET_ACCESS_KEY
 aws_credentials = get_aws_credentials()
-#AWS_ACCESS_KEY_ID = aws_credentials['credentials']['AWS_ACCESS_KEY_ID']
-#AWS_SECRET_ACCESS_KEY = aws_credentials['credentials']['AWS_SECRET_ACCESS_KEY']
+
 
 def manage_file(
     action: str,
@@ -44,7 +43,6 @@ def manage_file(
     md5: Optional[str] = None,
     metadata: Optional[Dict[str, str]] = None,
     debug: bool = False,
-    progress: bool = False,
 ) -> dict:
 
     debug_info = {}
