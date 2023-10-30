@@ -41,7 +41,7 @@ def manage_file(
     content: str = None,
     md5: Optional[str] = None,
     metadata: Optional[Dict[str, str]] = None,
-    debug: bool = False,
+    debug: bool = True,
 ) -> dict:
 
     debug_info = {}
