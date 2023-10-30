@@ -100,6 +100,7 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
         else:
             # Write to the local file system
             with open(path, "wb" if isinstance(content, bytes) else "w") as file:
+                debug_info['write_start'] = f"Starting write with content={content}"
                 file.write(content)
 
             return {
