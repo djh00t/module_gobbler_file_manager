@@ -57,7 +57,7 @@ def file_upload(action, path, content, md5=None, metadata={}, debug=False):
     result = manage_file(
         action=action,
         path=path,
-        content=content,
+        content="<binary data>" if isinstance(content, bytes) and action != 'get' else content,
         md5=md5,
         metadata=metadata,
         debug=debug,

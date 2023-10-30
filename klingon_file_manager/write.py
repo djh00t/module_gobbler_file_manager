@@ -133,7 +133,7 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                     "message": "File written successfully to S3.",
                     "md5": md5_hash,
                     "debug": debug_info,
-                    "content": content[:10] if isinstance(content, bytes) else content,
+                    "content": "<binary data>" if isinstance(content, bytes) else content,
                 }
             except Exception as exception:
                 debug_info["exception"] = str(exception)
