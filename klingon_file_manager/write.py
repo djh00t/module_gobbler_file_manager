@@ -116,9 +116,9 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                     content = content.encode('utf-8')
                 with io.BytesIO(content) as f:
                     s3_client.upload_fileobj(
+                        Fileobj=f,
                         Bucket=bucket_name,
                         Key=key,
-                        Body=f,
                         ContentMD5=md5,
                         Callback=progress,
                         ExtraArgs={'Metadata': metadata}
