@@ -5,7 +5,6 @@ from typing import Union, Dict
 import threading
 import sys
 import magic
-   
 
 def get_mime_type(file_path: str) -> str:
     """
