@@ -31,7 +31,7 @@ test_bin_post = 'tests/test_post_bin_file.wav'
 
 def test_large_upload_progress():
     # Set test files name
-    file_name = './large_file'
+    file_name = 'large_file'
     
     # Generate a 100MB file using dd command
     subprocess.run(['dd', 'if=/dev/zero', 'of='+file_name, 'bs=1M', 'count=100'])
