@@ -24,6 +24,7 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
             {
                 "status": int,          # HTTP-like status code (e.g., 200 for success, 500 for failure)
                 "message": str,         # Message describing the outcome
+                "md5": str,             # The MD5 hash of the written file (only included if status is 200)
                 "debug": Dict[str, str] # Debug information (only included if 'debug' flag is True)
             }
     """
@@ -123,6 +124,7 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                 return {
                     "status": 200,
                     "message": "File written successfully to S3.",
+                    "md5": md5_hash,
                     "debug": debug_info,
                 }
             except Exception as exception:

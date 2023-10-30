@@ -46,42 +46,24 @@ def manage_file(
     debug: bool = False,
 ) -> dict:
 
-    """Manages file operations like 'get' and 'post' for both local and
-    AWS S3 storage.
-
-    Args:
-        action (str): The action to be performed ('get', 'post' or 'delete').
-        path (str): The path for the file operation.
-        content (str): The file content.
-        content_size (int): The size of the content in bytes.
-        debug (bool, optional): Flag to enable debugging. Defaults to False.
-
-    Returns:
-        dict: A dictionary containing status, action, binary, file, path, and debug information.
-    """
-
     debug_info = {}
     result = {
         'action': action,
         'path': path,
         'content': content,
         'content_size': len(content),
-        'binary1': is_binary_file(content),
+        'binary': is_binary_file(content),
         'md5': md5,
         'metadata': metadata,
         'debug': debug_info,
     }
-
-    print()
-    print(result)
-    print()
 
     try:
         if action == 'get':
             read_result = read_file(path, debug)
             result['status'] = read_result['status']
             result['content'] = read_result['content']
-            result['binary2'] = is_binary_file(result['content'], debug)
+            result['binary'] = is_binary_file(result['content'], debug)
             # Add the debug info for the read_file() function
             if debug or result['status'] == 500:
                 debug_info['read_file'] = read_result['debug']
@@ -89,10 +71,11 @@ def manage_file(
             debug_info['write_file_start'] = f"Starting write_file with path={path}, content={content}, md5={md5}, metadata={metadata}"
             write_result = write_file(path, content, md5, metadata, debug)
             result['status'] = write_result['status']
-            result['binary2'] = is_binary_file(result['content'], debug)
+            result['binary'] = is_binary_file(result['content'], debug)
             # Add the debug info for the write_file() function
             if debug or result['status'] == 500:
                 debug_info['write_file'] = write_result['debug']
+            return result
         elif action == 'delete':
             delete_result = delete_file(path, debug)
             result['status'] = delete_result['status']
@@ -111,4 +94,4 @@ def manage_file(
     # If the debug flag is not set and there was no failure, remove the debug field
     if not debug and result['status'] != 500:
         del result['debug']
-    return result
+
