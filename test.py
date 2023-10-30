@@ -33,7 +33,7 @@ def test_large_upload_progress():
     file_name = 'large_file'
     
     # Generate a 100MB file using dd command
-    subprocess.run(['dd', 'if=/dev/zero', 'of=./' + file_name, 'bs=1M', 'count=10'])
+    subprocess.run(['dd', 'if=/dev/zero', 'of=./' + file_name, 'bs=1M', 'count=100'])
 
     # Get md5 hash of the generated file
     with open(file_name, 'rb') as f:
@@ -51,6 +51,7 @@ def test_large_upload_progress():
 
         # Get & announce the file size in bytes
         file_size = len(file_content)
+        print(f"File size: {file_size} bytes")
 
         # Get the file size in either bytes, kilobytes, megabytes or gigabytes depending
         # on how large it is, showing up to 6 decimal places, returning a
@@ -72,21 +73,22 @@ def test_large_upload_progress():
         "filesize": file_size
     }
 
+    print("Metadata: ", metadata)
+
     # Upload the file and dump the full response from
     # klingon-file-manager to console
     result = manage_file(
         action='post',
-        path="s3://fsg-gobbler/tests/"+file_name,
+        path="s3://fsg-gobbler/tests/" + file_name,
         content=file_content,
         md5=md5_hash_hex,
         metadata=metadata,
-        debug=True
+        debug=True,
     )
-    print(f"Result:     {result}")
 
     # Remove the test file
     #os.remove(file_name)
 
-    print(f"Upload result: {result}")
+    print("Upload result: ", result)
 
 test_large_upload_progress()
