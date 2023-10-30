@@ -1,7 +1,7 @@
 # write.py
 import os
 import boto3
-from typing import Union, Dict
+from typing import Union, Dict, Optional
 from .utils import get_aws_credentials, ProgressPercentage
 
 def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None, metadata: Optional[Dict[str, str]] = None, debug: bool = False) -> Dict[str, Union[int, str, Dict[str, str]]]:
