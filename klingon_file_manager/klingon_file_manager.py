@@ -23,7 +23,7 @@ Returns:
         }
 """
 from typing import Union, Dict, Optional, Callable
-from .utils import is_binary_file, get_aws_credentials
+from .utils import is_binary_file, get_aws_credentials, ProgressPercentage
 from .delete import delete_file
 from .write import write_file
 from .read import read_file
