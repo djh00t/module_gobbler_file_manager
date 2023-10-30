@@ -40,6 +40,7 @@ def manage_file(
     action: str,
     path: str,
     content: str = None,
+    content_size: int = None,
     md5: Optional[str] = None,
     metadata: Optional[Dict[str, str]] = None,
     debug: bool = False,
@@ -52,7 +53,7 @@ def manage_file(
         action (str): The action to be performed ('get', 'post' or 'delete').
         path (str): The path for the file operation.
         content (str): The file content.
-        content_size_mb (int): The size of the content in megabytes.
+        content_size (int): The size of the content in bytes.
         debug (bool, optional): Flag to enable debugging. Defaults to False.
 
     Returns:
@@ -64,8 +65,8 @@ def manage_file(
         'action': action,
         'path': path,
         'content': content,
-        'content_size_mb': None,
-        'binary': is_binary_file(content),
+        'content_size': len(content),
+        'binary1': is_binary_file(content),
         'md5': md5,
         'metadata': metadata,
         'debug': debug_info,
@@ -80,10 +81,7 @@ def manage_file(
             read_result = read_file(path, debug)
             result['status'] = read_result['status']
             result['content'] = read_result['content']
-            # Calculate the size in megabytes rounded to 6 decimal places of
-            # the result['content'] object
-            result['content_size_mb'] = round(len(result['content']) / 1000000, 6)
-            result['binary'] = is_binary_file(path, debug)
+            result['binary2'] = is_binary_file(path, debug)
             # Add the debug info for the read_file() function
             if debug or result['status'] == 500:
                 debug_info['read_file'] = read_result['debug']
@@ -91,10 +89,7 @@ def manage_file(
             debug_info['write_file_start'] = f"Starting write_file with path={path}, content={content}, md5={md5}, metadata={metadata}"
             write_result = write_file(path, content, md5, metadata, debug)
             result['status'] = write_result['status']
-            # Calculate the size in megabytes rounded to 6 decimal places of
-            # the file object
-            result['content_size_mb'] = round(len(content) / 1000000, 6)
-            result['binary'] = is_binary_file(path, debug)
+            result['binary2'] = is_binary_file(path, debug)
             # Add the debug info for the write_file() function
             if debug or result['status'] == 500:
                 debug_info['write_file'] = write_result['debug']
