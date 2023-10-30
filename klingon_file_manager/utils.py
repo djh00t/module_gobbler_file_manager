@@ -92,24 +92,21 @@ class ProgressPercentage(object):
         _lock (threading.Lock): A lock to ensure thread safety.
         
     Input Schema:
-        fileobj: io.BytesIO
-        file_size: int
+        file_name: str
     """
     
-    def __init__(self, fileobj, file_size):
+    def __init__(self, file_name):
         """
         Initializes the ProgressPercentage class.
         
         Args:
-            fileobj (io.BytesIO): The file object being transferred.
-            file_size (int): The size of the file being transferred.
+            file_name (str): The name of the file being transferred.
             
         Input Schema:
-            fileobj: io.BytesIO
-            file_size: int
+            file_name: str
         """
-        self._fileobj = fileobj
-        self._total_size = file_size
+        self._fileobj = open(file_name, 'rb')
+        self._total_size = os.path.getsize(file_name)
         self._seen_so_far = 0
         self._lock = threading.Lock()
 
