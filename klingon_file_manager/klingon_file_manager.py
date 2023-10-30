@@ -55,7 +55,7 @@ def manage_file(
         'binary': is_binary_file(content),
         'md5': md5,
         'metadata': metadata,
-        'debug': debug_info,
+        'debug': debug_info if debug else {},
     }
 
     try:
