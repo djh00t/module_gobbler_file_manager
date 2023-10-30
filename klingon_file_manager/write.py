@@ -8,7 +8,7 @@ from .utils import get_aws_credentials, ProgressPercentage
 import hashlib
 
 
-def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None, metadata: Optional[Dict[str, str]] = None, debug: bool = False) -> Dict[str, Union[int, str, Dict[str, str]]]:
+def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None, metadata: Optional[Dict[str, str]] = None, debug: bool = False, progress: bool = False) -> Dict[str, Union[int, str, Dict[str, str]]]:
     """
     Writes content to a file at a given path, which can be either a local file or an S3 object.
 
@@ -113,13 +113,22 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                     # Convert all metadata values to strings
                     metadata_str = {k: str(v) for k, v in metadata.items()}
 
-                    # Upload the file to S3
-                    s3_client.upload_fileobj(
-                        Fileobj=f,
-                        Bucket=bucket_name,
-                        Key=key,
-                        ExtraArgs={'Metadata': metadata_str}
-                    )
+                    # Upload the file to S3 with progress callback if progress is True
+                    if progress:
+                        s3_client.upload_fileobj(
+                            Fileobj=f,
+                            Bucket=bucket_name,
+                            Key=key,
+                            ExtraArgs={'Metadata': metadata_str},
+                            Callback=ProgressPercentage(f)
+                        )
+                    else:
+                        s3_client.upload_fileobj(
+                            Fileobj=f,
+                            Bucket=bucket_name,
+                            Key=key,
+                            ExtraArgs={'Metadata': metadata_str}
+                        )
 
                 return {
                     "status": 200,
