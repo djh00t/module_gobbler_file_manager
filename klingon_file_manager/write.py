@@ -66,7 +66,7 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                     if isinstance(content, str):
                         content = content.encode('utf-8')
                     elif isinstance(content, int):
-                        content = bytes(content)
+                        content = str(content).encode('utf-8')
                     calculated_md5 = hashlib.md5(content).hexdigest()
                     if calculated_md5 != md5:
                         return {
