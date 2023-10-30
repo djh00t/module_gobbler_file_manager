@@ -4,7 +4,7 @@ import boto3
 from typing import Union, Dict
 from .utils import get_aws_credentials, ProgressPercentage
 
-def write_file(path: str, content: Union[str, bytes], debug: bool = False) -> Dict[str, Union[int, str, Dict[str, str]]]:
+def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None, metadata: Optional[Dict[str, str]] = None, debug: bool = False) -> Dict[str, Union[int, str, Dict[str, str]]]:
     """
     Writes content to a file at a given path, which can be either a local file or an S3 object.
     
@@ -61,7 +61,18 @@ def write_file(path: str, content: Union[str, bytes], debug: bool = False) -> Di
                 s3 = boto3.resource('s3')
                 file_size = len(content)
                 progress = ProgressPercentage(file_size)
-                s3.Bucket(bucket_name).upload_file('/tmp/temp_file', key, Callback=progress)
+                import hashlib
+                if md5:
+                    calculated_md5 = hashlib.md5(content).hexdigest()
+                    if calculated_md5 != md5:
+                        return {
+                            "status": 400,
+                            "message": "Provided MD5 does not match calculated MD5.",
+                            "debug": debug_info,
+                        }
+                    metadata["md5"] = calculated_md5
+
+                s3.Bucket(bucket_name).upload_file('/tmp/temp_file', key, Callback=progress, ExtraArgs={'Metadata': metadata})
                 os.remove('/tmp/temp_file')
 
                 return {
