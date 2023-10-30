@@ -78,7 +78,6 @@ def test_large_upload_progress():
         action='post',
         path="s3://fsg-gobbler/tests/"+file_name,
         content=file_content,
-        content_size=file_size,
         md5=md5_hash_hex,
         metadata=metadata,
         debug=True
