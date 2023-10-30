@@ -23,7 +23,7 @@ Returns:
         }
 """
 from typing import Union, Dict, Optional, Callable
-from .utils import is_binary_file, get_aws_credentials, ProgressPercentage
+from .utils import is_binary_file, get_aws_credentials
 from .delete import delete_file
 from .write import write_file
 from .read import read_file
@@ -43,7 +43,6 @@ def manage_file(
     md5: Optional[str] = None,
     metadata: Optional[Dict[str, str]] = None,
     debug: bool = False,
-    progress_callback: Optional[Callable] = None,
 ) -> dict:
 
     debug_info = {}
@@ -69,7 +68,7 @@ def manage_file(
                 debug_info['read_file'] = read_result['debug']
         elif action == 'post':
             debug_info['write_file_start'] = f"Starting write_file with path={path}, content={content}, md5={md5}, metadata={metadata}"
-            write_result = write_file(path, content, md5, metadata, debug, progress_callback=progress_callback)
+            write_result = write_file(path, content, md5, metadata, debug)
             result['status'] = write_result['status']
             result['binary'] = is_binary_file(result['content'], debug)
             # Add the debug info for the write_file() function
