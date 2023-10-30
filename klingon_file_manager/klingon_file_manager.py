@@ -91,7 +91,7 @@ def manage_file(
             print(f"DEBUG: content_size_mb {result['content_size_mb']}") 
             # Calculate the binary flag
             result['binary'] = is_binary_file(path, debug)
-            result(f"DEBUG: binary {result['binary']}")
+            print(f"DEBUG: binary {result['binary']}")
             # Add the debug info for the write_file() function
             if debug or result['status'] == 500:
                 debug_info['write_file'] = write_result['debug']
