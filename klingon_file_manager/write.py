@@ -1,6 +1,7 @@
 # write.py
 import os
 import boto3
+import hashlib
 from typing import Union, Dict, Optional
 from .utils import get_aws_credentials, ProgressPercentage
 import logging
