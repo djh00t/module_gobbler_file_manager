@@ -54,6 +54,8 @@ def get_aws_credentials(debug: bool = False) -> dict:
     }
 
 
+import chardet
+
 def is_binary_file(content: bytes, debug: bool = False) -> bool:
     """
     Checks if content is binary or text.
@@ -67,16 +69,11 @@ def is_binary_file(content: bytes, debug: bool = False) -> bool:
     """
 
     try:
-        # Check for null bytes (often found in binary content)
-        if b'\x00' in content:
-            return True
-        
-        # Check for non-printable characters (common in binary content)
-        if not content.isascii():
-            return True
-        
-        # If none of the above conditions matched, it's likely a text content
-        return False
+        # Detect the encoding of the content
+        result = chardet.detect(content)
+
+        # If the detected encoding is None, the content is likely binary
+        return result['encoding'] is None
     except:
         return False
 
