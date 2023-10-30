@@ -4,11 +4,11 @@ import os
 import boto3
 import hashlib
 from typing import Union, Dict, Optional, Callable
-from .utils import get_aws_credentials, ProgressPercentage
+from .utils import get_aws_credentials
 import hashlib
 
 
-def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None, metadata: Optional[Dict[str, str]] = None, debug: bool = False, progress: bool = False, progress_callback: Optional[Callable] = None) -> Dict[str, Union[int, str, Dict[str, str]]]:
+def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None, metadata: Optional[Dict[str, str]] = None, debug: bool = False):
     """
     Writes content to a file at a given path, which can be either a local file or an S3 object.
 
@@ -113,13 +113,12 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                     # Convert all metadata values to strings
                     metadata_str = {k: str(v) for k, v in metadata.items()}
 
-                    # Upload the file to S3 with progress callback if progress is True
+                    # Upload the file to S3
                     s3_client.upload_fileobj(
                         Fileobj=f,
                         Bucket=bucket_name,
                         Key=key,
-                        ExtraArgs={'Metadata': metadata_str},
-                        Callback=progress_callback if progress else None
+                        ExtraArgs={'Metadata': metadata_str}
                     )
 
                 return {
