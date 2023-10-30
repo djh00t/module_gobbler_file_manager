@@ -46,7 +46,7 @@ def manage_file(
     Callback: Optional[Callable] = None,
 ) -> dict:
     if Callback is not None:
-        Callback = ProgressPercentage(path)
+        Callback = ProgressPercentage(path, size=content_size)
 
     debug_info = {}
     result = {
