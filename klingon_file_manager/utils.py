@@ -72,8 +72,8 @@ def is_binary_file(content: bytes, debug: bool = False) -> bool:
         # Detect the encoding of the content
         result = chardet.detect(content)
 
-        # If the detected encoding is None, the content is likely binary
-        return result['encoding'] is None
+        # If the detected encoding is None or 'ISO-8859-1', the content is likely binary
+        return result['encoding'] is None or result['encoding'] == 'ISO-8859-1'
     except:
         return False
 
