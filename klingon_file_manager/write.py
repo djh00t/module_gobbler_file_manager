@@ -3,7 +3,7 @@ import io
 import os
 import boto3
 import hashlib
-from typing import Union, Dict, Optional
+from typing import Union, Dict, Optional, Callable
 from .utils import get_aws_credentials, ProgressPercentage
 import hashlib
 
