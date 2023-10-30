@@ -159,11 +159,14 @@ def test_post_s3_txt_file():
 
 
 def test_large_upload_progress():
+    # Set test files name
+    file_name = './large_file3'
+    
     # Generate a 100MB file using dd command
-    subprocess.run(['dd', 'if=/dev/zero', 'of=./large_file', 'bs=1b', 'count=1'])
+    subprocess.run(['dd', 'if=/dev/zero', 'of='+file_name, 'bs=1b', 'count=1'])
 
     # Get md5 hash of the generated file
-    with open('./large_file', 'rb') as f:
+    with open(file_name, 'rb') as f:
         # Read the file content
         file_content = f.read()
         
@@ -177,7 +180,7 @@ def test_large_upload_progress():
         
         # Convert md5_hash to a hex string for metadata and logging
         md5_hash_hex = md5_hash.hex()
-        print(f"The MD5 Hash of this file is:   {md5_hash_hex}")
+        #print(f"The MD5 Hash of this file is:   {md5_hash_hex}")
 
         # Get & announce the file size in bytes
         file_size = len(file_content)
@@ -195,34 +198,27 @@ def test_large_upload_progress():
                 return f"{round(file_size / 1000000, 6)} MB"
             else:
                 return f"{round(file_size / 1000000000, 6)} GB"
-        print(f"The file size is: {get_file_size(file_size)}")
+
 
     # Create metadata
     metadata = {
-        "md5chksum": md5_hash_hex,
+        "md5": md5_hash_hex,
         "filesize": file_size
     }
-
-    # Create a progress callback
-    progress = ProgressPercentage(file_size, './large_file')
 
     # Upload the file with progress callback and dump the full response from
     # klingon-file-manager to console
     result = manage_file(
         action='post',
-        path="s3://fsg-gobbler/tests/large_file",
+        path="s3://fsg-gobbler/tests/"+file_name,
         content=file_content,
         md5=md5_hash_hex,
         metadata=metadata,
-        debug=True
+        debug=False
     )
-
-    print(result)
 
     # Delete the generated file
     #os.remove('./large_file')
-
-    # Sleep for 5 seconds to allow the file to sync within s3's systems
 
     
 
@@ -235,36 +231,26 @@ def test_text_upload_progress():
     
     # Get the md5 hash of the content
     md5_hash = hashlib.md5(content.encode('utf-8')).digest()
-    print(f"md (binary):                    {md5_hash}")
 
     # Convert md5_hash to a hex string for metadata and logging
     md5_hash_hex = md5_hash.hex()
 
-    # Get & announce the file size in bytes
-    file_size = len(content)
-    print(f"The file size is: {file_size} bytes")
-
     # Create metadata
     metadata = {
-        "md5chksum": md5_hash_hex,
+        "md5": md5_hash_hex,
         "filesize": file_size
     }
-
-    # Create a progress callback
-    progress = ProgressPercentage(file_size, content)
 
     # Upload the file with progress callback and dump the full response from
     # klingon-file-manager to console
     result = manage_file(
         action='post',
-        path="s3://fsg-gobbler/tests/text_file",
+        path="s3://fsg-gobbler/tests/test-txt-file.txt",
         content=content,
         md5=md5_hash_hex,
         metadata=metadata,
-        debug=True
+        debug=False
     )
-
-    print(result)
 
     # Delete the generated file
     #os.remove('./large_file')
@@ -273,5 +259,7 @@ def test_text_upload_progress():
 
     
 
-test_text_upload_progress()
+
+test_large_upload_progress()
+# test_text_upload_progress()
 
