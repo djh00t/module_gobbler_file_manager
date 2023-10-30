@@ -57,7 +57,7 @@ def file_upload(action, path, content, md5=None, metadata={}, debug=False):
     result = manage_file(
         action=action,
         path=path,
-        content="<binary data>" if isinstance(content, bytes) and action != 'get' else content,
+        content=content,
         md5=md5,
         metadata=metadata,
         debug=debug,
@@ -112,54 +112,90 @@ def test_small_upload_progress():
     # Announce the upload result
     print("Upload result: ", result)
 
-test_small_upload_progress()
 
 
 
-def test_large_upload_progress():
+def test_medium_upload_progress():
     # Set test files name
-    #file_name = 'small_file'
-    #file_name = 'medium_file'
-    file_name = 'large_file'
-    
+    file_name = 'medium_file'
 
+    # Set file size in Mb
+    create_size = '10'
+
+    # Generate the file
+    create_test_binary_file(file_name, create_size)
 
     # Get md5 hash of the generated file
     with open(file_name, 'rb') as f:
         # Read the file content
         file_content = f.read()
-        
 
+    # Get the file size in bytes
+    file_size = len(file_content)
 
-        # Get & announce the file size in bytes
-        file_size = len(file_content)
-        print(f"File size: {file_size} bytes")
-
-
-        print(f"File size: {get_file_size(file_size)}")
-
-    # Create metadata
+    # Create metadata dictionary
     metadata = {
-        "md5": md5_hash_hex,
+        "md5": get_md5_hash(file_content),
         "filesize": file_size
     }
 
-    print("Metadata: ", metadata)
+    # Print the file size
+    print(f"File size: {get_file_size(file_size)}")
 
-    # Upload the file and dump the full response from
-    # klingon-file-manager to console
-    result = manage_file(
+    # Upload file
+    result = file_upload(
         action='post',
         path="s3://fsg-gobbler/tests/" + file_name,
         content=file_content,
-        md5=md5_hash_hex,
         metadata=metadata,
-        debug=False,
+        debug=False
     )
 
-    # Remove the test file
-    #os.remove(file_name)
-
+    # Announce the upload result
     print("Upload result: ", result)
 
-#test_large_upload_progress()
+
+
+
+def test_large_upload_progress():
+    # Set test files name
+    file_name = 'large_file'
+
+    # Set file size in Mb
+    create_size = '100'
+
+    # Generate the file
+    create_test_binary_file(file_name, create_size)
+
+    # Get md5 hash of the generated file
+    with open(file_name, 'rb') as f:
+        # Read the file content
+        file_content = f.read()
+
+    # Get the file size in bytes
+    file_size = len(file_content)
+
+    # Create metadata dictionary
+    metadata = {
+        "md5": get_md5_hash(file_content),
+        "filesize": file_size
+    }
+
+    # Print the file size
+    print(f"File size: {get_file_size(file_size)}")
+
+    # Upload file
+    result = file_upload(
+        action='post',
+        path="s3://fsg-gobbler/tests/" + file_name,
+        content=file_content,
+        metadata=metadata,
+        debug=False
+    )
+
+    # Announce the upload result
+    print("Upload result: ", result)
+
+#test_small_upload_progress()
+test_medium_upload_progress()
+# test_large_upload_progress()

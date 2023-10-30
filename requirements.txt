@@ -10,3 +10,5 @@ nbsphinx
 ipython
 datetime
 uuid
+python-magic
+chardet
