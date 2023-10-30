@@ -48,7 +48,7 @@ def manage_file(
     result = {
         'action': action,
         'path': path,
-        'content': content[:10] if is_binary_file(content) else content,
+        'content': (content[:10] if isinstance(content, str) else content[:10].decode('utf-8')) if content else None,
         'content_size': len(content),
         'binary': is_binary_file(content),
         'md5': md5,
