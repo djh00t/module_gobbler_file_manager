@@ -96,6 +96,8 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                     # Check if content is a string and encode it to bytes if it is
                     if isinstance(content, str):
                         content = content.encode()
+                    elif isinstance(content, int):
+                        content = str(content).encode()
                     temp_file.write(content)
                 # Write the content to S3 with progress callback
                 s3 = boto3.resource('s3')
