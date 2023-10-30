@@ -4,6 +4,21 @@ import boto3
 from typing import Union, Dict
 import threading
 import sys
+import magic
+
+
+def get_mime_type(file_path: str) -> str:
+    """
+    Gets the mime type of a file.
+    
+    Args:
+        file_path (str): The path to the file.
+        
+    Returns:
+        str: The mime type of the file.
+    """
+    mime = magic.Magic(mime=True)
+    return mime.from_file(file_path)
 
 
 def get_aws_credentials(debug: bool = False) -> dict:
@@ -40,42 +55,8 @@ def get_aws_credentials(debug: bool = False) -> dict:
     }
 
 
-def is_binary_file(file_path: str, debug: bool = False) -> bool:
-    """
-    Checks if a file is binary or text.
-    
-    Args:
-        file_path (str): The path to the file.
-        debug (bool, optional): Flag to enable debugging. Defaults to False.
-        
-    Returns:
-        bool: True if the file is binary, False otherwise.
-    """
+l
 
-    try:
-        with open(file_path, "rb") as file:
-            # Read the first few bytes from the file
-            num_bytes_to_check = 1024  # You can adjust this value
-            content = file.read(num_bytes_to_check)
-            
-            # Check for null bytes (often found in binary files)
-            if b'\x00' in content:
-                return True
-            
-            # Check for non-printable characters (common in binary files)
-            if not content.isascii():
-                return True
-            
-            # If none of the above conditions matched, it's likely a text file
-            return False
-    except:
-        return False
-
-import threading
-import sys
-
-import threading
-import sys
 
 class ProgressPercentage(object):
     """
