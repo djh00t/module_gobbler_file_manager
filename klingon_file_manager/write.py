@@ -63,10 +63,9 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                 progress = ProgressPercentage(file_size, '/tmp/temp_file')
                 import hashlib
                 if md5:
-                    if isinstance(content, str):
-                        content = content.encode('utf-8')
-                    elif isinstance(content, int):
-                        content = str(content).encode('utf-8')
+                    if not isinstance(content, str):
+                        content = str(content)
+                    content = content.encode('utf-8')
                     calculated_md5 = hashlib.md5(content).hexdigest()
                     if calculated_md5 != md5:
                         return {
