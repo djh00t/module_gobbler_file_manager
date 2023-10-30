@@ -63,7 +63,7 @@ def manage_file(
         'path': path,
         'content': content,
         'content_size_mb': None,
-        'binary': None,
+        'binary': is_binary_file(content),
         'md5': md5,
         'metadata': metadata,
         'debug': debug_info,
