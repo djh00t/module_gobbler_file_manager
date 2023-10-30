@@ -119,6 +119,7 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                         Fileobj=f,
                         Bucket=bucket_name,
                         Key=key,
+                        ContentMD5=md5,
                         Callback=progress,
                         ExtraArgs={'Metadata': metadata}
                     )
