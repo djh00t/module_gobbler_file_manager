@@ -111,7 +111,10 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                 print("###################################################################")
 
                 s3_client = boto3.client('s3')
-                with open(content, "rb") as f:
+                import io
+                if isinstance(content, str):
+                    content = content.encode('utf-8')
+                with io.BytesIO(content) as f:
                     s3_client.upload_fileobj(
                         Bucket=bucket_name,
                         Key=key,
