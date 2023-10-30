@@ -94,20 +94,23 @@ class ProgressPercentage(object):
         
     Input Schema:
         fileobj: io.BytesIO
+        file_size: int
     """
     
-    def __init__(self, fileobj):
+    def __init__(self, fileobj, file_size):
         """
         Initializes the ProgressPercentage class.
         
         Args:
             fileobj (io.BytesIO): The file object being transferred.
+            file_size (int): The size of the file being transferred.
             
         Input Schema:
             fileobj: io.BytesIO
+            file_size: int
         """
         self._fileobj = fileobj
-        self._total_size = fileobj.getbuffer().nbytes
+        self._total_size = file_size
         self._seen_so_far = 0
         self._lock = threading.Lock()
 
