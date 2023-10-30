@@ -3,6 +3,10 @@ import os
 import boto3
 from typing import Union, Dict, Optional
 from .utils import get_aws_credentials, ProgressPercentage
+import logging
+from botocore.exceptions import ClientError
+import hashlib
+
 
 def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None, metadata: Optional[Dict[str, str]] = None, debug: bool = False) -> Dict[str, Union[int, str, Dict[str, str]]]:
     """
@@ -23,7 +27,12 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                 "debug": Dict[str, str] # Debug information (only included if 'debug' flag is True)
             }
     """
-    print("")
+    print("path:            ", path)
+    # Print first 10 chars of content
+    print("content:         ", content[:10])
+    print("md5:             ", md5)
+    print("metadata:        ", metadata)
+    print("debug:           ", debug)
     try:
         debug_info = {}
 
@@ -62,9 +71,13 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
             try:
                 # Write the content to S3 with progress callback
                 s3 = boto3.resource('s3')
+                # Get file size in bytes
                 file_size = len(content)
-                progress = ProgressPercentage(file_size, '/tmp/temp_file')
-                import hashlib
+                # Set file name from key
+                file_name = os.path.basename(key)
+                # Set progress callback
+                progress = ProgressPercentage(file_size, content)
+                # Set metadata
                 if md5:
                     if not isinstance(content, (str, bytes)):
                         content = str(content)
@@ -79,8 +92,39 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                         }
                     metadata["md5"] = calculated_md5
 
-                s3.Bucket(bucket_name).upload_file('/tmp/temp_file', key, Callback=progress, ExtraArgs={'Metadata': metadata})
-                os.remove('/tmp/temp_file')
+                #s3.Bucket(bucket_name).upload_file('/tmp/temp_file', key, Callback=progress, ExtraArgs={'Metadata': metadata})
+
+                # Convert content into binary if it's a string
+                if isinstance(content, str):
+                    content = content.encode('utf-8')
+
+                print("###################################################################")
+                print(" Upload content to S3")
+                print("###################################################################")
+                print("Bucket Name:    ", bucket_name)
+                # Pull the file name out of the key
+                file_name = os.path.basename(key)
+                print("File Name:      ", file_name)
+                print("Key:            ", key)
+                print("Content:        ", content[:10])
+                print("Metadata:       ", metadata)
+                print("###################################################################")
+
+                s3_client = boto3.client('s3')
+                with open(content, "rb") as f:
+                    s3_client.upload_fileobj(
+                        Bucket=bucket_name,
+                        Key=key,
+                        Body=f,
+                        ContentMD5=md5,
+                        Callback=progress,
+                        ExtraArgs={'Metadata': metadata}
+                    )
+
+
+                #os.remove('/tmp/temp_file')
+
+                
 
                 return {
                     "status": 200,
