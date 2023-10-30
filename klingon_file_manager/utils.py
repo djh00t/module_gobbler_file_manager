@@ -89,29 +89,26 @@ class ProgressPercentage(object):
     Attributes:
         _total_size (int): The total size of the file being transferred in bytes.
         _seen_so_far (int): The amount of bytes transferred so far.
-        _filename (str): The name of the file being transferred.
+        _fileobj (io.BytesIO): The file object being transferred.
         _lock (threading.Lock): A lock to ensure thread safety.
         
     Input Schema:
-        total_size: int
-        filename: str
+        fileobj: io.BytesIO
     """
     
-    def __init__(self, total_size: int, filename: str):
+    def __init__(self, fileobj):
         """
         Initializes the ProgressPercentage class.
         
         Args:
-            total_size (int): The total size of the file being transferred in bytes.
-            filename (str): The name of the file being transferred.
+            fileobj (io.BytesIO): The file object being transferred.
             
         Input Schema:
-            total_size: int
-            filename: str
+            fileobj: io.BytesIO
         """
-        self._total_size = total_size
+        self._fileobj = fileobj
+        self._total_size = fileobj.getbuffer().nbytes
         self._seen_so_far = 0
-        self._filename = filename
         self._lock = threading.Lock()
 
     def __call__(self, bytes_amount: int):
@@ -132,7 +129,7 @@ class ProgressPercentage(object):
             percentage = (self._seen_so_far / self._total_size) * 100
             sys.stdout.write(
                 "\r%s  %s / %s  (%.2f%%)" % (
-                    self._filename, self._seen_so_far, self._total_size,
+                    self._fileobj.name, self._seen_so_far, self._total_size,
                     percentage))
             sys.stdout.flush()
 
