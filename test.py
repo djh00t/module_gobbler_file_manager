@@ -81,7 +81,7 @@ def test_large_upload_progress():
         content=file_content,
         md5=md5_hash_hex,
         metadata=metadata,
-        progress=True,
+        progress=ProgressPercentage(file_content, file_size),
         debug=True
     )
 
