@@ -89,9 +89,8 @@ def manage_file(
         result['status'] = 500
         result['error_message'] = str(exception)
         # Add the debug info for the exception
-        debug_info['exception'] = str(exception)
-        debug_info['error_message'] = str(exception)
+        debug_info['exception'] = str(exception) if debug else None
+        debug_info['error_message'] = str(exception) if debug else None
     # If the debug flag is not set and there was no failure, remove the debug field
-    if not debug and result['status'] != 500:
-        del result['debug']
+    # No need to delete the 'debug' key as it will be empty if debug is False
 
