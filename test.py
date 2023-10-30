@@ -1,5 +1,4 @@
 from klingon_file_manager import manage_file
-from klingon_file_manager.utils import ProgressPercentage
 import base64
 import hashlib
 import lorem
@@ -73,8 +72,6 @@ def test_large_upload_progress():
         "filesize": file_size
     }
 
-    # Create a progress callback
-    progress_callback = ProgressPercentage(file_name)
 
     # Upload the file and dump the full response from
     # klingon-file-manager to console
@@ -84,8 +81,7 @@ def test_large_upload_progress():
         content=file_content,
         md5=md5_hash_hex,
         metadata=metadata,
-        debug=False,
-        progress_callback=progress_callback
+        debug=False
     )
 
     # Remove the test file
