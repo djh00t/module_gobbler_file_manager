@@ -43,6 +43,7 @@ def manage_file(
     md5: Optional[str] = None,
     metadata: Optional[Dict[str, str]] = None,
     debug: bool = False,
+    Callback: Optional[Callable] = None,
 ) -> dict:
 
     debug_info = {}
@@ -67,8 +68,8 @@ def manage_file(
             if debug or result['status'] == 500:
                 debug_info['read_file'] = read_result['debug']
         elif action == 'post':
-            debug_info['write_file_start'] = f"Starting write_file with path={path}, content={content}, md5={md5}, metadata={metadata}"
-            write_result = write_file(path, content, md5, metadata, debug)
+            debug_info['write_file_start'] = f"Starting write_file with path={path}, content={content}, md5={md5}, metadata={metadata}, Callback={Callback}"
+            write_result = write_file(path, content, md5, metadata, debug, Callback)
             result['status'] = write_result['status']
             result['binary'] = is_binary_file(result['content'], debug)
             # Add the debug info for the write_file() function
