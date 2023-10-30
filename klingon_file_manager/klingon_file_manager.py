@@ -39,14 +39,10 @@ def manage_file(
     action: str,
     path: str,
     content: str = None,
-    content_size: int = None,
     md5: Optional[str] = None,
     metadata: Optional[Dict[str, str]] = None,
     debug: bool = False,
-    Callback: Optional[Callable] = None,
 ) -> dict:
-    if Callback is not None and content is not None:
-        Callback = ProgressPercentage(path, size=len(content))
 
     debug_info = {}
     result = {
