@@ -7,12 +7,14 @@ from .utils import get_aws_credentials, ProgressPercentage
 def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None, metadata: Optional[Dict[str, str]] = None, debug: bool = False) -> Dict[str, Union[int, str, Dict[str, str]]]:
     """
     Writes content to a file at a given path, which can be either a local file or an S3 object.
-    
+
     Args:
         path (str): The path where the file should be written. Can be a local path or an S3 URI (e.g., 's3://bucket/key').
         content (Union[str, bytes]): The content to write to the file.
-        debug (bool, optional): Flag to enable debugging. Defaults to False.
-        
+        md5 (Optional[str]): The MD5 hash of the content, used to verify the integrity of the data. Defaults to None.
+        metadata (Optional[Dict[str, str]]): Additional metadata to include with the file. Defaults to None.
+        debug (bool): Flag to enable debugging. Defaults to False.
+
     Returns:
         dict: A dictionary containing the status of the write operation with the following schema:
             {
@@ -21,6 +23,7 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                 "debug": Dict[str, str] # Debug information (only included if 'debug' flag is True)
             }
     """
+    print("")
     try:
         debug_info = {}
 
