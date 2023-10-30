@@ -226,7 +226,13 @@ def test_large_upload_progress():
 
     # Get file metadata
     s3 = boto3.client('s3')
-    head_object_response = s3.head_object(Bucket='fsg-gobbler', Key='tests/large_file')
+    try:
+        head_object_response = s3.head_object(Bucket='fsg-gobbler', Key='tests/large_file')
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            print("The object does not exist.")
+        else:
+            raise
     metadata = head_object_response['Metadata']
     content_length = head_object_response['ContentLength']
     content_type = head_object_response['ContentType']
