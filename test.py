@@ -76,8 +76,8 @@ def test_large_upload_progress():
     # Create a progress callback
     progress_callback = ProgressPercentage(file_content, file_size)
 
-    # Call the progress callback
-    progress_callback()
+    # Call the progress callback with a dummy value for bytes_amount
+    progress_callback(0)
 
     # Upload the file and dump the full response from
     # klingon-file-manager to console
