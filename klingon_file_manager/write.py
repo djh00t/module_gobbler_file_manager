@@ -1,11 +1,10 @@
 # write.py
+import io
 import os
 import boto3
 import hashlib
 from typing import Union, Dict, Optional
 from .utils import get_aws_credentials, ProgressPercentage
-import logging
-from botocore.exceptions import ClientError
 import hashlib
 
 
@@ -28,16 +27,11 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                 "debug": Dict[str, str] # Debug information (only included if 'debug' flag is True)
             }
     """
-    print("path:            ", path)
-    # Print first 10 chars of content
-    print("content:         ", content[:10])
-    print("md5:             ", md5)
-    print("metadata:        ", metadata)
-    print("debug:           ", debug)
     try:
         debug_info = {}
-
+        # Check if the path is an S3 URI
         if path.startswith("s3://"):
+            # Get AWS credentials
             AWS_ACCESS_KEY_ID  = os.environ.get("AWS_ACCESS_KEY_ID")
             AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
             # Write to S3 if the path is an S3 URI
@@ -64,67 +58,65 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
             debug_info["bucket_name"] = bucket_name
             debug_info["key"] = key
             
-            # Initialize S3 client with credentials
-            s3 = boto3.client(
-                "s3"
-            )
-
             try:
-                # Write the content to S3 with progress callback
+                # Initialize S3 resource
                 s3 = boto3.resource('s3')
+                
                 # Get file size in bytes
                 file_size = len(content)
+                
                 # Set file name from key
                 file_name = os.path.basename(key)
-                # Set progress callback
-                progress = ProgressPercentage(file_size, content)
-                # Set metadata
+
+                # MD5 handler
                 if md5:
+                    # If the content is not a string or bytes, convert it to a string
                     if not isinstance(content, (str, bytes)):
                         content = str(content)
+
+                    # If the content is a string, encode it to UTF-8 bytes
                     if isinstance(content, str):
                         content = content.encode('utf-8')
+
+                    # Calculate the MD5 hash of the content
                     calculated_md5 = hashlib.md5(content).hexdigest()
+
+                    # If the calculated MD5 does not match the provided MD5, return an error
                     if calculated_md5 != md5:
                         return {
                             "status": 400,
                             "message": "Provided MD5 does not match calculated MD5.",
                             "debug": debug_info,
                         }
-                    metadata["md5"] = calculated_md5
 
-                #s3.Bucket(bucket_name).upload_file('/tmp/temp_file', key, Callback=progress, ExtraArgs={'Metadata': metadata})
+                    # Store the calculated MD5 in the metadata
+                    metadata["md5"] = calculated_md5
 
                 # Convert content into binary if it's a string
                 if isinstance(content, str):
                     content = content.encode('utf-8')
 
-                print("###################################################################")
-                print(" Upload content to S3")
-                print("###################################################################")
-                print("Bucket Name:    ", bucket_name)
-                # Pull the file name out of the key
-                file_name = os.path.basename(key)
-                print("File Name:      ", file_name)
-                print("Key:            ", key)
-                print("Content:        ", content[:10])
-                print("Metadata:       ", metadata)
-                print("###################################################################")
-
+                # Initialize S3 client
                 s3_client = boto3.client('s3')
-                import io
+
+                # If content is a string, convert it to bytes
                 if isinstance(content, str):
                     content = content.encode('utf-8')
+
+                # Create a BytesIO object from the content
                 with io.BytesIO(content) as f:
+                    # Calculate the MD5 hash of the content and store it in the metadata
                     md5_hash = hashlib.md5(content).hexdigest()
                     metadata['ContentMD5'] = md5_hash
+
                     # Convert all metadata values to strings
                     metadata_str = {k: str(v) for k, v in metadata.items()}
+
+                    # Upload the file to S3
                     s3_client.upload_fileobj(
                         Fileobj=f,
                         Bucket=bucket_name,
                         Key=key,
-                        Callback=progress,
                         ExtraArgs={'Metadata': metadata_str}
                     )
 
