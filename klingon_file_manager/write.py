@@ -93,16 +93,15 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                     # Store the calculated MD5 in the metadata
                     metadata["md5"] = calculated_md5
 
+                # Determine if the content is binary or text
+                is_binary = is_binary_file(content)
+
                 # Convert content into binary if it's a string
                 if isinstance(content, str):
                     content = content.encode('utf-8')
 
                 # Initialize S3 client
                 s3_client = boto3.client('s3')
-
-                # If content is a string, convert it to bytes
-                if isinstance(content, str):
-                    content = content.encode('utf-8')
 
                 # Create a BytesIO object from the content
                 with io.BytesIO(content) as f:
