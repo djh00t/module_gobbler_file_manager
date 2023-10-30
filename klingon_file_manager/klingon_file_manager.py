@@ -69,6 +69,10 @@ def manage_file(
         'debug': debug_info,
     }
 
+    print()
+    print(result)
+    print()
+
     try:
         if action == 'get':
             read_result = read_file(path, debug)
