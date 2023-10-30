@@ -8,7 +8,7 @@ from .utils import get_aws_credentials, ProgressPercentage
 import hashlib
 
 
-def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None, metadata: Optional[Dict[str, str]] = None, debug: bool = False, progress: bool = False) -> Dict[str, Union[int, str, Dict[str, str]]]:
+def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None, metadata: Optional[Dict[str, str]] = None, debug: bool = False, progress: bool = False, progress_callback: Optional[Callable] = None) -> Dict[str, Union[int, str, Dict[str, str]]]:
     """
     Writes content to a file at a given path, which can be either a local file or an S3 object.
 
@@ -114,21 +114,13 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                     metadata_str = {k: str(v) for k, v in metadata.items()}
 
                     # Upload the file to S3 with progress callback if progress is True
-                    if progress:
-                        s3_client.upload_fileobj(
-                            Fileobj=f,
-                            Bucket=bucket_name,
-                            Key=key,
-                            ExtraArgs={'Metadata': metadata_str},
-                            Callback=ProgressPercentage(f, file_size)
-                        )
-                    else:
-                        s3_client.upload_fileobj(
-                            Fileobj=f,
-                            Bucket=bucket_name,
-                            Key=key,
-                            ExtraArgs={'Metadata': metadata_str}
-                        )
+                    s3_client.upload_fileobj(
+                        Fileobj=f,
+                        Bucket=bucket_name,
+                        Key=key,
+                        ExtraArgs={'Metadata': metadata_str},
+                        Callback=progress_callback if progress else None
+                    )
 
                 return {
                     "status": 200,

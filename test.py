@@ -88,7 +88,8 @@ def test_large_upload_progress():
         content=file_content,
         md5=md5_hash_hex,
         metadata=metadata,
-        debug=False
+        debug=False,
+        progress_callback=progress_callback
     )
 
     # Remove the test file
