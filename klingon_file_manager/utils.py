@@ -84,7 +84,7 @@ def is_binary_file(content: bytes, debug: bool = False) -> bool:
 class ProgressPercentage(object):
     def __init__(self, filename, size=None):
         self._filename = filename
-        self._size = float(size if size is not None else os.path.getsize(filename))
+        self._size = float(size)
         self._seen_so_far = 0
         self._lock = threading.Lock()
 
