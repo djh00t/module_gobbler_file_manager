@@ -83,10 +83,15 @@ def manage_file(
         elif action == 'post':
             write_result = write_file(path, content, md5, metadata, debug)
             result['status'] = write_result['status']
+            # Add the debug info for the write_file() function
+            print(f"DEBUG: status {result['status']}")
             # Calculate the size in megabytes rounded to 6 decimal places of
             # the file object
             result['content_size_mb'] = round(len(content) / 1000000, 6)
+            print(f"DEBUG: content_size_mb {result['content_size_mb']}") 
+            # Calculate the binary flag
             result['binary'] = is_binary_file(path, debug)
+            result(f"DEBUG: binary {result['binary']}")
             # Add the debug info for the write_file() function
             if debug or result['status'] == 500:
                 debug_info['write_file'] = write_result['debug']
