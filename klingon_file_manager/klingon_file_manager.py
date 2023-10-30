@@ -22,7 +22,7 @@ Returns:
             'debug': Dict[str, str]  # Debug information (only included if 'debug' flag is True)
         }
 """
-from typing import Union, Dict, Optional
+from typing import Union, Dict, Optional, Callable
 from .utils import is_binary_file, get_aws_credentials, ProgressPercentage
 from .delete import delete_file
 from .write import write_file
