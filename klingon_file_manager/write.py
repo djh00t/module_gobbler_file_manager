@@ -118,12 +118,14 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                 with io.BytesIO(content) as f:
                     md5_hash = hashlib.md5(content).hexdigest()
                     metadata['ContentMD5'] = md5_hash
+                    # Convert all metadata values to strings
+                    metadata_str = {k: str(v) for k, v in metadata.items()}
                     s3_client.upload_fileobj(
                         Fileobj=f,
                         Bucket=bucket_name,
                         Key=key,
                         Callback=progress,
-                        ExtraArgs={'Metadata': metadata}
+                        ExtraArgs={'Metadata': metadata_str}
                     )
 
                 return {
