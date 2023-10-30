@@ -6,6 +6,7 @@ Args:
     action (str): The action to be performed ('get', 'post', or 'delete').
     path (str): The path for the file operation.
     content (Union[str, bytes], optional): The file content for 'post' action.
+    md5 (str, optional): The md5 hash of the file content for 'post' action.
     debug (bool, optional): Flag to enable debugging. Defaults to False.
     
 Returns:
@@ -16,6 +17,7 @@ Returns:
             'content': Union[str, bytes],  # File content for 'get' and 'post' actions
             'content_size_mb': float,  # Size of the content in megabytes
             'binary': bool,        # Flag indicating if the content is binary
+            'md5': str,            # The md5 hash of the file content for 'get' and 'post' actions
             'status': int,         # HTTP-like status code (e.g., 200 for success, 500 for failure)
             'debug': Dict[str, str]  # Debug information (only included if 'debug' flag is True)
         }
