@@ -160,7 +160,7 @@ def test_post_s3_txt_file():
 
 def test_large_upload_progress():
     # Generate a 100MB file using dd command
-    subprocess.run(['dd', 'if=/dev/zero', 'of=./large_file', 'bs=1M', 'count=10'])
+    subprocess.run(['dd', 'if=/dev/zero', 'of=./large_file', 'bs=1b', 'count=1'])
 
     # Get md5 hash of the generated file
     with open('./large_file', 'rb') as f:
@@ -206,9 +206,9 @@ def test_large_upload_progress():
     # Create a progress callback
     progress = ProgressPercentage(file_size, './large_file')
 
-    # Upload the file with progress callback
-    from klingon_file_manager import manage_file
-    manage_file(
+    # Upload the file with progress callback and dump the full response from
+    # klingon-file-manager to console
+    result = manage_file(
         action='post',
         path="s3://fsg-gobbler/tests/large_file",
         content=file_content,
@@ -217,29 +217,61 @@ def test_large_upload_progress():
         debug=True
     )
 
+    print(result)
+
     # Delete the generated file
     #os.remove('./large_file')
 
     # Sleep for 5 seconds to allow the file to sync within s3's systems
-    import time
-    time.sleep(5)
 
-    # Get file metadata
-    s3 = boto3.client('s3')
-    try:
-        head_object_response = s3.head_object(Bucket='fsg-gobbler', Key='tests/large_file')
-    except botocore.exceptions.ClientError as e:
-        if e.response['Error']['Code'] == "404":
-            print("The object does not exist.")
-        else:
-            raise
-    metadata = head_object_response['Metadata']
-    content_length = head_object_response['ContentLength']
-    content_type = head_object_response['ContentType']
+    
 
-    print(f"metadata:           {metadata}")
-    print(f"content_length:     {content_length}")
-    print(f"content_type:       {content_type}")
+# test_large_upload_progress()
 
-test_large_upload_progress()
+
+def test_text_upload_progress():
+    # Content to upload
+    content="Hello World!"
+    
+    # Get the md5 hash of the content
+    md5_hash = hashlib.md5(content.encode('utf-8')).digest()
+    print(f"md (binary):                    {md5_hash}")
+
+    # Convert md5_hash to a hex string for metadata and logging
+    md5_hash_hex = md5_hash.hex()
+
+    # Get & announce the file size in bytes
+    file_size = len(content)
+    print(f"The file size is: {file_size} bytes")
+
+    # Create metadata
+    metadata = {
+        "md5chksum": md5_hash_hex,
+        "filesize": file_size
+    }
+
+    # Create a progress callback
+    progress = ProgressPercentage(file_size, content)
+
+    # Upload the file with progress callback and dump the full response from
+    # klingon-file-manager to console
+    result = manage_file(
+        action='post',
+        path="s3://fsg-gobbler/tests/text_file",
+        content=content,
+        md5=md5_hash_hex,
+        metadata=metadata,
+        debug=True
+    )
+
+    print(result)
+
+    # Delete the generated file
+    #os.remove('./large_file')
+
+    # Sleep for 5 seconds to allow the file to sync within s3's systems
+
+    
+
+test_text_upload_progress()
 
