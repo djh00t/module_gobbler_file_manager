@@ -85,7 +85,7 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
             )
             if md5 is not None:
                 # Add Content-MD5 header if md5 is provided
-                content_md5_base64 = base64.b64encode(hashlib.md5(content.encode() if isinstance(content, str) else content).digest()).decode()
+                content_md5_base64 = base64.b64encode(hashlib.md5(str(content).encode()).digest()).decode()
                 extra_args = {'ContentMD5': content_md5_base64}
             else:
                 extra_args = None
