@@ -20,6 +20,7 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
         path (str): The path where the file should be written. Can be a local path or an S3 URI (e.g., 's3://bucket/key').
         content (Union[str, bytes]): The content to write to the file.
         md5 (Optional[str]): The MD5 hash of the content. If provided, the function will check if the hash matches the content's MD5 hash before writing to the file.
+        metadata (Optional[Dict]): The metadata to be added to the file. If provided, the function will add the metadata to the file.
         debug (bool, optional): Flag to enable debugging. Defaults to False.
         
     Returns:
@@ -27,6 +28,7 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
             {
                 "status": int,          # HTTP-like status code (e.g., 200 for success, 500 for failure)
                 "message": str,         # Message describing the outcome
+                "md5": str,             # The MD5 hash of the content
                 "debug": Dict[str, str] # Debug information (only included if 'debug' flag is True)
             }
     """
@@ -164,6 +166,7 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
             "message": "Failed to write file.",
             "debug": debug_info,
         }
+        
 def get_s3_object_metadata(s3, bucket_name, key):
     """
     Retrieves the metadata of an S3 object.
