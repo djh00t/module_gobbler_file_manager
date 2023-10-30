@@ -115,6 +115,7 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                 return {
                     "status": 200,
                     "message": "File written successfully to S3.",
+                    "md5": content_md5,
                     "debug": debug_info,
                 }
             except Exception as exception:
@@ -147,6 +148,7 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
             return {
                 "status": 200,
                 "message": "File written successfully.",
+                "md5": content_md5,
                 "debug": debug_info,
             }
     except Exception as exception:
