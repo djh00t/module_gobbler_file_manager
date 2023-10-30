@@ -116,7 +116,6 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                 if isinstance(content, str):
                     content = content.encode('utf-8')
                 with io.BytesIO(content) as f:
-                    import hashlib
                     md5_hash = hashlib.md5(content).hexdigest()
                     metadata['ContentMD5'] = md5_hash
                     s3_client.upload_fileobj(
@@ -126,11 +125,6 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                         Callback=progress,
                         ExtraArgs={'Metadata': metadata}
                     )
-
-
-                #os.remove('/tmp/temp_file')
-
-                
 
                 return {
                     "status": 200,
