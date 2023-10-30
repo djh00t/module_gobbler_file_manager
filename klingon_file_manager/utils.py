@@ -82,53 +82,21 @@ def is_binary_file(content: bytes, debug: bool = False) -> bool:
 
 
 class ProgressPercentage(object):
-    """
-    A utility class to show the upload/download progress in percentage.
-    
-    Attributes:
-        _total_size (int): The total size of the file being transferred in bytes.
-        _seen_so_far (int): The amount of bytes transferred so far.
-        _fileobj (io.BytesIO): The file object being transferred.
-        _lock (threading.Lock): A lock to ensure thread safety.
-        
-    Input Schema:
-        file_name: str
-    """
-    
-    def __init__(self, file_name):
-        """
-        Initializes the ProgressPercentage class.
-        
-        Args:
-            file_name (str): The name of the file being transferred.
-            
-        Input Schema:
-            file_name: str
-        """
-        self._fileobj = open(file_name, 'rb')
-        self._total_size = os.path.getsize(file_name)
+    def __init__(self, filename):
+        self._filename = filename
+        self._size = float(os.path.getsize(filename))
         self._seen_so_far = 0
         self._lock = threading.Lock()
 
-    def __call__(self, bytes_amount: int):
-        """
-        Callable method to update the progress percentage.
-        
-        Args:
-            bytes_amount (int): The amount of bytes transferred so far.
-            
-        Input Schema:
-            bytes_amount: int
-            
-        Output:
-            Writes the progress percentage to stdout.
-        """
+    def __call__(self, bytes_amount):
+        # To simplify we'll assume this is hooked up
+        # to a single filename.
         with self._lock:
             self._seen_so_far += bytes_amount
-            percentage = (self._seen_so_far / self._total_size) * 100
+            percentage = (self._seen_so_far / self._size) * 100
             sys.stdout.write(
                 "\r%s  %s / %s  (%.2f%%)" % (
-                    self._fileobj.name, self._seen_so_far, self._total_size,
+                    self._filename, self._seen_so_far, self._size,
                     percentage))
             sys.stdout.flush()
 
