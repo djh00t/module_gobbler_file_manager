@@ -102,6 +102,16 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                 s3.Bucket(bucket_name).upload_file('/tmp/temp_file', key, ExtraArgs=extra_args, Callback=progress)
                 os.remove('/tmp/temp_file')
 
+                # Get the metadata of the uploaded file
+                uploaded_file_metadata = get_s3_object_metadata(s3, bucket_name, key)
+                uploaded_file_md5 = uploaded_file_metadata['Metadata'].get('md5chksum')
+                if md5 != uploaded_file_md5:
+                    return {
+                        "status": 400,
+                        "message": "MD5 hash does not match the uploaded file.",
+                        "debug": debug_info,
+                    }
+
                 return {
                     "status": 200,
                     "message": "File written successfully to S3.",
@@ -152,3 +162,21 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
             "message": "Failed to write file.",
             "debug": debug_info,
         }
+def get_s3_object_metadata(s3, bucket_name, key):
+    """
+    Retrieves the metadata of an S3 object.
+
+    Args:
+        s3 (boto3.resource): The S3 resource.
+        bucket_name (str): The name of the S3 bucket.
+        key (str): The key of the S3 object.
+
+    Returns:
+        dict: The metadata of the S3 object.
+    """
+    try:
+        response = s3.meta.client.head_object(Bucket=bucket_name, Key=key)
+        return response
+    except Exception as e:
+        print(f"Error getting metadata for S3 object {bucket_name}/{key}: {e}")
+        return None
