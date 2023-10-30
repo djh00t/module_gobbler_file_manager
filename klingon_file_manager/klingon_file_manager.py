@@ -81,7 +81,7 @@ def manage_file(
             read_result = read_file(path, debug)
             result['status'] = read_result['status']
             result['content'] = read_result['content']
-            result['binary2'] = is_binary_file(path, debug)
+            result['binary2'] = is_binary_file(result['content'], debug)
             # Add the debug info for the read_file() function
             if debug or result['status'] == 500:
                 debug_info['read_file'] = read_result['debug']
@@ -89,7 +89,7 @@ def manage_file(
             debug_info['write_file_start'] = f"Starting write_file with path={path}, content={content}, md5={md5}, metadata={metadata}"
             write_result = write_file(path, content, md5, metadata, debug)
             result['status'] = write_result['status']
-            result['binary2'] = is_binary_file(path, debug)
+            result['binary2'] = is_binary_file(result['content'], debug)
             # Add the debug info for the write_file() function
             if debug or result['status'] == 500:
                 debug_info['write_file'] = write_result['debug']
