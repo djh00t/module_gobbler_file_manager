@@ -44,7 +44,7 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                         "message": "AWS credentials not found",
                         "content": None,
                         "is_binary": None,
-                        "debug": {"error": "AWS credentials not found"},
+                        "debug": {"error": "AWS credentials not found"} if debug else {},
                     }
                 AWS_ACCESS_KEY_ID = aws_credentials["credentials"]["AWS_ACCESS_KEY_ID"]
                 AWS_SECRET_ACCESS_KEY = aws_credentials["credentials"]["AWS_SECRET_ACCESS_KEY"]
@@ -87,7 +87,7 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                         return {
                             "status": 400,
                             "message": "Provided MD5 does not match calculated MD5.",
-                            "debug": debug_info,
+                            "debug": debug_info if debug else {},
                         }
 
                     # Store the calculated MD5 in the metadata
@@ -134,12 +134,12 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                     return {
                         "status": 500,
                         "message": f"Failed to write file to S3: {str(exception)}",
-                        "debug": debug_info,
+                        "debug": debug_info if debug else {},
                     }
                 return {
                     "status": 500,
                     "message": "Failed to write file to S3.",
-                    "debug": debug_info,
+                    "debug": debug_info if debug else {},
                 }
         else:
             # Write to the local file system
@@ -158,10 +158,10 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
             return {
                 "status": 500,
                 "message": f"Failed to write file: {str(exception)}",
-                "debug": debug_info,
+                "debug": debug_info if debug else {},
             }
         return {
             "status": 500,
             "message": "Failed to write file.",
-            "debug": debug_info,
+            "debug": debug_info if debug else {},
         }
