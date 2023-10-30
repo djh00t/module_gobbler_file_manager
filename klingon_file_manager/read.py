@@ -2,7 +2,7 @@
 import os
 import boto3
 from typing import Union, Dict
-from .utils import get_aws_credentials, is_binary_file, ProgressPercentage
+from .utils import get_aws_credentials, is_binary_file
 
 
 def read_file(path: str, debug: bool = False) -> Dict[str, Union[int, str, bytes, bool, Dict[str, str]]]:
