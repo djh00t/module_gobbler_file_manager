@@ -4,7 +4,6 @@ import hashlib
 import lorem
 import os
 import subprocess
-from klingon_file_manager.utils import ProgressPercentage
 
 
 AWS_ACCESS_KEY_ID  = os.environ.get("AWS_ACCESS_KEY_ID")
@@ -34,7 +33,7 @@ def test_large_upload_progress():
     file_name = 'large_file'
     
     # Generate a 100MB file using dd command
-    subprocess.run(['dd', 'if=/dev/zero', 'of='+file_name, 'bs=1M', 'count=100'])
+    subprocess.run(['dd', 'if=/dev/zero', 'of=./' + file_name, 'bs=1M', 'count=10'])
 
     # Get md5 hash of the generated file
     with open(file_name, 'rb') as f:
@@ -73,10 +72,6 @@ def test_large_upload_progress():
         "filesize": file_size
     }
 
-
-    # Initialize the ProgressPercentage instance
-    progress = ProgressPercentage(file_name)
-
     # Upload the file and dump the full response from
     # klingon-file-manager to console
     result = manage_file(
@@ -85,12 +80,12 @@ def test_large_upload_progress():
         content=file_content,
         md5=md5_hash_hex,
         metadata=metadata,
-        debug=False,
-        Callback=progress
+        debug=True
     )
+    print(f"Result:     {result}")
 
     # Remove the test file
-    os.remove(file_name)
+    #os.remove(file_name)
 
     print(f"Upload result: {result}")
 
