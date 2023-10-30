@@ -120,7 +120,7 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                             Bucket=bucket_name,
                             Key=key,
                             ExtraArgs={'Metadata': metadata_str},
-                            Callback=ProgressPercentage(f)
+                            Callback=ProgressPercentage(f, file_size)
                         )
                     else:
                         s3_client.upload_fileobj(
