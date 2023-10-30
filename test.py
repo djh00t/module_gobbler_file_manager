@@ -82,7 +82,7 @@ def test_large_upload_progress():
         md5=md5_hash_hex,
         metadata=metadata,
         progress=ProgressPercentage(file_content, file_size),
-        debug=True
+        debug=False
     )
 
     # Remove the test file
