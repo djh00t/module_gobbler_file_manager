@@ -94,6 +94,10 @@ def write_file(path: str, content: Union[str, bytes], md5: Optional[str] = None,
                     if metadata is None:
                         metadata = {}
 
+                    # Ensure metadata is a dictionary
+                    if metadata is None:
+                        metadata = {}
+
                     # Store the calculated MD5 in the metadata
                     metadata["md5"] = calculated_md5
 
