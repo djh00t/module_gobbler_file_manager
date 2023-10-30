@@ -21,7 +21,6 @@ Returns:
         }
 """
 from typing import Union, Dict
-from typing import Optional
 from .utils import is_binary_file, get_aws_credentials, ProgressPercentage
 from .delete import delete_file
 from .write import write_file
@@ -40,7 +39,6 @@ def manage_file(
     path: str,
     content: str = None,
     md5: Optional[str] = None,
-    metadata: Optional[Dict] = None,
     debug: bool = False,
 ) -> dict:
 
@@ -81,17 +79,12 @@ def manage_file(
             if debug or result['status'] == 500:
                 debug_info['read_file'] = read_result['debug']
         elif action == 'post':
-            write_result = write_file(path, content, md5, metadata, debug)
+            write_result = write_file(path, content, md5, debug)
             result['status'] = write_result['status']
-            # Add the debug info for the write_file() function
-            print(f"DEBUG: status {result['status']}")
             # Calculate the size in megabytes rounded to 6 decimal places of
             # the file object
             result['content_size_mb'] = round(len(content) / 1000000, 6)
-            print(f"DEBUG: content_size_mb {result['content_size_mb']}") 
-            # Calculate the binary flag
             result['binary'] = is_binary_file(path, debug)
-            print(f"DEBUG: binary {result['binary']}")
             # Add the debug info for the write_file() function
             if debug or result['status'] == 500:
                 debug_info['write_file'] = write_result['debug']
