@@ -1,31 +1,23 @@
 # get.py
-"""File Management Service for Local and AWS S3 Storage.
+"""
+Module for getting files from local and AWS S3 storage.
 
 This module provides a centralized way to manage file operations on both
 local and AWS S3 storage. It leverages utility functions from the `utils` module
-and specific actions from `get`, `post`, and `delete` modules. It provides an
-interface for reading, writing, and deleting files, with additional support for
-debugging and AWS authentication.
-
-Modules:
-    utils: Provides utility functions like AWS credential fetching and file type checking.
-    get: Contains the functionality for reading files.
-    post: Contains the functionality for writing files.
-    delete: Contains the functionality for deleting files.
+and specific actions from `get`, `post`, and `delete` modules.
 
 Functions:
-    manage_file: The main function that delegates to specific actions based on user input.
+    get_file: Function for getting files.
 
 Example:
-    To read a file from a local directory:
+    To get a file from a local directory:
     >>> manage_file('get', '/path/to/local/file')
-
-    To write a file to an S3 bucket:
-    >>> manage_file('post', 's3://bucket/file', 'Hello, world!')
-
-    To delete a file from a local directory:
-    >>> manage_file('delete', '/path/to/local/file')
+    
+    To get a file from an S3 bucket:
+    >>> manage_file('get', 's3://bucket/file')
+    ...
 """
+
 
 import os
 import boto3
@@ -33,18 +25,19 @@ from typing import Union, Dict
 from .utils import get_aws_credentials, is_binary_file
 
 
-def read_file(path: str, debug: bool = False) -> Dict[str, Union[int, str, bytes, bool, Dict[str, str]]]:
-    """Reads a file from a given path.
+def get_file(path: str, debug: bool = False) -> Dict[str, Union[int, str, bytes, bool, Dict[str, str]]]:
+    """
+    Gets a file from a given path.
 
-    This function reads a file from a specified path. The path can either be a
+    This function gets a file from a specified path. The path can either be a
     local directory or an S3 bucket.
 
     Args:
-        path: The path of the file to read.
+        path: The path of the file to get.
         debug: Flag to enable debugging. Defaults to False.
 
     Returns:
-        A dictionary containing the status of the read operation. The schema
+        A dictionary containing the status of the get operation. The schema
         is as follows:
             {
                 "status": int,          # HTTP-like status code
@@ -58,9 +51,9 @@ def read_file(path: str, debug: bool = False) -> Dict[str, Union[int, str, bytes
 
     try:
         if path.startswith("s3://"):
-            debug_info.update(_read_from_s3(path, debug))
+            debug_info.update(_get_from_s3(path, debug))
         else:
-            debug_info.update(_read_from_local(path, debug))
+            debug_info.update(_get_from_local(path, debug))
 
         return debug_info
 
@@ -68,22 +61,23 @@ def read_file(path: str, debug: bool = False) -> Dict[str, Union[int, str, bytes
         debug_info["exception"] = str(exception)
         return {
             "status": 500,
-            "message": f"Failed to read file: {str(exception)}" if debug else "Failed to read file.",
+            "message": f"Failed to get file: {str(exception)}" if debug else "Failed to get file.",
             "content": None,
             "binary": None,
             "debug": debug_info if debug else {},
         }
 
 
-def _read_from_s3(path: str, debug: bool) -> Dict[str, Union[int, str, bytes, bool, Dict[str, str]]]:
-    """Reads a file from an S3 bucket.
+def _get_from_s3(path: str, debug: bool) -> Dict[str, Union[int, str, bytes, bool, Dict[str, str]]]:
+    """
+    Gets a file from an S3 bucket.
 
     Args:
         path: The S3 path where the file should be read from.
         debug: Flag to enable debugging.
 
     Returns:
-        A dictionary containing the status of the read operation from S3.
+        A dictionary containing the status of the get operation from S3.
     """
     debug_info = {}
 
@@ -104,7 +98,7 @@ def _read_from_s3(path: str, debug: bool) -> Dict[str, Union[int, str, bytes, bo
         debug_info["exception"] = str(exception)
         return {
             "status": 500,
-            "message": "Failed to read file from S3.",
+            "message": "Failed to get file from S3.",
             "content": None,
             "binary": None,
             "debug": debug_info if debug else {},
@@ -120,15 +114,16 @@ def _read_from_s3(path: str, debug: bool) -> Dict[str, Union[int, str, bytes, bo
 
 
 
-def _read_from_local(path: str, debug: bool) -> Dict[str, Union[int, str, bytes, bool, Dict[str, str]]]:
-    """Reads a file from a local directory.
+def _get_from_local(path: str, debug: bool) -> Dict[str, Union[int, str, bytes, bool, Dict[str, str]]]:
+    """
+    Gets a file from a local directory.
 
     Args:
         path: The local path where the file should be read from.
         debug: Flag to enable debugging.
 
     Returns:
-        A dictionary containing the status of the read operation from the local directory.
+        A dictionary containing the status of the get operation from the local directory.
     """
     debug_info = {}
 
@@ -139,7 +134,7 @@ def _read_from_local(path: str, debug: bool) -> Dict[str, Union[int, str, bytes,
         debug_info["exception"] = str(exception)
         return {
             "status": 500,
-            "message": "Failed to read file from local.",
+            "message": "Failed to get file from local.",
             "content": None,
             "binary": None,
             "debug": debug_info if debug else {},

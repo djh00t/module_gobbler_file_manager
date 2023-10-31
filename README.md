@@ -20,16 +20,25 @@ The module looks for the following environment variables:
 - AWS credentials are fetched using the `get_aws_credentials` function
 - File operations are performed using the `read_file`, `write_file`, and `delete_file` functions
 - The `manage_file` function returns a dictionary containing the result of the file operation with the following schema:
-    {
-        'action': str,         # Action performed ('get', 'post', or 'delete')
-        'path': str,           # Path for the file operation
-        'content': Union[str, bytes],  # File content for 'get' and 'post' actions
-        'content_size_mb': float,  # Size of the content in megabytes
-        'binary': bool,        # Flag indicating if the content is binary
-        'md5': str,            # The md5 hash of the file content for 'get' and 'post' actions
-        'status': int,         # HTTP-like status code (e.g., 200 for success, 500 for failure)
-        'debug': Dict[str, str]  # Debug information (only included if 'debug' flag is True)
-    }
+```json
+{
+    'action': str,         # Action performed ('get', 'post', or 'delete')
+    'path': str,           # Path for the file operation
+    'content': Union[str, bytes],  # File content for 'get' and 'post' actions
+    'content_size_mb': float,  # Size of the content in megabytes
+    'binary': bool,        # Flag indicating if the content is binary
+    'md5': str,            # The md5 hash of the file content for 'get' and 'post' actions
+    'status': int,         # HTTP-like status code (e.g., 200 for success, 500 for failure)
+    'debug': Dict[str, str]  # Debug information (only included if 'debug' flag is True)
+}
+```
+
+- Utility function `get_mime_type` to fetch the MIME type of a file.
+- Utility function `is_binary_file` to check if a file is binary.
+- Internal function `_read_from_s3` for reading from S3 storage.
+- Internal function `_read_from_local` for reading from local storage.
+- Internal function `_write_to_s3` for writing to S3 storage.
+- Internal function `_write_to_local` for writing to local storage.
 
 ## Usage Examples
 ### Using `manage_file` function

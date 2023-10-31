@@ -1,35 +1,42 @@
 # utils.py
-"""File Management Service for Local and AWS S3 Storage.
+"""
+Utility functions for the Klingon File Manager, including AWS credential fetching.
 
 This module provides a centralized way to manage file operations on both
 local and AWS S3 storage. It leverages utility functions from the `utils` module
-and specific actions from `get`, `post`, and `delete` modules. It provides an
-interface for reading, writing, and deleting files, with additional support for
-debugging and AWS authentication.
-
-Modules:
-    utils: Provides utility functions like AWS credential fetching and file type checking.
-    get: Contains the functionality for reading files.
-    post: Contains the functionality for writing files.
-    delete: Contains the functionality for deleting files.
+and specific actions from `get`, `post`, and `delete` modules.
 
 Functions:
-    manage_file: The main function that delegates to specific actions based on user input.
+    get_mime_type: Fetch the MIME type of a file.
+    is_binary_file: Check if a file is binary.
+    get_aws_credentials: Fetch AWS credentials.
 
 Example:
-    To read a file from a local directory:
-    >>> manage_file('get', '/path/to/local/file')
-
-    To write a file to an S3 bucket:
-    >>> manage_file('post', 's3://bucket/file', 'Hello, world!')
-
-    To delete a file from a local directory:
-    >>> manage_file('delete', '/path/to/local/file')
+    # To get the MIME type of a local file:
+    >>> get_mime_type('/path/to/local/file.txt')
+    'text/plain'
+    
+    # To get the MIME type of an S3 file:
+    >>> get_mime_type('s3://bucket/file.jpg')
+    'image/jpeg'
+    
+    # To check if a local file is binary:
+    >>> is_binary_file('/path/to/local/file.bin')
+    True
+    
+    # To check if an S3 file is binary:
+    >>> is_binary_file('s3://bucket/file.bin')
+    True
+    
+    # To fetch AWS credentials:
+    >>> credentials = get_aws_credentials()
+    >>> print(credentials['aws_access_key_id'])
+    'YOUR_AWS_ACCESS_KEY_ID'
 """
 
 import magic
 from boto3 import Session
-from typing import Dict, Union, bool, str
+from typing import Dict, Union
 
 
 def get_mime_type(file_path: str) -> str:
@@ -41,9 +48,15 @@ def get_mime_type(file_path: str) -> str:
     Returns:
         The MIME type of the file.
     """
-    with open(file_path, 'rb') as file:
-        content = file.read()
-    return magic.from_buffer(content, mime=True)
+    if file_path.startswith('s3://'):
+        s3 = boto3.client('s3')
+        bucket_name, key = file_path[5:].split('/', 1)
+        obj = s3.get_object(Bucket=bucket_name, Key=key)
+        return obj['ContentType']
+    else:
+        with open(file_path, 'rb') as file:
+            content = file.read()
+        return magic.from_buffer(content, mime=True)
 
 
 def get_aws_credentials(debug: bool = False) -> Dict[str, Union[int, str]]:
@@ -66,16 +79,22 @@ def get_aws_credentials(debug: bool = False) -> Dict[str, Union[int, str]]:
         },
     }
 
-def is_binary_file(content: bytes, debug: bool = False) -> bool:
-    """Checks if content is binary or text.
+def is_binary_file(file_path: str) -> bool:
+    """Check if a file is binary.
 
     Args:
-        content: The content to check.
-        debug: Flag to enable debugging. Defaults to False.
+        file_path: The path to the file.
 
     Returns:
-        True if the content is binary, False otherwise.
+        True if the file is binary, False otherwise.
     """
-    text_chars = bytearray({7, 8, 9, 10, 12, 13, 27} | set(range(0x20, 0x100)) - {0x7F})
-    is_binary_str = lambda data: bool(data.translate(None, text_chars))
-    return is_binary_str(content)
+    if file_path.startswith('s3://'):
+        s3 = boto3.client('s3')
+        bucket_name, key = file_path[5:].split('/', 1)
+        obj = s3.get_object(Bucket=bucket_name, Key=key)
+        return obj['ContentType'].startswith('application/')
+    else:
+        with open(file_path, 'rb') as file:
+            content = file.read()
+        mime_type = magic.from_buffer(content, mime=True)
+        return mime_type.startswith('application/')

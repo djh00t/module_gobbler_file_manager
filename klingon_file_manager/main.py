@@ -1,5 +1,6 @@
 # main.py
-"""File Management Service for Local and AWS S3 Storage.
+"""
+File Management Service for Local and AWS S3 Storage.
 
 This module provides a centralized way to manage file operations on both
 local and AWS S3 storage. It leverages utility functions from the `utils` module
@@ -17,46 +18,31 @@ Functions:
     manage_file: The main function that delegates to specific actions based on user input.
 
 Example:
-    To read a file from a local directory:
+    # To get a file from a local directory:
     >>> manage_file('get', '/path/to/local/file')
-
-    To write a file to an S3 bucket:
+    
+    # To get a file from an S3 bucket:
+    >>> manage_file('get', 's3://bucket/file')
+    
+    # To post a file to a local directory:
+    >>> manage_file('post', '/path/to/local/file', 'Hello, world!')
+    
+    # To post a file to an S3 bucket:
     >>> manage_file('post', 's3://bucket/file', 'Hello, world!')
-
-    To delete a file from a local directory:
+    
+    # To delete a file from a local directory:
     >>> manage_file('delete', '/path/to/local/file')
+    
+    # To delete a file from an S3 bucket:
+    >>> manage_file('delete', 's3://bucket/file')
+
 """
 
 from typing import Union, Dict, Optional, Callable
 from .utils import is_binary_file, get_aws_credentials
 from .delete import delete_file
-from .post import write_file
-from .get import read_file
-
-"""
-Manages file operations like 'get', 'post', and 'delete' for both local and AWS S3 storage.
-
-Args:
-    action (str): The action to be performed ('get', 'post', or 'delete').
-    path (str): The path for the file operation.
-    content (Union[str, bytes], optional): The file content for 'post' action.
-    md5 (str, optional): The md5 hash of the file content for 'post' action.
-    debug (bool, optional): Flag to enable debugging. Defaults to False.
-    
-Returns:
-    dict: A dictionary containing the result of the file operation with the following schema:
-        {
-            'action': str,         # Action performed ('get', 'post', or 'delete')
-            'path': str,           # Path for the file operation
-            'content': Union[str, bytes],  # File content for 'get' and 'post' actions
-            'content_size_mb': float,  # Size of the content in megabytes
-            'binary': bool,        # Flag indicating if the content is binary
-            'md5': str,            # The md5 hash of the file content for 'get' and 'post' actions
-            'status': int,         # HTTP-like status code (e.g., 200 for success, 500 for failure)
-            'debug': Dict[str, str]  # Debug information (only included if 'debug' flag is True)
-        }
-"""
-
+from .post import post_file
+from .get import get_file
 
 # Use the get_aws_credentials function to get AWS credentials returned as a
 # json object containing the following keys:
@@ -88,21 +74,21 @@ def manage_file(
 
     try:
         if action == 'get':
-            read_result = read_file(path, debug)
-            result['status'] = read_result['status']
-            result['content'] = read_result['content']
+            get_result = get_file(path, debug)
+            result['status'] = get_result['status']
+            result['content'] = get_result['content']
             result['binary'] = is_binary_file(result['content'], debug)
-            # Add the debug info for the read_file() function
+            # Add the debug info for the get_file() function
             if debug or result['status'] == 500:
-                debug_info['read_file'] = read_result['debug']
+                debug_info['get_file'] = get_result['debug']
         elif action == 'post':
             result['binary'] = is_binary_file(content, debug)
-            debug_info['write_file_start'] = f"Starting write_file with path={path}, content={content[:10]}, md5={md5}, metadata={metadata}"
-            write_result = write_file(path, content, md5, metadata, debug)
-            result['status'] = write_result['status']
-            # Add the debug info for the write_file() function
+            debug_info['post_file_start'] = f"Starting post_file with path={path}, content={content[:10]}, md5={md5}, metadata={metadata}"
+            post_result = post_file(path, content, md5, metadata, debug)
+            result['status'] = post_result['status']
+            # Add the debug info for the post_file() function
             if debug or result['status'] == 500:
-                debug_info['write_file'] = write_result['debug']
+                debug_info['post_file'] = post_result['debug']
             return result
         elif action == 'delete':
             delete_result = delete_file(path, debug)
