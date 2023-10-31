@@ -2,7 +2,7 @@
 
 ## Introduction
 The Klingon File Manager is a Python module designed for managing files both locally and on AWS S3 storage. 
-It provides functionalities to 'get' and 'post' files using a unified interface.
+It provides functionalities to 'get', 'post', and 'delete' files using a unified interface.
 
 ## Installation
 Run the following command to install the package:
@@ -15,8 +15,21 @@ The module looks for the following environment variables:
 
 ## Features
 - Supports both local and AWS S3 storage
-- Single function interface (`manage_file`) to handle 'get' and 'post' operations
+- Single function interface (`manage_file`) to handle 'get', 'post', and 'delete' operations
 - Debugging support
+- AWS credentials are fetched using the `get_aws_credentials` function
+- File operations are performed using the `read_file`, `write_file`, and `delete_file` functions
+- The `manage_file` function returns a dictionary containing the result of the file operation with the following schema:
+    {
+        'action': str,         # Action performed ('get', 'post', or 'delete')
+        'path': str,           # Path for the file operation
+        'content': Union[str, bytes],  # File content for 'get' and 'post' actions
+        'content_size_mb': float,  # Size of the content in megabytes
+        'binary': bool,        # Flag indicating if the content is binary
+        'md5': str,            # The md5 hash of the file content for 'get' and 'post' actions
+        'status': int,         # HTTP-like status code (e.g., 200 for success, 500 for failure)
+        'debug': Dict[str, str]  # Debug information (only included if 'debug' flag is True)
+    }
 
 ## Usage Examples
 ### Using `manage_file` function
