@@ -1,24 +1,30 @@
 # post.py
 """
-Module for posting files to local and AWS S3 storage.
+# Module for posting files to local and S3 storage.
 
 This module provides a centralized way to manage file operations on both
 local and AWS S3 storage. It leverages utility functions from the `utils` module
 and specific actions from `get`, `post`, and `delete` modules.
 
-Functions:
-    post_file: Function for writing files.
+# Functions
 
-Example:
-    To post a file to a local directory:
-    >>> manage_file('post', '/path/to/local/file', 'Hello, world!')
-    
-    To post a file to an S3 bucket:
-    >>> manage_file('post', 's3://bucket/file', 'Hello, world!')
-    ...
+## post_file
+
+Function for writing files into locally mounted filesystems or S3.
+
+# Usage Examples
+To post a file to a local directory:
+
+```python
+>>> manage_file('post', '/path/to/local/file', 'Hello, world!')
+```
+
+To post a file to an S3 bucket:
+```python
+>>> manage_file('post', 's3://bucket/file', 'Hello, world!')
+...
+```
 """
-
-
 
 import io
 import os

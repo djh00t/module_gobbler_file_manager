@@ -1,37 +1,62 @@
 # utils.py
 """
+# Overview
 Utility functions for the Klingon File Manager, including AWS credential fetching.
 
 This module provides a centralized way to manage file operations on both
 local and AWS S3 storage. It leverages utility functions from the `utils` module
 and specific actions from `get`, `post`, and `delete` modules.
 
-Functions:
-    get_mime_type: Fetch the MIME type of a file.
-    is_binary_file: Check if a file is binary.
-    get_aws_credentials: Fetch AWS credentials.
+# Functions
 
-Example:
-    # To get the MIME type of a local file:
-    >>> get_mime_type('/path/to/local/file.txt')
-    'text/plain'
-    
-    # To get the MIME type of an S3 file:
-    >>> get_mime_type('s3://bucket/file.jpg')
-    'image/jpeg'
-    
-    # To check if a local file is binary:
-    >>> is_binary_file('/path/to/local/file.bin')
-    True
-    
-    # To check if an S3 file is binary:
-    >>> is_binary_file('s3://bucket/file.bin')
-    True
-    
-    # To fetch AWS credentials:
-    >>> credentials = get_aws_credentials()
-    >>> print(credentials['aws_access_key_id'])
-    'YOUR_AWS_ACCESS_KEY_ID'
+## get_mime_type
+Fetch the MIME type of a file.
+
+## get_aws_credentials
+Fetch AWS credentials.
+
+## is_binary_file
+Check if a file is binary.
+
+# Usage Examples
+
+To get the MIME type of a local file:
+```python
+>>> get_mime_type('/path/to/local/file.txt')
+'text/plain'
+```
+
+To get the MIME type of an S3 file:
+```python
+>>> get_mime_type('s3://bucket/file.jpg')
+'image/jpeg'
+```
+
+To check if a local file is binary:
+```python
+>>> is_binary_file('/path/to/local/file.bin')
+True
+```
+
+To check if an S3 file is binary:
+```python
+>>> is_binary_file('s3://bucket/file.bin')
+True
+```
+
+To fetch AWS credentials:
+```python
+>>> credentials = get_aws_credentials()
+>>> print(credentials['aws_access_key_id'])
+{
+    'status': 200,
+    'message': 'AWS credentials retrieved successfully.',
+    'credentials': {
+        'AWS_ACCESS_KEY_ID': 'AKIAIOSFODNN7EXAMPLE',
+        'AWS_SECRET_ACCESS_KEY': 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+    }
+}
+```
 """
 
 import magic
@@ -40,13 +65,14 @@ from typing import Dict, Union
 
 
 def get_mime_type(file_path: str) -> str:
-    """Gets the MIME type of a file.
+    """
+    # Get the MIME type of a file.
 
-    Args:
-        file_path: The path to the file.
+    ## Args
+    - file_path (str): The path to the file.
 
-    Returns:
-        The MIME type of the file.
+    ## Returns
+    - (str) The MIME type of the file.
     """
     if file_path.startswith('s3://'):
         s3 = boto3.client('s3')
@@ -60,13 +86,25 @@ def get_mime_type(file_path: str) -> str:
 
 
 def get_aws_credentials(debug: bool = False) -> Dict[str, Union[int, str]]:
-    """Fetches AWS credentials from environment variables or provided arguments.
+    """
+    # Fetches AWS credentials from environment variables or provided arguments.
 
-    Args:
-        debug: Flag to enable debugging. Defaults to False.
+    ## Args
+    - debug (bool): Flag to enable debugging. Defaults to False.
 
-    Returns:
-        A dictionary containing AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.
+    ## Returns
+    A dictionary containing AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.
+
+    ## Example return dictionary
+    ```python
+    {
+        'status': 200,
+        'message': 'AWS credentials retrieved successfully.',
+        'credentials': {
+            'AWS_ACCESS_KEY_ID': 'AKIAIOSFODNN7EXAMPLE',
+            'AWS_SECRET_ACCESS_KEY': 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+        },
+    }
     """
     session = Session()
     credentials = session.get_credentials()
@@ -80,13 +118,14 @@ def get_aws_credentials(debug: bool = False) -> Dict[str, Union[int, str]]:
     }
 
 def is_binary_file(file_path_or_content: Union[str, bytes]) -> bool:
-    """Check if a file or content is binary.
+    """
+    # Check if a file or content is binary.
 
-    Args:
-        file_path_or_content: The path to the file or the content of the file.
+    ## Args
+    - file_path_or_content(str or bytes): The path to the file or the content of the file.
 
-    Returns:
-        True if the file or content is binary, False otherwise.
+    ## Returns
+    - True if the file or content is binary, False otherwise.
     """
     if isinstance(file_path_or_content, str):
         if file_path_or_content.startswith('s3://'):
