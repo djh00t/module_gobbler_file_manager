@@ -12,3 +12,10 @@ datetime
 uuid
 python-magic
 chardet
+mkdocs
+mkdocs-gen-files
+mkdocs-material
+mkdocs-gen-files 
+mkdocs-literate-nav 
+mkdocs-section-index
+mkdocstrings-crystal

@@ -1,4 +1,38 @@
-# klingon_file_manager.py
+# main.py
+"""File Management Service for Local and AWS S3 Storage.
+
+This module provides a centralized way to manage file operations on both
+local and AWS S3 storage. It leverages utility functions from the `utils` module
+and specific actions from `get`, `post`, and `delete` modules. It provides an
+interface for reading, writing, and deleting files, with additional support for
+debugging and AWS authentication.
+
+Modules:
+    utils: Provides utility functions like AWS credential fetching and file type checking.
+    get: Contains the functionality for reading files.
+    post: Contains the functionality for writing files.
+    delete: Contains the functionality for deleting files.
+
+Functions:
+    manage_file: The main function that delegates to specific actions based on user input.
+
+Example:
+    To read a file from a local directory:
+    >>> manage_file('get', '/path/to/local/file')
+
+    To write a file to an S3 bucket:
+    >>> manage_file('post', 's3://bucket/file', 'Hello, world!')
+
+    To delete a file from a local directory:
+    >>> manage_file('delete', '/path/to/local/file')
+"""
+
+from typing import Union, Dict, Optional, Callable
+from .utils import is_binary_file, get_aws_credentials
+from .delete import delete_file
+from .post import write_file
+from .get import read_file
+
 """
 Manages file operations like 'get', 'post', and 'delete' for both local and AWS S3 storage.
 
@@ -22,11 +56,7 @@ Returns:
             'debug': Dict[str, str]  # Debug information (only included if 'debug' flag is True)
         }
 """
-from typing import Union, Dict, Optional, Callable
-from .utils import is_binary_file, get_aws_credentials
-from .delete import delete_file
-from .write import write_file
-from .read import read_file
+
 
 # Use the get_aws_credentials function to get AWS credentials returned as a
 # json object containing the following keys:
@@ -91,4 +121,5 @@ def manage_file(
         debug_info['error_message'] = str(exception) if debug else None
     # If the debug flag is not set and there was no failure, remove the debug field
     # No need to delete the 'debug' key as it will be empty if debug is False
-
+    if not debug and result['status'] != 500:
+        del result['debug']

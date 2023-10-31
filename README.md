@@ -1,8 +1,8 @@
 # Klingon File Manager
 
 ## Introduction
-The Klingon File Manager is a Python module designed for managing files both locally and on AWS S3 storage. 
-It provides functionalities to 'get', 'post', and 'delete' files using a unified interface.
+Klingon File Manager is a Python module designed for managing files both
+locally and on AWS S3 storage.  It provides functionalities to 'get', 'post', and 'delete' files using a unified interface.
 
 ## Installation
 Run the following command to install the package:
