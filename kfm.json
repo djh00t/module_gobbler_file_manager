@@ -1,0 +1,881 @@
+{
+  "klingon_file_manager": {
+    "kind": "module",
+    "name": "klingon_file_manager",
+    "labels": [],
+    "members": [
+      {
+        "kind": "alias",
+        "name": "manage_file",
+        "target_path": "klingon_file_manager.main.manage_file",
+        "lineno": 2,
+        "endlineno": 2
+      },
+      {
+        "kind": "alias",
+        "name": "delete_file",
+        "target_path": "klingon_file_manager.delete.delete_file",
+        "lineno": 3,
+        "endlineno": 3
+      },
+      {
+        "kind": "alias",
+        "name": "read_file",
+        "target_path": "klingon_file_manager.get.read_file",
+        "lineno": 4,
+        "endlineno": 4
+      },
+      {
+        "kind": "alias",
+        "name": "write_file",
+        "target_path": "klingon_file_manager.post.write_file",
+        "lineno": 5,
+        "endlineno": 5
+      },
+      {
+        "kind": "alias",
+        "name": "get_mime_type",
+        "target_path": "klingon_file_manager.utils.get_mime_type",
+        "lineno": 6,
+        "endlineno": 6
+      },
+      {
+        "kind": "alias",
+        "name": "get_aws_credentials",
+        "target_path": "klingon_file_manager.utils.get_aws_credentials",
+        "lineno": 6,
+        "endlineno": 6
+      },
+      {
+        "kind": "alias",
+        "name": "is_binary_file",
+        "target_path": "klingon_file_manager.utils.is_binary_file",
+        "lineno": 6,
+        "endlineno": 6
+      },
+      {
+        "kind": "module",
+        "name": "delete",
+        "labels": [],
+        "members": [
+          {
+            "kind": "alias",
+            "name": "os",
+            "target_path": "os",
+            "lineno": 2,
+            "endlineno": 2
+          },
+          {
+            "kind": "alias",
+            "name": "boto3",
+            "target_path": "boto3",
+            "lineno": 3,
+            "endlineno": 3
+          },
+          {
+            "kind": "alias",
+            "name": "Union",
+            "target_path": "typing.Union",
+            "lineno": 4,
+            "endlineno": 4
+          },
+          {
+            "kind": "alias",
+            "name": "Dict",
+            "target_path": "typing.Dict",
+            "lineno": 4,
+            "endlineno": 4
+          },
+          {
+            "kind": "alias",
+            "name": "get_aws_credentials",
+            "target_path": "klingon_file_manager.utils.get_aws_credentials",
+            "lineno": 5,
+            "endlineno": 5
+          },
+          {
+            "kind": "function",
+            "name": "delete_file",
+            "lineno": 7,
+            "endlineno": 113,
+            "docstring": {
+              "value": "Deletes a file at a given path, which can be either a local file or an S3 object.\n\nArgs:\n    path (str): The path where the file should be deleted. Can be a local path or an S3 URI (e.g., 's3://bucket/key').\n    debug (bool, optional): Flag to enable debugging. Defaults to False.\n\nReturns:\n    dict: A dictionary containing the status of the delete operation with the following schema:\n        {\n            \"status\": int,          # HTTP-like status code (e.g., 200 for success, 500 for failure)\n            \"message\": str,         # Message describing the outcome\n            \"debug\": Dict[str, str] # Debug information (only included if 'debug' flag is True)\n        }",
+              "lineno": 8,
+              "endlineno": 22
+            },
+            "labels": [],
+            "members": [],
+            "decorators": [],
+            "parameters": [
+              {
+                "name": "path",
+                "annotation": {
+                  "name": "str",
+                  "cls": "ExprName"
+                },
+                "kind": "positional or keyword",
+                "default": null
+              },
+              {
+                "name": "debug",
+                "annotation": {
+                  "name": "bool",
+                  "cls": "ExprName"
+                },
+                "kind": "positional or keyword",
+                "default": "False"
+              }
+            ],
+            "returns": {
+              "left": {
+                "name": "Dict",
+                "cls": "ExprName"
+              },
+              "slice": {
+                "elements": [
+                  {
+                    "name": "str",
+                    "cls": "ExprName"
+                  },
+                  {
+                    "left": {
+                      "name": "Union",
+                      "cls": "ExprName"
+                    },
+                    "slice": {
+                      "elements": [
+                        {
+                          "name": "int",
+                          "cls": "ExprName"
+                        },
+                        {
+                          "name": "str",
+                          "cls": "ExprName"
+                        },
+                        {
+                          "left": {
+                            "name": "Dict",
+                            "cls": "ExprName"
+                          },
+                          "slice": {
+                            "elements": [
+                              {
+                                "name": "str",
+                                "cls": "ExprName"
+                              },
+                              {
+                                "name": "str",
+                                "cls": "ExprName"
+                              }
+                            ],
+                            "implicit": true,
+                            "cls": "ExprTuple"
+                          },
+                          "cls": "ExprSubscript"
+                        }
+                      ],
+                      "implicit": true,
+                      "cls": "ExprTuple"
+                    },
+                    "cls": "ExprSubscript"
+                  }
+                ],
+                "implicit": true,
+                "cls": "ExprTuple"
+              },
+              "cls": "ExprSubscript"
+            }
+          }
+        ],
+        "filepath": "klingon_file_manager/delete.py"
+      },
+      {
+        "kind": "module",
+        "name": "post",
+        "labels": [],
+        "members": [
+          {
+            "kind": "alias",
+            "name": "io",
+            "target_path": "io",
+            "lineno": 2,
+            "endlineno": 2
+          },
+          {
+            "kind": "alias",
+            "name": "os",
+            "target_path": "os",
+            "lineno": 3,
+            "endlineno": 3
+          },
+          {
+            "kind": "alias",
+            "name": "boto3",
+            "target_path": "boto3",
+            "lineno": 4,
+            "endlineno": 4
+          },
+          {
+            "kind": "alias",
+            "name": "hashlib",
+            "target_path": "hashlib",
+            "lineno": 8,
+            "endlineno": 8
+          },
+          {
+            "kind": "alias",
+            "name": "Union",
+            "target_path": "typing.Union",
+            "lineno": 6,
+            "endlineno": 6
+          },
+          {
+            "kind": "alias",
+            "name": "Dict",
+            "target_path": "typing.Dict",
+            "lineno": 6,
+            "endlineno": 6
+          },
+          {
+            "kind": "alias",
+            "name": "Optional",
+            "target_path": "typing.Optional",
+            "lineno": 6,
+            "endlineno": 6
+          },
+          {
+            "kind": "alias",
+            "name": "Callable",
+            "target_path": "typing.Callable",
+            "lineno": 6,
+            "endlineno": 6
+          },
+          {
+            "kind": "alias",
+            "name": "get_aws_credentials",
+            "target_path": "klingon_file_manager.utils.get_aws_credentials",
+            "lineno": 7,
+            "endlineno": 7
+          },
+          {
+            "kind": "alias",
+            "name": "is_binary_file",
+            "target_path": "klingon_file_manager.utils.is_binary_file",
+            "lineno": 7,
+            "endlineno": 7
+          },
+          {
+            "kind": "function",
+            "name": "write_file",
+            "lineno": 11,
+            "endlineno": 174,
+            "docstring": {
+              "value": "Writes content to a file at a given path, which can be either a local file or an S3 object.\n\nArgs:\n    path (str): The path where the file should be written. Can be a local path or an S3 URI (e.g., 's3://bucket/key').\n    content (Union[str, bytes]): The content to write to the file.\n    md5 (Optional[str]): The MD5 hash of the content, used to verify the integrity of the data. Defaults to None.\n    metadata (Optional[Dict[str, str]]): Additional metadata to include with the file. Defaults to None.\n    debug (bool): Flag to enable debugging. Defaults to False.\n\nReturns:\n    dict: A dictionary containing the status of the write operation with the following schema:\n        {\n            \"status\": int,          # HTTP-like status code (e.g., 200 for success, 500 for failure)\n            \"message\": str,         # Message describing the outcome\n            \"md5\": str,             # The MD5 hash of the written file (only included if status is 200)\n            \"debug\": Dict[str, str] # Debug information (only included if 'debug' flag is True)\n        }",
+              "lineno": 12,
+              "endlineno": 30
+            },
+            "labels": [],
+            "members": [],
+            "decorators": [],
+            "parameters": [
+              {
+                "name": "path",
+                "annotation": {
+                  "name": "str",
+                  "cls": "ExprName"
+                },
+                "kind": "positional or keyword",
+                "default": null
+              },
+              {
+                "name": "content",
+                "annotation": {
+                  "left": {
+                    "name": "Union",
+                    "cls": "ExprName"
+                  },
+                  "slice": {
+                    "elements": [
+                      {
+                        "name": "str",
+                        "cls": "ExprName"
+                      },
+                      {
+                        "name": "bytes",
+                        "cls": "ExprName"
+                      }
+                    ],
+                    "implicit": true,
+                    "cls": "ExprTuple"
+                  },
+                  "cls": "ExprSubscript"
+                },
+                "kind": "positional or keyword",
+                "default": null
+              },
+              {
+                "name": "md5",
+                "annotation": {
+                  "left": {
+                    "name": "Optional",
+                    "cls": "ExprName"
+                  },
+                  "slice": {
+                    "name": "str",
+                    "cls": "ExprName"
+                  },
+                  "cls": "ExprSubscript"
+                },
+                "kind": "positional or keyword",
+                "default": "None"
+              },
+              {
+                "name": "metadata",
+                "annotation": {
+                  "left": {
+                    "name": "Optional",
+                    "cls": "ExprName"
+                  },
+                  "slice": {
+                    "left": {
+                      "name": "Dict",
+                      "cls": "ExprName"
+                    },
+                    "slice": {
+                      "elements": [
+                        {
+                          "name": "str",
+                          "cls": "ExprName"
+                        },
+                        {
+                          "name": "str",
+                          "cls": "ExprName"
+                        }
+                      ],
+                      "implicit": true,
+                      "cls": "ExprTuple"
+                    },
+                    "cls": "ExprSubscript"
+                  },
+                  "cls": "ExprSubscript"
+                },
+                "kind": "positional or keyword",
+                "default": "None"
+              },
+              {
+                "name": "debug",
+                "annotation": {
+                  "name": "bool",
+                  "cls": "ExprName"
+                },
+                "kind": "positional or keyword",
+                "default": "False"
+              }
+            ],
+            "returns": null
+          }
+        ],
+        "filepath": "klingon_file_manager/post.py"
+      },
+      {
+        "kind": "module",
+        "name": "utils",
+        "labels": [],
+        "members": [
+          {
+            "kind": "alias",
+            "name": "os",
+            "target_path": "os",
+            "lineno": 2,
+            "endlineno": 2
+          },
+          {
+            "kind": "alias",
+            "name": "boto3",
+            "target_path": "boto3",
+            "lineno": 3,
+            "endlineno": 3
+          },
+          {
+            "kind": "alias",
+            "name": "Union",
+            "target_path": "typing.Union",
+            "lineno": 4,
+            "endlineno": 4
+          },
+          {
+            "kind": "alias",
+            "name": "Dict",
+            "target_path": "typing.Dict",
+            "lineno": 4,
+            "endlineno": 4
+          },
+          {
+            "kind": "alias",
+            "name": "threading",
+            "target_path": "threading",
+            "lineno": 5,
+            "endlineno": 5
+          },
+          {
+            "kind": "alias",
+            "name": "sys",
+            "target_path": "sys",
+            "lineno": 6,
+            "endlineno": 6
+          },
+          {
+            "kind": "alias",
+            "name": "magic",
+            "target_path": "magic",
+            "lineno": 7,
+            "endlineno": 7
+          },
+          {
+            "kind": "function",
+            "name": "get_mime_type",
+            "lineno": 9,
+            "endlineno": 20,
+            "docstring": {
+              "value": "Gets the mime type of a file.\n\nArgs:\n    file_path (str): The path to the file.\n    \nReturns:\n    str: The mime type of the file.",
+              "lineno": 10,
+              "endlineno": 18
+            },
+            "labels": [],
+            "members": [],
+            "decorators": [],
+            "parameters": [
+              {
+                "name": "file_path",
+                "annotation": {
+                  "name": "str",
+                  "cls": "ExprName"
+                },
+                "kind": "positional or keyword",
+                "default": null
+              }
+            ],
+            "returns": {
+              "name": "str",
+              "cls": "ExprName"
+            }
+          },
+          {
+            "kind": "function",
+            "name": "get_aws_credentials",
+            "lineno": 23,
+            "endlineno": 54,
+            "docstring": {
+              "value": "Fetches AWS credentials from environment variables or provided arguments.\n\nArgs:\n    debug (bool, optional): Flag to enable debugging. Defaults to False.\n    \nReturns:\n    dict: A dictionary containing AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.",
+              "lineno": 24,
+              "endlineno": 32
+            },
+            "labels": [],
+            "members": [],
+            "decorators": [],
+            "parameters": [
+              {
+                "name": "debug",
+                "annotation": {
+                  "name": "bool",
+                  "cls": "ExprName"
+                },
+                "kind": "positional or keyword",
+                "default": "False"
+              }
+            ],
+            "returns": {
+              "name": "dict",
+              "cls": "ExprName"
+            }
+          },
+          {
+            "kind": "function",
+            "name": "is_binary_file",
+            "lineno": 57,
+            "endlineno": 71,
+            "docstring": {
+              "value": "Checks if content is binary or text.\n\nArgs:\n    content (bytes): The content to check.\n    debug (bool, optional): Flag to enable debugging. Defaults to False.\n    \nReturns:\n    bool: True if the content is binary, False otherwise.",
+              "lineno": 58,
+              "endlineno": 67
+            },
+            "labels": [],
+            "members": [],
+            "decorators": [],
+            "parameters": [
+              {
+                "name": "content",
+                "annotation": {
+                  "name": "bytes",
+                  "cls": "ExprName"
+                },
+                "kind": "positional or keyword",
+                "default": null
+              },
+              {
+                "name": "debug",
+                "annotation": {
+                  "name": "bool",
+                  "cls": "ExprName"
+                },
+                "kind": "positional or keyword",
+                "default": "False"
+              }
+            ],
+            "returns": {
+              "name": "bool",
+              "cls": "ExprName"
+            }
+          }
+        ],
+        "filepath": "klingon_file_manager/utils.py"
+      },
+      {
+        "kind": "module",
+        "name": "main",
+        "docstring": {
+          "value": "Manages file operations like 'get', 'post', and 'delete' for both local and AWS S3 storage.\n\nArgs:\n    action (str): The action to be performed ('get', 'post', or 'delete').\n    path (str): The path for the file operation.\n    content (Union[str, bytes], optional): The file content for 'post' action.\n    md5 (str, optional): The md5 hash of the file content for 'post' action.\n    debug (bool, optional): Flag to enable debugging. Defaults to False.\n    \nReturns:\n    dict: A dictionary containing the result of the file operation with the following schema:\n        {\n            'action': str,         # Action performed ('get', 'post', or 'delete')\n            'path': str,           # Path for the file operation\n            'content': Union[str, bytes],  # File content for 'get' and 'post' actions\n            'content_size_mb': float,  # Size of the content in megabytes\n            'binary': bool,        # Flag indicating if the content is binary\n            'md5': str,            # The md5 hash of the file content for 'get' and 'post' actions\n            'status': int,         # HTTP-like status code (e.g., 200 for success, 500 for failure)\n            'debug': Dict[str, str]  # Debug information (only included if 'debug' flag is True)\n        }",
+          "lineno": 2,
+          "endlineno": 24
+        },
+        "labels": [],
+        "members": [
+          {
+            "kind": "alias",
+            "name": "Union",
+            "target_path": "typing.Union",
+            "lineno": 25,
+            "endlineno": 25
+          },
+          {
+            "kind": "alias",
+            "name": "Dict",
+            "target_path": "typing.Dict",
+            "lineno": 25,
+            "endlineno": 25
+          },
+          {
+            "kind": "alias",
+            "name": "Optional",
+            "target_path": "typing.Optional",
+            "lineno": 25,
+            "endlineno": 25
+          },
+          {
+            "kind": "alias",
+            "name": "Callable",
+            "target_path": "typing.Callable",
+            "lineno": 25,
+            "endlineno": 25
+          },
+          {
+            "kind": "alias",
+            "name": "is_binary_file",
+            "target_path": "klingon_file_manager.utils.is_binary_file",
+            "lineno": 26,
+            "endlineno": 26
+          },
+          {
+            "kind": "alias",
+            "name": "get_aws_credentials",
+            "target_path": "klingon_file_manager.utils.get_aws_credentials",
+            "lineno": 26,
+            "endlineno": 26
+          },
+          {
+            "kind": "alias",
+            "name": "delete_file",
+            "target_path": "klingon_file_manager.delete.delete_file",
+            "lineno": 27,
+            "endlineno": 27
+          },
+          {
+            "kind": "alias",
+            "name": "write_file",
+            "target_path": "klingon_file_manager.post.write_file",
+            "lineno": 28,
+            "endlineno": 28
+          },
+          {
+            "kind": "alias",
+            "name": "read_file",
+            "target_path": "klingon_file_manager.get.read_file",
+            "lineno": 29,
+            "endlineno": 29
+          },
+          {
+            "kind": "attribute",
+            "name": "aws_credentials",
+            "lineno": 35,
+            "endlineno": 35,
+            "labels": [
+              "module-attribute"
+            ],
+            "members": [],
+            "value": {
+              "arguments": [],
+              "function": {
+                "name": "get_aws_credentials",
+                "cls": "ExprName"
+              },
+              "cls": "ExprCall"
+            }
+          },
+          {
+            "kind": "function",
+            "name": "manage_file",
+            "lineno": 38,
+            "endlineno": 91,
+            "labels": [],
+            "members": [],
+            "decorators": [],
+            "parameters": [
+              {
+                "name": "action",
+                "annotation": {
+                  "name": "str",
+                  "cls": "ExprName"
+                },
+                "kind": "positional or keyword",
+                "default": null
+              },
+              {
+                "name": "path",
+                "annotation": {
+                  "name": "str",
+                  "cls": "ExprName"
+                },
+                "kind": "positional or keyword",
+                "default": null
+              },
+              {
+                "name": "content",
+                "annotation": {
+                  "name": "str",
+                  "cls": "ExprName"
+                },
+                "kind": "positional or keyword",
+                "default": "None"
+              },
+              {
+                "name": "md5",
+                "annotation": {
+                  "left": {
+                    "name": "Optional",
+                    "cls": "ExprName"
+                  },
+                  "slice": {
+                    "name": "str",
+                    "cls": "ExprName"
+                  },
+                  "cls": "ExprSubscript"
+                },
+                "kind": "positional or keyword",
+                "default": "None"
+              },
+              {
+                "name": "metadata",
+                "annotation": {
+                  "left": {
+                    "name": "Optional",
+                    "cls": "ExprName"
+                  },
+                  "slice": {
+                    "left": {
+                      "name": "Dict",
+                      "cls": "ExprName"
+                    },
+                    "slice": {
+                      "elements": [
+                        {
+                          "name": "str",
+                          "cls": "ExprName"
+                        },
+                        {
+                          "name": "str",
+                          "cls": "ExprName"
+                        }
+                      ],
+                      "implicit": true,
+                      "cls": "ExprTuple"
+                    },
+                    "cls": "ExprSubscript"
+                  },
+                  "cls": "ExprSubscript"
+                },
+                "kind": "positional or keyword",
+                "default": "None"
+              },
+              {
+                "name": "debug",
+                "annotation": {
+                  "name": "bool",
+                  "cls": "ExprName"
+                },
+                "kind": "positional or keyword",
+                "default": "True"
+              }
+            ],
+            "returns": {
+              "name": "dict",
+              "cls": "ExprName"
+            }
+          }
+        ],
+        "filepath": "klingon_file_manager/main.py"
+      },
+      {
+        "kind": "module",
+        "name": "get",
+        "labels": [],
+        "members": [
+          {
+            "kind": "alias",
+            "name": "os",
+            "target_path": "os",
+            "lineno": 2,
+            "endlineno": 2
+          },
+          {
+            "kind": "alias",
+            "name": "boto3",
+            "target_path": "boto3",
+            "lineno": 3,
+            "endlineno": 3
+          },
+          {
+            "kind": "alias",
+            "name": "Union",
+            "target_path": "typing.Union",
+            "lineno": 4,
+            "endlineno": 4
+          },
+          {
+            "kind": "alias",
+            "name": "Dict",
+            "target_path": "typing.Dict",
+            "lineno": 4,
+            "endlineno": 4
+          },
+          {
+            "kind": "alias",
+            "name": "get_aws_credentials",
+            "target_path": "klingon_file_manager.utils.get_aws_credentials",
+            "lineno": 5,
+            "endlineno": 5
+          },
+          {
+            "kind": "alias",
+            "name": "is_binary_file",
+            "target_path": "klingon_file_manager.utils.is_binary_file",
+            "lineno": 5,
+            "endlineno": 5
+          },
+          {
+            "kind": "function",
+            "name": "read_file",
+            "lineno": 8,
+            "endlineno": 127,
+            "docstring": {
+              "value": "Reads a file from a given path, which can be either a local file or an S3 object.\n\nArgs:\n    path (str): The path of the file to read. Can be a local path or an S3 URI (e.g., 's3://bucket/key').\n    debug (bool, optional): Flag to enable debugging. Defaults to False.\n    \nReturns:\n    dict: A dictionary containing the status of the read operation with the following schema:\n        {\n            \"status\": int,           # HTTP-like status code (e.g., 200 for success, 500 for failure)\n            \"message\": str,          # Message describing the outcome\n            \"content\": Union[str, bytes],  # The actual file content\n            \"binary\": bool,          # Flag indicating if the content is binary\n            \"debug\": Dict[str, str]  # Debug information (only included if 'debug' flag is True)\n        }",
+              "lineno": 9,
+              "endlineno": 25
+            },
+            "labels": [],
+            "members": [],
+            "decorators": [],
+            "parameters": [
+              {
+                "name": "path",
+                "annotation": {
+                  "name": "str",
+                  "cls": "ExprName"
+                },
+                "kind": "positional or keyword",
+                "default": null
+              },
+              {
+                "name": "debug",
+                "annotation": {
+                  "name": "bool",
+                  "cls": "ExprName"
+                },
+                "kind": "positional or keyword",
+                "default": "False"
+              }
+            ],
+            "returns": {
+              "left": {
+                "name": "Dict",
+                "cls": "ExprName"
+              },
+              "slice": {
+                "elements": [
+                  {
+                    "name": "str",
+                    "cls": "ExprName"
+                  },
+                  {
+                    "left": {
+                      "name": "Union",
+                      "cls": "ExprName"
+                    },
+                    "slice": {
+                      "elements": [
+                        {
+                          "name": "int",
+                          "cls": "ExprName"
+                        },
+                        {
+                          "name": "str",
+                          "cls": "ExprName"
+                        },
+                        {
+                          "name": "bytes",
+                          "cls": "ExprName"
+                        },
+                        {
+                          "name": "bool",
+                          "cls": "ExprName"
+                        },
+                        {
+                          "left": {
+                            "name": "Dict",
+                            "cls": "ExprName"
+                          },
+                          "slice": {
+                            "elements": [
+                              {
+                                "name": "str",
+                                "cls": "ExprName"
+                              },
+                              {
+                                "name": "str",
+                                "cls": "ExprName"
+                              }
+                            ],
+                            "implicit": true,
+                            "cls": "ExprTuple"
+                          },
+                          "cls": "ExprSubscript"
+                        }
+                      ],
+                      "implicit": true,
+                      "cls": "ExprTuple"
+                    },
+                    "cls": "ExprSubscript"
+                  }
+                ],
+                "implicit": true,
+                "cls": "ExprTuple"
+              },
+              "cls": "ExprSubscript"
+            }
+          }
+        ],
+        "filepath": "klingon_file_manager/get.py"
+      }
+    ],
+    "filepath": "klingon_file_manager/__init__.py"
+  }
+}
