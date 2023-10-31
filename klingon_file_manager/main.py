@@ -59,18 +59,37 @@ def manage_file(
     metadata: Optional[Dict[str, str]] = None,
     debug: bool = True,
 ) -> dict:
+    """
+    Main function to manage file operations.
+
+    Parameters:
+    action (str): The action to perform. Can be 'get', 'post', or 'delete'.
+    path (str): The path to the file to operate on.
+    content (str, optional): The content to write to the file. Only used for 'post' action.
+    md5 (str, optional): The MD5 hash of the content. Only used for 'post' action.
+    metadata (dict, optional): The metadata to associate with the file. Only used for 'post' action.
+    debug (bool, optional): Whether to include debug information in the response.
+
+    Returns:
+    dict: A dictionary containing the result of the operation.
+    """
+
+    # Start of the function
     print("manage_file function called")  # Debug print statement
 
+    # Initialize debug information
     debug_info = {}
+
+    # Initialize result dictionary
     result = {
-        'action': action,
-        'path': path,
-        'content': "<binary data>" if isinstance(content, bytes) and action != 'get' else (content[:10] if isinstance(content, str) else content[:10].decode('utf-8')) if content and debug else content,
-        'content_size': len(content),
-        'binary': is_binary_file(content),
-        'md5': md5,
-        'metadata': metadata,
-        'debug': debug_info if debug else {},
+        'action': action,  # The action performed
+        'path': path,  # The path to the file
+        'content': "<binary data>" if isinstance(content, bytes) and action != 'get' else (content[:10] if isinstance(content, str) else content[:10].decode('utf-8')) if content and debug else content,  # The content of the file
+        'content_size': len(content),  # The size of the content
+        'binary': is_binary_file(content),  # Whether the content is binary
+        'md5': md5,  # The MD5 hash of the content
+        'metadata': metadata,  # The metadata of the file
+        'debug': debug_info if debug else {},  # The debug information
     }
 
     try:
