@@ -148,7 +148,7 @@ def test_medium_upload_progress():
         path="s3://fsg-gobbler/tests/" + file_name,
         content=file_content,
         metadata=metadata,
-        debug=False
+        debug=True
     )
 
     # Announce the upload result
