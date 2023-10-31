@@ -59,6 +59,7 @@ def manage_file(
     metadata: Optional[Dict[str, str]] = None,
     debug: bool = True,
 ) -> dict:
+    print("manage_file function called")  # Debug print statement
 
     debug_info = {}
     result = {
@@ -73,7 +74,9 @@ def manage_file(
     }
 
     try:
+        print("Inside try block")  # Debug print statement
         if action == 'get':
+            print("Action is get")  # Debug print statement
             get_result = get_file(path, debug)
             result['status'] = get_result['status']
             result['content'] = get_result['content']
@@ -82,6 +85,7 @@ def manage_file(
             if debug or result['status'] == 500:
                 debug_info['get_file'] = get_result['debug']
         elif action == 'post':
+            print("Action is post")  # Debug print statement
             result['binary'] = is_binary_file(content, debug)
             debug_info['post_file_start'] = f"Starting post_file with path={path}, content={content[:10]}, md5={md5}, metadata={metadata}"
             post_result = post_file(path, content, md5, metadata, debug)
@@ -91,15 +95,18 @@ def manage_file(
                 debug_info['post_file'] = post_result['debug']
             return result
         elif action == 'delete':
+            print("Action is delete")  # Debug print statement
             delete_result = delete_file(path, debug)
             result['status'] = delete_result['status']
             # Add the debug info for the delete_file() function
             if debug or result['status'] == 500:
                 debug_info['delete_file'] = delete_result['debug']
         else:
+            print("Invalid action")  # Debug print statement
             result['status'] = 500
             debug_info['error'] = 'Invalid action'
     except Exception as exception:
+        print(f"Exception occurred: {str(exception)}")  # Debug print statement
         result['status'] = 500
         result['error_message'] = str(exception)
         # Add the debug info for the exception
