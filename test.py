@@ -62,6 +62,7 @@ def file_upload(action, path, content, md5=None, metadata={}, debug=False):
         metadata=metadata,
         debug=debug,
     )
+    print(f"Debug: {result}")
     return result
 
 # Get MD5 hash of the generated file
