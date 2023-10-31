@@ -79,22 +79,28 @@ def get_aws_credentials(debug: bool = False) -> Dict[str, Union[int, str]]:
         },
     }
 
-def is_binary_file(file_path: str) -> bool:
-    """Check if a file is binary.
+def is_binary_file(file_path_or_content: Union[str, bytes]) -> bool:
+    """Check if a file or content is binary.
 
     Args:
-        file_path: The path to the file.
+        file_path_or_content: The path to the file or the content of the file.
 
     Returns:
-        True if the file is binary, False otherwise.
+        True if the file or content is binary, False otherwise.
     """
-    if file_path.startswith('s3://'):
-        s3 = boto3.client('s3')
-        bucket_name, key = file_path[5:].split('/', 1)
-        obj = s3.get_object(Bucket=bucket_name, Key=key)
-        return obj['ContentType'].startswith('application/')
-    else:
-        with open(file_path, 'rb') as file:
-            content = file.read()
-        mime_type = magic.from_buffer(content, mime=True)
+    if isinstance(file_path_or_content, str):
+        if file_path_or_content.startswith('s3://'):
+            s3 = boto3.client('s3')
+            bucket_name, key = file_path_or_content[5:].split('/', 1)
+            obj = s3.get_object(Bucket=bucket_name, Key=key)
+            return obj['ContentType'].startswith('application/')
+        else:
+            with open(file_path_or_content, 'rb') as file:
+                content = file.read()
+            mime_type = magic.from_buffer(content, mime=True)
+            return mime_type.startswith('application/')
+    elif isinstance(file_path_or_content, bytes):
+        mime_type = magic.from_buffer(file_path_or_content, mime=True)
         return mime_type.startswith('application/')
+    else:
+        raise TypeError("file_path_or_content must be either str or bytes.")
