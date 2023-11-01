@@ -1,15 +1,16 @@
 # post.py
 """
-# Module for posting files to local and S3 storage.
+# Overview
 
-This module provides a centralized way to manage file operations on both
+Post files to locally mounted and S3 storage.
+
+This submodule provides a centralized way to manage file operations on both
 local and AWS S3 storage. It leverages utility functions from the `utils` module
 and specific actions from `get`, `post`, and `delete` modules.
 
 # Functions
 
 ## post_file
-
 Function for writing files into locally mounted filesystems or S3.
 
 # Usage Examples
@@ -22,7 +23,6 @@ To post a file to a local directory:
 To post a file to an S3 bucket:
 ```python
 >>> manage_file('post', 's3://bucket/file', 'Hello, world!')
-...
 ```
 """
 
@@ -40,27 +40,56 @@ def post_file(
         md5: Optional[str] = None,
         metadata: Optional[Dict[str, str]] = None,
         debug: bool = False) -> Dict[str, Union[int, str, Dict[str, str]]]:
-    """Posts content to a file at a given path.
+    """
+    # Post content to a file at a given path.
 
     This function posts content to a file at a specified path. The path can
     either be a local directory or an S3 bucket.
 
-    Args:
-        path: The path where the file should be written.
-        content: The content to post.
-        md5: The MD5 hash of the content, used for data integrity. Defaults to None.
-        metadata: Additional metadata to include with the file. Defaults to None.
-        debug: Flag to enable debugging. Defaults to False.
+    ## Args
+    
+    | Name      | Type              | Description | Default |
+    |-----------|-------------------|-------------|---------|
+    | path      | string            | Path where the file should be written |   |
+    | content   | string or bytes   | Content to post |  |
+    | md5       | string            | MD5 hash of the file, used for data integrity | * See note |
+    | metadata  | dictionary        | Additional metadata to include with the file | ^ See note |
+    | debug     | boolean           | Flag to enable/disable debugging | False |
 
-    Returns:
-        A dictionary containing the status of the post operation. The schema
-        is as follows:
-            {
-                "status": int,          # HTTP-like status code
-                "message": str,         # Message describing the outcome
-                "md5": str,             # The MD5 hash of the written file
-                "debug": Dict[str, str] # Debug information
-            }
+    **Note:**
+
+    \* If md5 is provided, it will be compared against the calculated MD5 hash
+        of the content. If they do not match, the post will fail. If md5 hash
+        is not provided, it will be calculated, returned in the response and
+        will also be used to validate that the file arrived in tact by S3
+
+    ^ Default metadata includes the following, if you add your own metadata, it
+        will be merged with the default metadata:
+    ```json
+    {
+        "md5": str,
+        "filesize": int
+    }
+    ```
+
+    ## Returns
+    
+    A dictionary containing the status of the post operation. The schema
+    is as follows:
+    ```json
+    {
+        "status": int,
+        "message": str,
+        "md5": str,
+        "debug": Dict[str, str]
+    }
+    ```
+    | Name      | Type              | Description |
+    |-----------|-------------------|-------------|
+    | status    | int               | HTTP-like status code |
+    | message   | string            | Message describing the outcome |
+    | md5       | string            | MD5 hash of the written file |
+    | debug     | dictionary        | Debug information |
     """
     debug_info = {}
 

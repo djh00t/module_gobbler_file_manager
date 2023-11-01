@@ -69,10 +69,13 @@ def get_mime_type(file_path: str) -> str:
     # Get the MIME type of a file.
 
     ## Args
-    - file_path (str): The path to the file.
+    | Name      | Type              | Description | Default |
+    |-----------|-------------------|-------------|---------|
+    | file_path | string            | Path to the file |   |
 
     ## Returns
-    - (str) The MIME type of the file.
+    A string containing the MIME type of the file. For example 
+    
     """
     if file_path.startswith('s3://'):
         s3 = boto3.client('s3')
@@ -90,7 +93,9 @@ def get_aws_credentials(debug: bool = False) -> Dict[str, Union[int, str]]:
     # Fetches AWS credentials from environment variables or provided arguments.
 
     ## Args
-    - debug (bool): Flag to enable debugging. Defaults to False.
+    | Name      | Type              | Description | Default |
+    |-----------|-------------------|-------------|---------|
+    | debug     | bool              | Flag to enable debugging. | False |
 
     ## Returns
     A dictionary containing AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.

@@ -1,6 +1,6 @@
 # delete.py
 """
-Module for handling file deletion in both local and AWS S3 storage.
+Delete files from local and AWS S3 storage.
 
 This module provides a centralized way to manage file operations on both
 local and AWS S3 storage. It leverages utility functions from the `utils` module
