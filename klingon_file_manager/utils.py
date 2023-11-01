@@ -70,7 +70,7 @@ import os
 
 def get_mime_type(file_path: str) -> str:
     """
-    # Get the MIME type of a file.
+    # Get the MIME type of a file
 
     ## Args
     | Name      | Type              | Description | Default |
@@ -97,7 +97,11 @@ def get_mime_type(file_path: str) -> str:
 
 def get_aws_credentials(debug: bool = False) -> Dict[str, Union[int, str]]:
     """
-    # Fetches AWS credentials from .env file or environment variables.
+    # Get AWS credentials and check access to S3 buckets
+    
+    Fetches AWS credentials from .env file or environment variables. If the
+    function finds them, it checks if they are valid and returns them along
+    with a list of buckets and the permissions the credentials have to each.
 
     ## Args
     | Name      | Type              | Description | Default |
@@ -105,7 +109,8 @@ def get_aws_credentials(debug: bool = False) -> Dict[str, Union[int, str]]:
     | debug     | bool              | Flag to enable debugging. | False |
 
     ## Returns
-    A dictionary containing AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY as follows:
+    A dictionary containing AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY as well
+    as a list of buckets the credentials have read and write access to as follows:
 
     ```python
     {
@@ -115,7 +120,22 @@ def get_aws_credentials(debug: bool = False) -> Dict[str, Union[int, str]]:
             'AWS_ACCESS_KEY_ID': 'AKIAIOSFODNN7EXAMPLE',
             'AWS_SECRET_ACCESS_KEY': 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
         },
+        'access': {
+                'bucket1': {
+                    'ListBucket': true,
+                    'GetBucketAcl': true,
+                    'PutObject': true,
+                    'DeleteObject': true
+                },
+                'bucket2': {
+                    'ListBucket': true,
+                    'GetBucketAcl': true,
+                    'PutObject': true,
+                    'DeleteObject': true
+                }
+        },
     }
+    ```
     """
     load_dotenv()
     access_key = os.getenv('AWS_ACCESS_KEY_ID')
@@ -125,7 +145,7 @@ def get_aws_credentials(debug: bool = False) -> Dict[str, Union[int, str]]:
     if not access_key or not secret_key:
         return {
             'status': 424,
-            'message': 'Failed Dependency - No working S3 credentials in .env or environment',
+            'message': 'Failed Dependency - No working AWS credentials in .env or environment',
         }
 
     # Check if the credentials are valid and user can login
@@ -138,6 +158,7 @@ def get_aws_credentials(debug: bool = False) -> Dict[str, Union[int, str]]:
             'message': 'Access Denied - AWS credentials are invalid',
         }
 
+    # Check if the credentials have read and write access to any s3 buckets
     s3 = session.client('s3')
     all_buckets = s3.list_buckets()
     access = {'read': [], 'write': []}
@@ -164,7 +185,7 @@ def get_aws_credentials(debug: bool = False) -> Dict[str, Union[int, str]]:
 
 def is_binary_file(file_path_or_content: Union[str, bytes]) -> bool:
     """
-    # Check if a file or content is binary.
+    # Check if a file or content is binary
 
     ## Args
     | Name      | Type              | Description |
