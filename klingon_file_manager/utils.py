@@ -138,28 +138,29 @@ def get_aws_credentials(debug: bool = False) -> Dict[str, Union[int, str]]:
             'message': 'Access Denied - AWS credentials are invalid',
         }
 
-    try:
-        # Make sure we have read and write access to the bucket
-        s3 = session.client('s3')
-        # Try to list all the buckets
-        s3.list_buckets()
-        # Try to create a bucket. This will fail if the bucket already exists, but that's okay because we just want to check if we have the necessary permissions.
-        s3.create_bucket(Bucket='test-bucket-for-permission-check')
-        # If we reach this point, we have read and write access to the bucket.
-        return {
-            'status': 200,
-            'message': 'AWS credentials retrieved, valid and have read and write access to this bucket',
-            'credentials': {
-                'AWS_ACCESS_KEY_ID': access_key,
-                'AWS_SECRET_ACCESS_KEY': secret_key,
-            },
-        }
-    except botocore.exceptions.BotoCoreError as e:
-        # If an exception occurs, we do not have read and write access to the bucket.
-        return {
-            'status': 403,
-            'message': 'Access Denied - AWS credentials do not have read and write access to the bucket',
-        }
+    s3 = session.client('s3')
+    all_buckets = s3.list_buckets()
+    access = {'read': [], 'write': []}
+    for bucket in all_buckets['Buckets']:
+        try:
+            s3.get_bucket_acl(Bucket=bucket['Name'])
+            access['read'].append(bucket['Name'])
+        except botocore.exceptions.BotoCoreError:
+            pass
+        try:
+            s3.put_bucket_acl(AccessControlPolicy={'Grants': [], 'Owner': {}}, Bucket=bucket['Name'])
+            access['write'].append(bucket['Name'])
+        except botocore.exceptions.BotoCoreError:
+            pass
+    return {
+        'status': 200,
+        'message': 'AWS credentials retrieved, valid and have read and write access to this bucket',
+        'credentials': {
+            'AWS_ACCESS_KEY_ID': access_key,
+            'AWS_SECRET_ACCESS_KEY': secret_key,
+        },
+        'access': access
+    }
 
 def is_binary_file(file_path_or_content: Union[str, bytes]) -> bool:
     """
