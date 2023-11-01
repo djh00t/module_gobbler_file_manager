@@ -95,6 +95,37 @@ def get_mime_type(file_path: str) -> str:
 
 
 
+def check_bucket_permissions(bucket_name, s3):
+    permissions = {
+        'ListBucket': False,
+        'GetBucketAcl': False,
+        'PutObject': False,
+        'DeleteObject': False,
+    }
+
+    try:
+        s3.list_objects_v2(Bucket=bucket_name, MaxKeys=0)
+        permissions['ListBucket'] = True
+    except:
+        pass
+
+    try:
+        s3.get_bucket_acl(Bucket=bucket_name)
+        permissions['GetBucketAcl'] = True
+    except:
+        pass
+
+    try:
+        object_key = 'temp_permission_check_object'
+        s3.put_object(Bucket=bucket_name, Key=object_key, Body=b'')
+        permissions['PutObject'] = True
+        s3.delete_object(Bucket=bucket_name, Key=object_key)
+        permissions['DeleteObject'] = True
+    except:
+        pass
+
+    return permissions
+
 def get_aws_credentials(debug: bool = False) -> Dict[str, Union[int, str]]:
     """
     # Get AWS credentials and check access to S3 buckets
@@ -160,22 +191,22 @@ def get_aws_credentials(debug: bool = False) -> Dict[str, Union[int, str]]:
 
     # Check if the credentials have read and write access to any s3 buckets
     s3 = session.client('s3')
-    all_buckets = s3.list_buckets()
-    access = {'read': [], 'write': []}
-    for bucket in all_buckets['Buckets']:
+    response = s3.list_buckets()
+    buckets = response['Buckets']
+
+    access = {}
+    for bucket in buckets:
+        bucket_name = bucket['Name']
         try:
-            s3.get_bucket_acl(Bucket=bucket['Name'])
-            access['read'].append(bucket['Name'])
-        except botocore.exceptions.BotoCoreError:
+            s3.head_bucket(Bucket=bucket_name)
+            permissions = check_bucket_permissions(bucket_name, s3)
+            access[bucket_name] = permissions
+        except:
             pass
-        try:
-            s3.put_bucket_acl(AccessControlPolicy={'Grants': [], 'Owner': {}}, Bucket=bucket['Name'])
-            access['write'].append(bucket['Name'])
-        except botocore.exceptions.BotoCoreError:
-            pass
+
     return {
         'status': 200,
-        'message': 'AWS credentials retrieved, valid and have read and write access to this bucket',
+        'message': 'AWS credentials retrieved successfully.',
         'credentials': {
             'AWS_ACCESS_KEY_ID': access_key,
             'AWS_SECRET_ACCESS_KEY': secret_key,
