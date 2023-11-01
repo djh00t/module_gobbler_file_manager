@@ -91,9 +91,12 @@ def get_mime_type(file_path: str) -> str:
         return magic.from_buffer(content, mime=True)
 
 
+import os
+from dotenv import load_dotenv
+
 def get_aws_credentials(debug: bool = False) -> Dict[str, Union[int, str]]:
     """
-    # Fetches AWS credentials from environment variables or provided arguments.
+    # Fetches AWS credentials from .env file or environment variables.
 
     ## Args
     | Name      | Type              | Description | Default |
@@ -113,14 +116,33 @@ def get_aws_credentials(debug: bool = False) -> Dict[str, Union[int, str]]:
         },
     }
     """
-    session = Session()
-    credentials = session.get_credentials()
+    load_dotenv()
+    access_key = os.getenv('AWS_ACCESS_KEY_ID')
+    secret_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+
+    if not access_key or not secret_key:
+        return {
+            'status': 424,
+            'message': 'Failed Dependency - No working S3 credentials in .env or environment',
+        }
+
+    session = Session(aws_access_key_id=access_key, aws_secret_access_key=secret_key)
+    try:
+        user = session.client('iam').get_user()
+    except Exception as e:
+        return {
+            'status': 403,
+            'message': 'Access Denied - AWS credentials are invalid',
+        }
+
+    # TODO: Check read and write access to the bucket using GetUserPolicy API
+
     return {
         'status': 200,
-        'message': 'AWS credentials retrieved successfully.',
+        'message': 'AWS credentials retrieved, valid and have read and write access to this bucket',
         'credentials': {
-            'AWS_ACCESS_KEY_ID': credentials.access_key,
-            'AWS_SECRET_ACCESS_KEY': credentials.secret_key,
+            'AWS_ACCESS_KEY_ID': access_key,
+            'AWS_SECRET_ACCESS_KEY': secret_key,
         },
     }
 
