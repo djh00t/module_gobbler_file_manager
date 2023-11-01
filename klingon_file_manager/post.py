@@ -1,6 +1,6 @@
 # post.py
 """
-# Overview
+# Post Overview
 
 Post files to locally mounted and S3 storage.
 
@@ -65,7 +65,7 @@ def post_file(
 
     ^ Default metadata includes the following, if you add your own metadata, it
         will be merged with the default metadata:
-    ```json
+    ```python
     {
         "md5": str,
         "filesize": int
@@ -76,7 +76,7 @@ def post_file(
     
     A dictionary containing the status of the post operation. The schema
     is as follows:
-    ```json
+    ```python
     {
         "status": int,
         "message": str,
@@ -122,15 +122,19 @@ def _post_to_s3(
 
     This is a helper function for post_file.
 
-    Args:
-        path: The S3 path where the file should be written.
-        content: The content to post.
-        md5: The MD5 hash of the content, used for data integrity. Defaults to None.
-        metadata: Additional metadata to include with the file. Defaults to None.
-        debug: Flag to enable debugging. Defaults to False.
+    ## Args
 
-    Returns:
-        A dictionary containing the status of the post operation to S3.
+    | Name      | Type              | Description | Default |
+    |-----------|-------------------|-------------|---------|
+    | path      | string            | The S3 path where the file should be written. Must be an S3 URI. |   |
+    | content   | string or bytes   | Content to post |  |
+    | md5       | string            | MD5 hash of the file, used for data integrity | * See note |
+    | metadata  | dictionary        | Additional metadata to include with the file | ^ See note |
+    | debug     | boolean           | Flag to enable/disable debugging | False |
+
+    ## Returns
+    A dictionary containing the status of the post operation to S3 as follows:
+    
     """
     debug_info = {}
 

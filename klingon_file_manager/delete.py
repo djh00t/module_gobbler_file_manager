@@ -1,6 +1,6 @@
 # delete.py
 """
-# Overview
+# Delete Overview
 
 Delete files from local and AWS S3 storage.
 

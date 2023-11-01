@@ -1,6 +1,6 @@
 # utils.py
 """
-# Overview
+# Utils Overview
 Utility functions for the Klingon File Manager, including AWS credential fetching.
 
 This module provides a centralized way to manage file operations on both
@@ -99,9 +99,8 @@ def get_aws_credentials(debug: bool = False) -> Dict[str, Union[int, str]]:
     | debug     | bool              | Flag to enable debugging. | False |
 
     ## Returns
-    A dictionary containing AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.
+    A dictionary containing AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY as follows:
 
-    ## Example return dictionary
     ```python
     {
         'status': 200,

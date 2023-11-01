@@ -1,6 +1,6 @@
 # get.py
 """
-# Overview
+# Get Overview
 
 Module for getting files from local and AWS S3 storage.
 
@@ -48,8 +48,7 @@ def get_file(path: str, debug: bool = False) -> Dict[str, Union[int, str, bytes,
 
     ## Returns
     
-    A dictionary containing the status of the get operation. The schema
-    is as follows:
+    A dictionary containing the status of the get operation as follows:
     
     ```python
     {
@@ -105,7 +104,13 @@ def _get_from_s3(path: str, debug: bool) -> Dict[str, Union[int, str, bytes, boo
     A dictionary containing the status of the get operation from S3 as follows:
 
     ```python
-
+    {
+        "status": 200,
+        "message": "File read successfully from S3.",
+        "content": b'file content in bytes',
+        "binary": True,
+        "debug": {}
+    }
     ```
     """
     debug_info = {}
@@ -145,14 +150,28 @@ def _get_from_s3(path: str, debug: bool) -> Dict[str, Union[int, str, bytes, boo
 
 def _get_from_local(path: str, debug: bool) -> Dict[str, Union[int, str, bytes, bool, Dict[str, str]]]:
     """
-    Gets a file from a local directory.
+    # Gets a file from a local directory.
 
-    Args:
-        path: The local path where the file should be read from.
-        debug: Flag to enable debugging.
+    ## Args
 
-    Returns:
-        A dictionary containing the status of the get operation from the local directory.
+    | Name      | Type              | Description | Default |
+    |-----------|-------------------|-------------|---------|
+    | path      | string            | Path where the file should be retrieved from. Must be a local path. |   |
+    | debug     | boolean           | Flag to enable/disable debugging | False |
+
+    ## Returns
+    A dictionary containing the status of the get operation from the local
+    directory as follows:
+
+    ```python
+    {
+        "status": 200,
+        "message": "File read successfully.",
+        "content": b'file content in bytes',
+        "binary": True,
+        "debug": {}
+    }
+    ```
     """
     debug_info = {}
 
