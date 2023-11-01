@@ -108,7 +108,7 @@ def post_file(
         return {
             "status": 500,
             "message": f"Failed to post file: {str(exception)}" if debug else "Failed to post file.",
-            "debug": debug_info if debug else {},
+            "debug": debug_info if debug or status == 500 else {},
         }
 
 def _post_to_s3(
@@ -205,7 +205,7 @@ def _post_to_s3(
         "status": 200,
         "message": "File written successfully to S3.",
         "md5": hashlib.md5(content_bytes).hexdigest(),
-        "debug": debug_info if debug else {},
+        "debug": debug_info if debug or status == 500 else {},
     }
 
 
@@ -254,5 +254,5 @@ def _post_to_local(
     return {
         "status": 200,
         "message": "File written successfully.",
-        "debug": debug_info if debug else {},
+        "debug": debug_info if debug or status == 500 else {},
     }
