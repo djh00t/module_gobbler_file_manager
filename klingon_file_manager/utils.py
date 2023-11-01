@@ -63,6 +63,7 @@ from boto3 import Session
 from dotenv import load_dotenv
 from typing import Dict, Union
 import boto3
+import botocore.exceptions
 import magic
 import os
 
@@ -135,16 +136,27 @@ def get_aws_credentials(debug: bool = False) -> Dict[str, Union[int, str]]:
             'message': 'Access Denied - AWS credentials are invalid',
         }
 
-    # TODO: Check read and write access to the bucket using GetUserPolicy API
-
-    return {
-        'status': 200,
-        'message': 'AWS credentials retrieved, valid and have read and write access to this bucket',
-        'credentials': {
-            'AWS_ACCESS_KEY_ID': access_key,
-            'AWS_SECRET_ACCESS_KEY': secret_key,
-        },
-    }
+    try:
+        s3 = session.client('s3')
+        # Try to list all the buckets
+        s3.list_buckets()
+        # Try to create a bucket. This will fail if the bucket already exists, but that's okay because we just want to check if we have the necessary permissions.
+        s3.create_bucket(Bucket='test-bucket-for-permission-check')
+        # If we reach this point, we have read and write access to the bucket.
+        return {
+            'status': 200,
+            'message': 'AWS credentials retrieved, valid and have read and write access to this bucket',
+            'credentials': {
+                'AWS_ACCESS_KEY_ID': access_key,
+                'AWS_SECRET_ACCESS_KEY': secret_key,
+            },
+        }
+    except botocore.exceptions.BotoCoreError as e:
+        # If an exception occurs, we do not have read and write access to the bucket.
+        return {
+            'status': 403,
+            'message': 'Access Denied - AWS credentials do not have read and write access to the bucket',
+        }
 
 def is_binary_file(file_path_or_content: Union[str, bytes]) -> bool:
     """
