@@ -74,7 +74,8 @@ def get_mime_type(file_path: str) -> str:
     | file_path | string            | Path to the file |   |
 
     ## Returns
-    A string containing the MIME type of the file. For example 
+    A string containing the MIME type of the file. For example if run against a
+    jpeg file, the function would return `image/jpeg`
     
     """
     if file_path.startswith('s3://'):
@@ -127,10 +128,12 @@ def is_binary_file(file_path_or_content: Union[str, bytes]) -> bool:
     # Check if a file or content is binary.
 
     ## Args
-    - file_path_or_content(str or bytes): The path to the file or the content of the file.
+    | Name      | Type              | Description |
+    |-----------|-------------------|-------------|
+    | file_path_or_content | string or bytes | The path to the file or the content of the file. |
 
     ## Returns
-    - True if the file or content is binary, False otherwise.
+    A boolean value of true if the file or content is binary, False otherwise.
     """
     if isinstance(file_path_or_content, str):
         if file_path_or_content.startswith('s3://'):

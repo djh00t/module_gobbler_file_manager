@@ -1,21 +1,28 @@
 # delete.py
 """
+# Overview
+
 Delete files from local and AWS S3 storage.
 
 This module provides a centralized way to manage file operations on both
 local and AWS S3 storage. It leverages utility functions from the `utils` module
 and specific actions from `get`, `post`, and `delete` modules.
 
-Functions:
-    delete_file: Function for deleting files.
+# Functions
 
-Example:
-    To delete a file from a local directory:
-    >>> manage_file('delete', '/path/to/local/file')
-    
-    To delete a file from an S3 bucket:
-    >>> manage_file('delete', 's3://bucket/file')
-    ...
+## delete_file
+Function for deleting files on locally mounted or S3 storage.
+
+# Usage Examples
+To delete a file from a local directory:
+```python
+>>> manage_file('delete', '/path/to/local/file')
+```
+
+To delete a file from an S3 bucket:
+```python
+>>> manage_file('delete', 's3://bucket/file')
+```
 """
 
 
@@ -25,14 +32,18 @@ import boto3
 from .utils import get_aws_credentials
 
 def delete_file(path: str, debug: bool = False) -> Dict[str, Union[int, str, Dict[str, str]]]:
-    """Deletes a file from either a local file system or an S3 object.
+    """
+    # Delete a file from either a locally mounted or S3 storage.
     
-    Args:
-        path: The path where the file should be deleted. Can be a local path or an S3 URI.
-        debug: Flag to enable debugging. Defaults to False.
+    ## Args
 
-    Returns:
-        A dictionary containing the status of the delete operation.
+    | Name      | Type              | Description | Default |
+    |-----------|-------------------|-------------|---------|
+    | path      | string            | Path where the file should be deleted. Can be a local path or an S3 URI. |   |
+    | debug     | boolean           | Flag to enable/disable debugging | False |
+
+    ## Returns
+    A dictionary containing the status of the delete operation.
     """
     debug_info = {}
 
