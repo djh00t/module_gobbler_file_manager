@@ -58,7 +58,7 @@ def post_file(
 
     **Note:**
 
-    \* If md5 is provided, it will be compared against the calculated MD5 hash
+    \\* If md5 is provided, it will be compared against the calculated MD5 hash
         of the content. If they do not match, the post will fail. If md5 hash
         is not provided, it will be calculated, returned in the response and
         will also be used to validate that the file arrived in tact by S3
@@ -134,7 +134,22 @@ def _post_to_s3(
 
     ## Returns
     A dictionary containing the status of the post operation to S3 as follows:
+
+    ```python
+    {
+        "status": 200,
+        "message": "File written successfully to S3.",
+        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+        "debug": {}
+    }
+    ```
     
+    | Key       | Type              | Description |
+    |-----------|-------------------|-------------|
+    | status    | int               | HTTP-like status code |
+    | message   | string            | Message describing the outcome |
+    | md5       | string            | MD5 hash of the written file |
+    | debug     | dictionary        | Debug information |
     """
     debug_info = {}
 
@@ -153,6 +168,10 @@ def _post_to_s3(
     debug_info["bucket_name"] = bucket_name
     debug_info["key"] = key
 
+    # Check for metadata = None
+    if metadata is None:
+        metadata = {}
+
     # Handle MD5 and metadata
     if md5:
         calculated_md5 = hashlib.md5(content).hexdigest()
@@ -169,8 +188,11 @@ def _post_to_s3(
     # Convert all metadata values to strings
     metadata_str = {k: str(v) for k, v in metadata.items()}
 
+    # Convert strings to bytes
+    content_bytes = content if isinstance(content, bytes) else content.encode('utf-8')
+
     # Create a BytesIO object from the content
-    with io.BytesIO(content) as f:
+    with io.BytesIO(content_bytes) as f:
         # Upload the file to S3
         s3_client.upload_fileobj(
             Fileobj=f,
@@ -182,28 +204,45 @@ def _post_to_s3(
     return {
         "status": 200,
         "message": "File written successfully to S3.",
-        "md5": hashlib.md5(content).hexdigest(),
+        "md5": hashlib.md5(content_bytes).hexdigest(),
         "debug": debug_info if debug else {},
     }
-
-from typing import Union, Dict
 
 
 def _post_to_local(
         path: str,
         content: Union[str, bytes],
         debug: bool) -> Dict[str, Union[int, str, Dict[str, str]]]:
-    """Posts content to a local directory.
+    """
+    # Posts content to a local directory.
 
     This is a helper function for post_file.
 
-    Args:
-        path: The local path where the file should be written.
-        content: The content to post.
-        debug: Flag to enable debugging. Defaults to False.
+    ## Args
+    | Name      | Type              | Description | Default |
+    |-----------|-------------------|-------------|---------|
+    | path      | string            | The local path where the file should be written. |   |
+    | content   | string or bytes   | Content to post |  |
+    | debug     | boolean           | Flag to enable/disable debugging | False |
 
-    Returns:
-        A dictionary containing the status of the post operation to the local directory.
+    ## Returns
+    A dictionary containing the status of the post operation to the local
+    directory as follows:
+    
+    ```python
+    {
+        "status": 200,
+        "message": "File written successfully.",
+        "debug": {}
+    }
+    ```
+
+    | Key       | Type              | Description |
+    |-----------|-------------------|-------------|
+    | status    | int               | HTTP-like status code |
+    | message   | string            | Message describing the outcome |
+    | debug     | dictionary        | Debug information |
+    
     """
     debug_info = {}
 
