@@ -121,12 +121,14 @@ def get_aws_credentials(debug: bool = False) -> Dict[str, Union[int, str]]:
     access_key = os.getenv('AWS_ACCESS_KEY_ID')
     secret_key = os.getenv('AWS_SECRET_ACCESS_KEY')
 
+    # Make sure there are AWS variables in the dotenv or environment
     if not access_key or not secret_key:
         return {
             'status': 424,
             'message': 'Failed Dependency - No working S3 credentials in .env or environment',
         }
 
+    # Check if the credentials are valid and user can login
     session = Session(aws_access_key_id=access_key, aws_secret_access_key=secret_key)
     try:
         user = session.client('iam').get_user()
@@ -137,6 +139,7 @@ def get_aws_credentials(debug: bool = False) -> Dict[str, Union[int, str]]:
         }
 
     try:
+        # Make sure we have read and write access to the bucket
         s3 = session.client('s3')
         # Try to list all the buckets
         s3.list_buckets()
