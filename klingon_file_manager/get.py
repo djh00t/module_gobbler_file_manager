@@ -14,6 +14,7 @@ and specific actions from `get`, `post`, and `delete` modules.
 Function for getting files from locally mounted filesystems or S3.
 
 # Usage Examples
+
 To get a file from a local directory:
 ```python
 >>> manage_file('get', '/path/to/local/file')
@@ -112,6 +113,15 @@ def _get_from_s3(path: str, debug: bool) -> Dict[str, Union[int, str, bytes, boo
         "debug": {}
     }
     ```
+
+    | Key       | Type              | Description |
+    |-----------|-------------------|-------------|
+    | status    | int               | HTTP-like status code |
+    | message   | string            | Message describing the outcome |
+    | content   | bytes             | Content of the file |
+    | binary    | boolean           | Flag indicating if the content is binary |
+    | debug     | dictionary        | Debug information |
+    
     """
     debug_info = {}
 
@@ -150,6 +160,7 @@ def _get_from_s3(path: str, debug: bool) -> Dict[str, Union[int, str, bytes, boo
 
 def _get_from_local(path: str, debug: bool) -> Dict[str, Union[int, str, bytes, bool, Dict[str, str]]]:
     """
+    @all
     # Gets a file from a local directory.
 
     ## Args
@@ -172,6 +183,15 @@ def _get_from_local(path: str, debug: bool) -> Dict[str, Union[int, str, bytes, 
         "debug": {}
     }
     ```
+
+    | Key       | Type              | Description |
+    |-----------|-------------------|-------------|
+    | status    | int               | HTTP-like status code |
+    | message   | string            | Message describing the outcome |
+    | content   | bytes             | Content of the file |
+    | binary    | boolean           | Flag indicating if the content is binary |
+    | debug     | dictionary        | Debug information |
+    
     """
     debug_info = {}
 

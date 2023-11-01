@@ -94,6 +94,11 @@ def post_file(
     debug_info = {}
 
     try:
+        print(f"Posting file to {path}")  # Debug print
+        print(f"Content: {content}")  # Debug print
+        print(f"MD5: {md5}")  # Debug print
+        print(f"Metadata: {metadata}")  # Debug print
+        print(f"Debug: {debug}")  # Debug print
         if path.startswith("s3://"):
             debug_info.update(_post_to_s3(
                 path, content, md5, metadata, debug))
@@ -108,7 +113,7 @@ def post_file(
         return {
             "status": 500,
             "message": f"Failed to post file: {str(exception)}" if debug else "Failed to post file.",
-            "debug": debug_info if debug or status == 500 else {},
+            "debug": debug_info if debug else {},
         }
 
 def _post_to_s3(
@@ -205,7 +210,7 @@ def _post_to_s3(
         "status": 200,
         "message": "File written successfully to S3.",
         "md5": hashlib.md5(content_bytes).hexdigest(),
-        "debug": debug_info if debug or status == 500 else {},
+        "debug": debug_info if debug else {},
     }
 
 
@@ -254,5 +259,5 @@ def _post_to_local(
     return {
         "status": 200,
         "message": "File written successfully.",
-        "debug": debug_info if debug or status == 500 else {},
+        "debug": debug_info if debug else {},
     }

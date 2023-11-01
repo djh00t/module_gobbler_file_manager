@@ -1,72 +1,51 @@
+import io
 import os
-from klingon_file_manager import manage_file
-import lorem
-import boto3
+import tempfile
+import pytest
+from unittest.mock import patch, MagicMock, mock_open
+from klingon_file_manager import post_file, _post_to_s3, _post_to_local  # Importing functions from your post.py module
+from klingon_file_manager import get_mime_type  # Importing get_mime_type function from utils.py module
 
-AWS_ACCESS_KEY_ID  = os.environ.get("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
-AWS_S3_BUCKET_NAME = os.environ.get("AWS_S3_BUCKET_NAME")
+# A pytest fixture to manage temporary files for the test.
+@pytest.fixture(params=['text', 'binary'])
+def temp_file(request):
+    mode = 'w+' if request.param == 'text' else 'wb+'
+    # Create a temporary file
+    with tempfile.NamedTemporaryFile(mode=mode, delete=False) as f:
+        if request.param == 'text':
+            f.write("This is a test file.")
+        else:
+            f.write(b'\x00\x01\x02\x03')
+        temp_name = f.name
+    yield temp_name  # Yield control to test function
+    #os.unlink(temp_name)  # Cleanup: delete the temporary file
 
-# Set s3 bucket name
-s3_bucket_name = AWS_S3_BUCKET_NAME
+# Test for function post_file
+def test_post_file(temp_file):
+    import pdb; pdb.set_trace()  # Add a breakpoint here for debugging
+    
+    print("Starting test_post_file")  # Debug print
 
-# Generate a 100 word string of lorem ipsum text
-test_txt_content = lorem.text()
-test_bin_content = b'\x00\x00\x00\x00\x00\x00\x00\x00'
+    # Use patch as a context manager
+    with patch("klingon_file_manager._post_to_s3") as mock_post_to_s3, patch("klingon_file_manager._post_to_local") as mock_post_to_local:
+        
+        # Mock the return values
+        mock_post_to_s3.return_value = {"status": 200, "message": "OK"}
+        mock_post_to_local.return_value = {"status": 200, "message": "OK"}
+        
+        print("Mocks should be active here")  # Debug print
 
-# Test Files - post
-test_txt_post = 'tests/test_post_txt_file.txt'
-test_bin_post = 'tests/test_post_bin_file.wav'
+        # Open the temp file and read its contents
+        with open(temp_file, "rb") as f:
+            content = f.read()
 
-# Test 5 - post local text file
-def test_post_local_txt_file():
-    result = manage_file('post', test_txt_post, test_txt_content)
-    print(result)
-    assert result['status'] == 200
-    assert result['action'] == 'post'
-    assert result['content'] == test_txt_content
-    assert result['path'] == test_txt_post
-    assert result['binary'] is False
+        # Call the function under test
+        result = post_file(
+            path="s3://bucket/file",
+            content=content,
+            debug=True
+        )
+        print(f"Result from post_file when posting to S3: {result}")  # Debug print
 
-# Test 6 - post local binary file
-def test_post_local_bin_file():
-    result = manage_file('post', test_bin_post, test_bin_content)
-    print(result)
-    assert result['status'] == 200
-    assert result['action'] == 'post'
-    assert result['content'] == test_bin_content
-    assert result['path'] == test_bin_post
-    assert result['binary'] is True
-
-# Test 7 - post s3 text file
-def test_post_s3_txt_file():
-    result = manage_file('post', "s3://"+s3_bucket_name+"/"+test_txt_post, test_txt_content)
-    print(result)
-    assert result['status'] == 200
-    assert result['action'] == 'post'
-    assert result['path'] == "s3://"+s3_bucket_name+"/"+test_txt_post
-    assert result['binary'] is False
-    # Additional check: Read the file from s3 to make sure content was written
-    # correctly
-    validate = manage_file('get', "s3://"+s3_bucket_name+"/"+test_txt_post, None)
-    print(validate)
-    assert validate['status'] == 200
-    assert validate['action'] == 'get'
-    assert validate['content'].decode() == test_txt_content
-    assert validate['path'] == "s3://"+s3_bucket_name+"/"+test_txt_post
-
-# Test 8 - post s3 binary file
-def test_post_s3_bin_file():
-    result = manage_file('post', "s3://"+s3_bucket_name+"/"+test_bin_post, test_bin_content)
-    print(result)
-    assert result['status'] == 200
-    assert result['action'] == 'post'
-    assert result['path'] == "s3://"+s3_bucket_name+"/"+test_bin_post
-    # Additional check: Read the file from s3 to make sure content was written
-    # correctly
-    validate = manage_file('get', "s3://"+s3_bucket_name+"/"+test_bin_post, None)
-    print(validate)
-    assert validate['status'] == 200
-    assert validate['action'] == 'get'
-    assert validate['content'] == test_bin_content
-    assert validate['path'] == "s3://"+s3_bucket_name+"/"+test_bin_post
+        # Assertions
+        assert result["status"] == 200

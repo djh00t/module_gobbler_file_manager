@@ -51,11 +51,13 @@ def delete_file(path: str, debug: bool = False) -> Dict[str, Union[int, str, Dic
         "debug": {}
     }
     ```
+    
     | Key       | Type              | Description |
     |-----------|-------------------|-------------|
     | status    | int               | HTTP-like status code |
     | message   | string            | Message describing the outcome |
     | debug     | dictionary        | Debug information |
+    
     """
     debug_info = {}
 
