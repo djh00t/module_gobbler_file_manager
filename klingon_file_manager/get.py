@@ -1,21 +1,28 @@
 # get.py
 """
+# Overview
+
 Module for getting files from local and AWS S3 storage.
 
 This module provides a centralized way to manage file operations on both
 local and AWS S3 storage. It leverages utility functions from the `utils` module
 and specific actions from `get`, `post`, and `delete` modules.
 
-Functions:
-    get_file: Function for getting files.
+# Functions
 
-Example:
-    To get a file from a local directory:
-    >>> manage_file('get', '/path/to/local/file')
-    
-    To get a file from an S3 bucket:
-    >>> manage_file('get', 's3://bucket/file')
-    ...
+## get_file
+Function for getting files from locally mounted filesystems or S3.
+
+# Usage Examples
+To get a file from a local directory:
+```python
+>>> manage_file('get', '/path/to/local/file')
+```
+
+To get a file from an S3 bucket:
+```python
+>>> manage_file('get', 's3://bucket/file')
+```
 """
 
 
@@ -27,25 +34,40 @@ from .utils import get_aws_credentials, is_binary_file
 
 def get_file(path: str, debug: bool = False) -> Dict[str, Union[int, str, bytes, bool, Dict[str, str]]]:
     """
-    Gets a file from a given path.
+    # Gets a file from a given path.
 
     This function gets a file from a specified path. The path can either be a
     local directory or an S3 bucket.
 
-    Args:
-        path: The path of the file to get.
-        debug: Flag to enable debugging. Defaults to False.
+    ## Args
+    
+    | Name      | Type              | Description | Default |
+    |-----------|-------------------|-------------|---------|
+    | path      | string            | Path the file should be retrieved from |
+    | debug     | boolean           | Flag to enable/disable debugging | False |
 
-    Returns:
-        A dictionary containing the status of the get operation. The schema
-        is as follows:
-            {
-                "status": int,          # HTTP-like status code
-                "message": str,         # Message describing the outcome
-                "content": Union[str, bytes],  # The actual file content
-                "binary": bool,         # Flag indicating if the content is binary
-                "debug": Dict[str, str] # Debug information
-            }
+    ## Returns
+    
+    A dictionary containing the status of the get operation. The schema
+    is as follows:
+    
+    ```python
+    {
+        "status": int,
+        "message": str,
+        "content": Union[str, bytes],
+        "binary": bool,
+        "debug": Dict[str, str]
+    }
+    ```
+    
+    | Key       | Type              | Description |
+    |-----------|-------------------|-------------|
+    | status    | int               | HTTP-like status code |
+    | message   | string            | Message describing the outcome |
+    | content   | string or bytes   | Content of the file |
+    | binary    | boolean           | Flag indicating if the content is binary |
+    | debug     | dictionary        | Debug information |
     """
     debug_info = {}
 
@@ -70,14 +92,21 @@ def get_file(path: str, debug: bool = False) -> Dict[str, Union[int, str, bytes,
 
 def _get_from_s3(path: str, debug: bool) -> Dict[str, Union[int, str, bytes, bool, Dict[str, str]]]:
     """
-    Gets a file from an S3 bucket.
+    # Gets a file from an S3 bucket.
 
-    Args:
-        path: The S3 path where the file should be read from.
-        debug: Flag to enable debugging.
+    ## Args
 
-    Returns:
-        A dictionary containing the status of the get operation from S3.
+    | Name      | Type              | Description | Default |
+    |-----------|-------------------|-------------|---------|
+    | path      | string            | Path where the file should be retrieved from. Must be an S3 URI. |   |
+    | debug     | boolean           | Flag to enable/disable debugging | False |
+
+    ## Returns
+    A dictionary containing the status of the get operation from S3 as follows:
+
+    ```python
+
+    ```
     """
     debug_info = {}
 

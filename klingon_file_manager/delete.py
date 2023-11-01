@@ -43,7 +43,19 @@ def delete_file(path: str, debug: bool = False) -> Dict[str, Union[int, str, Dic
     | debug     | boolean           | Flag to enable/disable debugging | False |
 
     ## Returns
-    A dictionary containing the status of the delete operation.
+    A dictionary containing the status of the delete operation as follows:
+    ```python
+    {
+        "status": 200,
+        "message": "File deleted successfully.",
+        "debug": {}
+    }
+    ```
+    | Key       | Type              | Description |
+    |-----------|-------------------|-------------|
+    | status    | int               | HTTP-like status code |
+    | message   | string            | Message describing the outcome |
+    | debug     | dictionary        | Debug information |
     """
     debug_info = {}
 

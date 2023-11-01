@@ -84,7 +84,7 @@ def post_file(
         "debug": Dict[str, str]
     }
     ```
-    | Name      | Type              | Description |
+    | Key      | Type              | Description |
     |-----------|-------------------|-------------|
     | status    | int               | HTTP-like status code |
     | message   | string            | Message describing the outcome |
@@ -117,7 +117,8 @@ def _post_to_s3(
         md5: Optional[str],
         metadata: Optional[Dict[str, str]],
         debug: bool) -> Dict[str, Union[int, str, Dict[str, str]]]:
-    """Posts content to an S3 bucket.
+    """
+    # Posts content to an S3 bucket.
 
     This is a helper function for post_file.
 
