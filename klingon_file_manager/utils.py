@@ -59,11 +59,12 @@ To fetch AWS credentials:
 ```
 """
 
-import boto3
 from boto3 import Session
-import magic
+from dotenv import load_dotenv
 from typing import Dict, Union
-
+import boto3
+import magic
+import os
 
 
 def get_mime_type(file_path: str) -> str:
@@ -91,8 +92,7 @@ def get_mime_type(file_path: str) -> str:
         return magic.from_buffer(content, mime=True)
 
 
-import os
-from dotenv import load_dotenv
+
 
 def get_aws_credentials(debug: bool = False) -> Dict[str, Union[int, str]]:
     """
