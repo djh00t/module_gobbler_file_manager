@@ -284,7 +284,7 @@ def test_post_to_s3_with_md5():
         logger.debug(f"Metadata from S3: {metadata}")
     
     # Add an assertion to compare the stored MD5 hash with the calculated MD5 hash
-    assert metadata.get("ContentMD5") == md5_hash
+    assert metadata.get("contentmd5") == md5_hash
 
 @timing_decorator
 def test_post_to_s3_with_incorrect_md5():
