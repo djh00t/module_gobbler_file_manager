@@ -207,9 +207,13 @@ def test_post_with_metadata():
     bucket_name, object_key = s3_path[5:].split("/", 1)
     s3_object = s3.Object(bucket_name, object_key)
     fetched_metadata = s3_object.metadata
-    
-    # Validate that the fetched metadata matches what was sent
-    assert fetched_metadata == metadata
+
+    # Make sure key value pairs from metadata are present in the fetched
+    # metadata. Note that the fetched metadata will also contain some
+    # additional key value pairs that are not present in the metadata
+    # dictionary.
+    for key, value in metadata.items():
+        assert fetched_metadata.get(key) == value
 
 @timing_decorator
 def test_post_to_s3_authentication_failure():

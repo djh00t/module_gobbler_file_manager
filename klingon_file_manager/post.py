@@ -27,19 +27,21 @@ To post a file to an S3 bucket:
 """
 
 import io
-import os
 import hashlib
 from typing import Union, Dict, Optional
 import boto3
+import logging
+import base64
 
-from .utils import get_aws_credentials, is_binary_file
+from .utils import get_md5_hash, get_file_size, get_mime_type_content
 
 def post_file(
-        path: str,
-        content: Union[str, bytes],
-        md5: Optional[str] = None,
-        metadata: Optional[Dict[str, str]] = None,
-        debug: bool = False) -> Dict[str, Union[int, str, Dict[str, str]]]:
+    path: str,
+    content: Union[str, bytes],
+    md5=None,
+    metadata=None,
+    debug=False) -> Dict[str, Union[int, str, Dict[str, str]]]:
+
     """
     # Post content to a file at a given path.
 
@@ -93,29 +95,78 @@ def post_file(
     """
     debug_info = {}
 
-    try:
-        print(f"Posting file to {path}")  # Debug print
-        print(f"Content: {content}")  # Debug print
-        print(f"MD5: {md5}")  # Debug print
-        print(f"Metadata: {metadata}")  # Debug print
-        print(f"Debug: {debug}")  # Debug print
-        if path.startswith("s3://"):
-            debug_info.update(_post_to_s3(
-                path, content, md5, metadata, debug))
-        else:
-            debug_info.update(_post_to_local(
-                path, content, debug))
+    # Default metadata
+    # Set md5 if md5 is None
+    md5=md5 if md5 is not None else get_md5_hash(content)
+    # Calculate the file size and set file_size_var
+    file_size=get_file_size(content)
+    # Get the content type and set content_type_var
+    content_type=get_mime_type_content(content)
+    
+    default_metadata = {
+        "md5": md5,
+        "file-size-bytes": file_size,
+        "Content-Type": content_type,
+    }
 
+    # Build metadata dictionary
+    # Step 1: check if metadata is None, if so, set metadata to
+    # default_metadata
+    # Step 2: if metadata is not None, make sure it is a dictionary. If it
+    # isn't a dictionary try to convert it to a dictionary. If it can't be
+    # converted to a dictionary, return a 400 error.
+    # Step 3: if metadata is a dictionary, merge default_metadata with metadata
+    # so all keys and values are retained with the provided metadata taking precedence.
+    if metadata is None:
+        metadata = default_metadata
+    else:
+        if isinstance(metadata, dict):
+            metadata = {**default_metadata, **metadata}
+        else:
+            try:
+                metadata = {**default_metadata, **dict(metadata)}
+            except Exception as exception:
+                logging.exception(f"Exception: {str(exception)}")
+                return {
+                    "status": 400,
+                    "message": f"Bad metadata - should be python dictionary: {str(exception)}" if debug else "Bad metadata - should be python dictionary.",
+                    "debug": debug_info if debug else {},
+                }
+
+    try:
+        if path.startswith("s3://"):
+            debug_info.update(
+                _post_to_s3
+                    (
+                    path=path,
+                    content=content,
+                    md5=md5,
+                    metadata=metadata,
+                    debug=debug,
+                )
+            )
+        else:
+            debug_info.update(
+                _post_to_local(
+                    path=path,
+                    content=content,
+                    debug=debug,
+                )
+            )
+            
         return debug_info
 
     except Exception as exception:
         debug_info["exception"] = str(exception)
+        logging.exception(f"Exception: {str(exception)}")
         return {
             "status": 500,
             "message": f"Failed to post file: {str(exception)}" if debug else "Failed to post file.",
             "debug": debug_info if debug else {},
         }
 
+
+# Helper function to post to S3
 def _post_to_s3(
         path: str,
         content: Union[str, bytes],
@@ -165,30 +216,40 @@ def _post_to_s3(
     key = s3_uri_parts[1]
 
     # Initialize S3 resource and client
-    s3 = boto3.resource('s3')
     s3_client = boto3.client('s3')
-
-    # Additional Debug Info
-    debug_info["s3_uri_parts"] = s3_uri_parts
-    debug_info["bucket_name"] = bucket_name
-    debug_info["key"] = key
 
     # Check for metadata = None
     if metadata is None:
         metadata = {}
 
-    # Handle MD5 and metadata
+    # Get md5 of content using get_md5_hash
+    calculated_md5 = get_md5_hash(content)
+
+    # Check if md5 is provided
     if md5:
-        calculated_md5 = hashlib.md5(content).hexdigest()
+        # Check if calculated_md5 matches md5. If not return a 409 error.
         if calculated_md5 != md5:
             return {
-                "status": 400,
-                "message": "Provided MD5 does not match calculated MD5.",
+                "status": 409,
+                "message": "Conflict - Provided MD5 does not match calculated MD5.",
                 "debug": debug_info if debug else {},
             }
-        if metadata is None:
-            metadata = {}
-        metadata["ContentMD5"] = calculated_md5
+        
+    else:
+        # If no md5 is provided, set md5 to calculated_md5
+        md5 = calculated_md5
+
+    # Add md5 to object metadata if it isn't already there
+    metadata["md5"] = md5
+
+    # Assuming md5 contains the hexadecimal MD5 hash
+    hex_md5 = md5
+
+    # Convert the hexadecimal MD5 hash to bytes
+    md5_bytes = bytes.fromhex(hex_md5)
+
+    # Encode the bytes in base64 so AWS can use it in ContentMD5
+    content_md5 = base64.b64encode(md5_bytes).decode('utf-8')
 
     # Convert all metadata values to strings
     metadata_str = {k: str(v) for k, v in metadata.items()}
@@ -196,39 +257,41 @@ def _post_to_s3(
     # Convert strings to bytes
     content_bytes = content if isinstance(content, bytes) else content.encode('utf-8')
 
-    # Create a BytesIO object from the content
     with io.BytesIO(content_bytes) as f:
-        # Upload the file to S3
-        s3_client.upload_fileobj(
-            Fileobj=f,
+        f.seek(0)
+        # Use put_object method
+        result = s3_client.put_object(
+            Body=f.read(),
             Bucket=bucket_name,
             Key=key,
-            ExtraArgs={'Metadata': metadata_str}
+            Metadata=metadata_str,
+            ContentMD5=content_md5,
+            ContentType=metadata.get('Content-Type', 'binary/octet-stream')  # Set the Content-Type
         )
 
     return {
         "status": 200,
         "message": "File written successfully to S3.",
-        "md5": hashlib.md5(content_bytes).hexdigest(),
+        "md5": metadata.get("md5", ""),
         "debug": debug_info if debug else {},
     }
 
 
 def _post_to_local(
-        path: str,
-        content: Union[str, bytes],
-        debug: bool) -> Dict[str, Union[int, str, Dict[str, str]]]:
+    path: str,
+    content: Union[str, bytes],
+    debug: bool = False) -> Dict[str, Union[int, str, Dict[str, str]]]:
     """
     # Posts content to a local directory.
 
     This is a helper function for post_file.
 
     ## Args
-    | Name      | Type              | Description | Default |
-    |-----------|-------------------|-------------|---------|
-    | path      | string            | The local path where the file should be written. |   |
-    | content   | string or bytes   | Content to post |  |
-    | debug     | boolean           | Flag to enable/disable debugging | False |
+    | Name  | Type      | Description | Default |
+    |---|---|---|---|
+    | path  | string    | The local path where the file should be written. |   |
+    | content  | string or bytes | Content to post |  |
+    | debug  | boolean  | Flag to enable/disable debugging | False |
 
     ## Returns
     A dictionary containing the status of the post operation to the local
@@ -242,22 +305,39 @@ def _post_to_local(
     }
     ```
 
-    | Key       | Type              | Description |
-    |-----------|-------------------|-------------|
-    | status    | int               | HTTP-like status code |
-    | message   | string            | Message describing the outcome |
-    | debug     | dictionary        | Debug information |
+    | Key       | Type      | Description |
+    |---|---|---|
+    | status    | int       | HTTP-like status code |
+    | message   | string    | Message describing the outcome |
+    | debug     | dictionary | Debug information |
     
     """
+
     debug_info = {}
 
-    # Post to the local file system
-    with open(path, "wb" if isinstance(content, bytes) else "w") as file:
-        debug_info['post_start'] = f"Starting post with content={content}"
-        file.write(content)
+    try:
+        # Post to the local file system
+        with open(path, "wb" if isinstance(content, bytes) else "w") as file:
+            debug_info['post_start'] = f"Starting post with content={content}"
+            result = file.write(content)
 
-    return {
-        "status": 200,
-        "message": "File written successfully.",
-        "debug": debug_info if debug else {},
-    }
+            # If result is greater than or equal to 0, the write is considered successful
+            if result >= 0:
+                return {
+                    "status": 200,
+                    "message": "File written successfully.",
+                    "debug": debug_info if debug else {},
+                }
+            else:
+                return {
+                    "status": 500,
+                    "message": "Failed to post file.",
+                    "debug": debug_info if debug else {},
+                }
+    except OSError as e:
+        return {
+            "status": 500,
+            "message": f"Failed to post file: {e}",
+            "debug": debug_info if debug else {},
+        }
+
