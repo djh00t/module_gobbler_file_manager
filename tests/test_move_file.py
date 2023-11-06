@@ -42,3 +42,23 @@ def test_move_file(mock_delete_file, mock_post_file, mock_get_file):
     mock_get_file.assert_has_calls(calls)
     mock_post_file.assert_called_once_with(dest_path, file_content, file_md5, False, False)
     mock_delete_file.assert_called_once_with(source_path, False, False)
+
+@patch('klingon_file_manager.manage.get_file')
+@patch('klingon_file_manager.manage.post_file')
+@patch('klingon_file_manager.manage.delete_file')
+def test_move_file_get_file_fails(mock_delete_file, mock_post_file, mock_get_file):
+    # Define the source and destination paths
+    source_path = '/path/to/source/file'
+    dest_path = '/path/to/destination/file'
+
+    # Set up the mock get_file function to return a failure status
+    mock_get_file.return_value = {'status': 500}
+
+    # Call the move_file function
+    result = move_file(source_path, dest_path)
+
+    # Assert that the move_file function returned a failure status
+    assert result['status'] == 500
+
+    # Assert that the get_file function was called with the correct arguments
+    mock_get_file.assert_called_once_with(source_path, False)
