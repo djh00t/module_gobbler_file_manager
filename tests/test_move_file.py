@@ -1,3 +1,10 @@
+"""
+# Move File Tests
+
+This module contains pytest unit tests for the move_file function from the
+`klingon_file_manager.manage` module. It tests the file moving process under various conditions.
+
+"""
 import pytest
 from unittest.mock import patch, MagicMock, call
 from klingon_file_manager.manage import move_file
@@ -7,6 +14,11 @@ from klingon_file_manager.manage import move_file
 @patch('klingon_file_manager.manage.post_file')
 @patch('klingon_file_manager.manage.delete_file')
 def test_move_file(mock_delete_file, mock_post_file, mock_get_file):
+    """
+    # Move File Test
+    Tests the move_file function by mocking the get_file, post_file, and delete_file functions.
+    Verifies that the move_file function returns a successful status and the correct source and destination paths.
+    """
     # Define the source and destination paths
     source_path = '/path/to/source/file'
     dest_path = '/path/to/destination/file'
@@ -47,6 +59,11 @@ def test_move_file(mock_delete_file, mock_post_file, mock_get_file):
 @patch('klingon_file_manager.manage.post_file')
 @patch('klingon_file_manager.manage.delete_file')
 def test_move_file_get_file_fails(mock_delete_file, mock_post_file, mock_get_file):
+    """
+    # Move File Get File Fails Test
+    Tests the move_file function when the get_file function fails.
+    Verifies that the move_file function returns a failure status.
+    """
     # Define the source and destination paths
     source_path = '/path/to/source/file'
     dest_path = '/path/to/destination/file'
@@ -67,6 +84,11 @@ def test_move_file_get_file_fails(mock_delete_file, mock_post_file, mock_get_fil
 @patch('klingon_file_manager.manage.post_file')
 @patch('klingon_file_manager.manage.delete_file')
 def test_move_file_post_file_fails(mock_delete_file, mock_post_file, mock_get_file):
+    """
+    # Move File Post File Fails Test
+    Tests the move_file function when the post_file function fails.
+    Verifies that the move_file function returns a failure status.
+    """
     # Define the source and destination paths
     source_path = '/path/to/source/file'
     dest_path = '/path/to/destination/file'
@@ -95,6 +117,11 @@ def test_move_file_post_file_fails(mock_delete_file, mock_post_file, mock_get_fi
 @patch('klingon_file_manager.manage.post_file')
 @patch('klingon_file_manager.manage.delete_file')
 def test_move_file_delete_file_fails(mock_delete_file, mock_post_file, mock_get_file):
+    """
+    # Move File Delete File Fails Test
+    Tests the move_file function when the delete_file function fails.
+    Verifies that the move_file function returns a failure status.
+    """
     # Define the source and destination paths
     source_path = '/path/to/source/file'
     dest_path = '/path/to/destination/file'
@@ -127,6 +154,11 @@ def test_move_file_delete_file_fails(mock_delete_file, mock_post_file, mock_get_
 @patch('klingon_file_manager.manage.post_file')
 @patch('klingon_file_manager.manage.delete_file')
 def test_move_file_md5_mismatch(mock_delete_file, mock_post_file, mock_get_file):
+    """
+    # Move File MD5 Mismatch Test
+    Tests the move_file function when the MD5 hashes of the source and destination files do not match.
+    Verifies that the move_file function returns a failure status due to MD5 mismatch.
+    """
     # Define the source and destination paths
     source_path = '/path/to/source/file'
     dest_path = '/path/to/destination/file'
@@ -161,6 +193,11 @@ def test_move_file_md5_mismatch(mock_delete_file, mock_post_file, mock_get_file)
 @patch('klingon_file_manager.manage.post_file')
 @patch('klingon_file_manager.manage.delete_file')
 def test_move_file_exception_raised(mock_delete_file, mock_post_file, mock_get_file):
+    """
+    # Move File Exception Raised Test
+    Tests the move_file function when an exception is raised.
+    Verifies that the move_file function returns a failure status and the correct error message.
+    """
     # Define the source and destination paths
     source_path = '/path/to/source/file'
     dest_path = '/path/to/destination/file'
