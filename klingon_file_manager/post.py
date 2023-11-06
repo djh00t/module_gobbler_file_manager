@@ -158,7 +158,8 @@ def post_file(
                     debug=debug,
                 )
             )
-            
+        
+        debug_info["md5"] = get_md5_hash(content)
         return debug_info
 
     except Exception as exception:
@@ -167,6 +168,7 @@ def post_file(
         return {
             "status": 500,
             "message": f"Failed to post file: {str(exception)}" if debug else "Failed to post file.",
+            "md5": get_md5_hash(content),
             "debug": debug_info if debug else {},
         }
 
