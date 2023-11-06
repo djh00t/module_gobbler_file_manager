@@ -634,6 +634,14 @@ def get_md5_hash_filename(filename: str) -> str:
     if not filename:
         return None
 
+    # Check if the filename is an S3 URL
+    if filename.startswith('s3://'):
+        # Fetch the metadata of the S3 object
+        metadata = get_s3_metadata(filename)
+        # Extract the MD5 hash from the metadata
+        md5_hash = metadata.get('Metadata', {}).get('md5')
+        return md5_hash
+
     # Check if the file exists
     if not os.path.exists(filename):
         return None
