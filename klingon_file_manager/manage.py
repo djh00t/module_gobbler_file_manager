@@ -254,7 +254,7 @@ def move_file(source_path, dest_path, debug=False):
 def move_file(source_path, dest_path, debug=False):
     try:
         # Check if the file is binary
-        binary = is_binary_file(source_path, debug)
+        binary = is_binary_file(source_path)
 
         # Retrieve the file using get.py functionality
         get_result = get_file(source_path, binary, debug)
