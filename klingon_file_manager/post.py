@@ -94,11 +94,11 @@ def post_file(
     """
     debug_info = {}
 
-    print(f"Path: {path}")
-    print(f"Content: {content}")
-    print(f"MD5: {md5}")
-    print(f"Metadata: {metadata}")
-    print(f"Debug: {debug}")
+    #print(f"Path: {path}")
+    #print(f"Content: {content}")
+    #print(f"MD5: {md5}")
+    #print(f"Metadata: {metadata}")
+    #print(f"Debug: {debug}")
 
     # Default metadata
     # Set md5 if md5 is None
