@@ -75,19 +75,23 @@ To fetch AWS credentials:
 }
 ```
 """
-
+import re
 from boto3 import Session
 from dotenv import load_dotenv
 from typing import List, Dict, Union, Any, Callable
 import hashlib
 import boto3
-import botocore.exceptions
+from botocore.exceptions import NoCredentialsError, ClientError
 import magic
 import os
 from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 import time
+import logging
 from urllib.parse import urlparse
+
+# Logging configuration
+logging.basicConfig(level=logging.INFO)
 
 # Load environment variables from .env file
 load_dotenv()
@@ -113,7 +117,7 @@ def timing_decorator(func: Callable) -> Callable:
 
     ## Example
     ```python
-    >>> @timing_decorator
+    >>> #@timing_decorator
     ... def example_function():
     ...     print("Executing function...")
     ...
@@ -130,22 +134,31 @@ def timing_decorator(func: Callable) -> Callable:
         return result
     return wrapper
 
-@timing_decorator
+#@timing_decorator
 def get_mime_type(file_path: str) -> dict:
     """
-    # Get the MIME type of a file
+    Get the MIME type of a file
 
-    ## Args
-    | Name      | Type              | Description | Default |
-    |-----------|-------------------|-------------|---------|
-    | file_path | string            | Path to the file |   |
+    Args:
+    | Name      | Type     | Description           | Default |
+    |-----------|----------|-----------------------|---------|
+    | file_path | string   | Path to the file       |         |
 
-    ## Returns
+    Returns:
     A dictionary containing the status code, message, MIME type, and any debug information.
     
     """
-    try:
-        if file_path.startswith('s3://'):
+    # Check if the file_path is empty
+    if not file_path:
+        return {
+            'status': 500,
+            'message': 'Internal Server Error',
+            'mime_type': None,
+            'debug': {'error': 'Empty file_path', 'file_path': file_path}
+        }
+    # Check if it's an S3 URL
+    if file_path.startswith('s3://'):
+        try:
             bucket_name, key = file_path[5:].split('/', 1)
             obj = s3_client.get_object(Bucket=bucket_name, Key=key)
             return {
@@ -154,35 +167,44 @@ def get_mime_type(file_path: str) -> dict:
                 'mime_type': obj['ContentType'],
                 'debug': None
             }
-        else:
+        except:  # Catch the specific exceptions related to S3 here.
+            return {
+                'status': 404,
+                'message': 'Not Found - The S3 file you have requested does not exist',
+                'mime_type': None,
+                'debug': {'file_path': file_path, 'bucket_name': bucket_name, 'key': key}
+            }
+    
+    # Check if it's a local file
+    if os.path.exists(file_path):
+        try:
             with open(file_path, 'rb') as file:
                 content = file.read(1024)
+            mime_type = magic.from_buffer(content, mime=True)
             return {
                 'status': 200,
                 'message': 'Success',
-                'mime_type': magic.from_buffer(content, mime=True),
+                'mime_type': mime_type,
                 'debug': None
             }
-
-    except s3_client.exceptions.NoSuchKey:
+        except Exception as e:
+            return {
+                'status': 500,
+                'message': 'Internal Server Error',
+                'mime_type': None,
+                'debug': {'error': str(e), 'file_path': file_path}
+            }
+    else:
         return {
             'status': 404,
             'message': 'Not Found - The file you have requested does not exist',
             'mime_type': None,
-            'debug': {'file_path': file_path, 'bucket_name': bucket_name, 'key': key}
+            'debug': {'file_path': file_path}
         }
 
-    except Exception as e:
-        return {
-            'status': 500,
-            'message': 'Internal Server Error',
-            'mime_type': None,
-            'debug': {'error': str(e), 'file_path': file_path}
-        }
-
-@timing_decorator
-@lru_cache(maxsize=128)
-def parallel_check_bucket_permissions(bucket_names: List[str], s3: Any) -> Dict[str, Any]:
+#@timing_decorator
+#@lru_cache(maxsize=128)
+def parallel_check_bucket_permissions(bucket_names: List[str], s3_client: Any) -> Dict[str, Any]:
     """
     # Check permissions of multiple S3 buckets in parallel
 
@@ -209,13 +231,15 @@ def parallel_check_bucket_permissions(bucket_names: List[str], s3: Any) -> Dict[
     and an S3 client object, and return the permissions for the bucket.
     """
     with ThreadPoolExecutor() as executor:
-        results = list(executor.map(lambda bucket_name: (bucket_name, check_bucket_permissions(bucket_name, s3)), bucket_names))
+        results = list(executor.map(lambda bucket_name: (bucket_name, check_bucket_permissions(bucket_name, s3_client)), bucket_names))
     
     return {bucket_name: permissions for bucket_name, permissions in results}
 
-@timing_decorator
-@lru_cache(maxsize=128)
-def check_bucket_permissions(bucket_name, s3):
+#@timing_decorator
+#@lru_cache(maxsize=128)
+def check_bucket_permissions(bucket_name, s3_client):
+    print(f"Checking permissions for bucket: {bucket_name}")
+    print(f"Checking permissions for s3_client: {s3_client}")
     """
     # Check permissions of an S3 bucket
 
@@ -247,39 +271,86 @@ def check_bucket_permissions(bucket_name, s3):
     | DeleteObject | boolean        | True if the user has DeleteObject permission, False otherwise |
         
     """
+    
+    # Set the default permissions to False
     permissions = {
         'ListBucket': False,
         'GetBucketAcl': False,
         'PutObject': False,
-        'DeleteObject': False,
+        'DeleteObject': False
     }
 
-    try:
-        s3_client.list_objects_v2(Bucket=bucket_name, MaxKeys=0)
-        permissions['ListBucket'] = True
-    except s3_client.exceptions.NoSuchBucket:
-        return permissions
+    # Set default bucket_exists to True
+    bucket_exists = True
 
-    try:
-        s3_client.get_bucket_acl(Bucket=bucket_name)
-        permissions['GetBucketAcl'] = True
-    except s3_client.exceptions.NoSuchBucket:
-        return permissions
+    # Copy permissions variable into bucket_not_exists_permissions
+    bucket_not_exists_permissions = permissions.copy()
 
-    try:
-        object_key = 'temp_permission_check_object'
-        s3_client.put_object(Bucket=bucket_name, Key=object_key, Body=b'')
-        permissions['PutObject'] = True
-        s3_client.delete_object(Bucket=bucket_name, Key=object_key)
-        permissions['DeleteObject'] = True
-    except s3_client.exceptions.NoSuchBucket:
-        return permissions
+    # Check ListBucket permission
+    if bucket_exists:
+        try:
+            s3_client.list_objects_v2(Bucket=bucket_name, MaxKeys=1)
+            permissions['ListBucket'] = True
+        except ClientError as e:
+            if e.response['Error']['Code'] == 'NoSuchBucket':
+                permissions = bucket_not_exists_permissions
+                print(f"No such bucket: {bucket_name}")
+                bucket_exists = False
+            else:
+                permissions['ListBucket'] = False
+                print(f"Error checking ListBucket permission: {e}")
+
+    # Check GetBucketAcl permission
+    if bucket_exists:
+        try:
+            s3_client.get_bucket_acl(Bucket=bucket_name)
+            permissions['GetBucketAcl'] = True
+        except ClientError as e:
+            if e.response['Error']['Code'] == 'NoSuchBucket':
+                permissions = bucket_not_exists_permissions
+                print(f"No such bucket: {bucket_name}")
+                bucket_exists = False
+            else:
+                permissions['GetBucketAcl'] = False
+                print(f"Error checking GetBucketAcl permission: {e}")
+
+    # Check PutObject permission
+    if bucket_exists:
+        try:
+            s3_client.put_object(Bucket=bucket_name, Key='test_permission_object', Body=b'test')
+            permissions['PutObject'] = True
+            # Clean up by deleting the test object
+            s3_client.delete_object(Bucket=bucket_name, Key='test_permission_object')
+        except ClientError as e:
+            if e.response['Error']['Code'] == 'NoSuchBucket':
+                permissions = bucket_not_exists_permissions
+                print(f"No such bucket: {bucket_name}")
+                bucket_exists = False
+            else:
+                permissions['PutObject'] = False
+                print(f"Error checking PutObject permission: {e}")
+
+    # Check DeleteObject permission
+    if bucket_exists:
+        try:
+            s3_client.delete_object(Bucket=bucket_name, Key='non_existent_object_for_permission_check')
+            permissions['DeleteObject'] = True
+        except ClientError as e:
+            if e.response['Error']['Code'] == 'NoSuchBucket':
+                permissions = bucket_not_exists_permissions
+                print(f"No such bucket: {bucket_name}")
+                bucket_exists = False
+            elif e.response['Error']['Code'] != 'NoSuchKey':
+                permissions['DeleteObject'] = False
+                print(f"Error checking DeleteObject permission: {e}")
+            else:
+                permissions['DeleteObject'] = False
+                print(f"Error checking DeleteObject permission: {e}")
 
     return permissions
 
-@timing_decorator
-@lru_cache(maxsize=128)
-def get_aws_credentials(debug: bool = False) -> Dict[str, Union[int, str]]:
+#@timing_decorator
+def get_aws_credentials(debug: bool = False, access_key: str = None, secret_key: str = None) -> Dict[str, Union[int, str]]:
     """
     # Get AWS credentials and check access to S3 buckets
     
@@ -321,18 +392,49 @@ def get_aws_credentials(debug: bool = False) -> Dict[str, Union[int, str]]:
     }
     ```
     """
-    access_key = os.getenv('AWS_ACCESS_KEY_ID')
-    secret_key = os.getenv('AWS_SECRET_ACCESS_KEY')
 
-    # Make sure there are AWS variables in the dotenv or environment
-    if not access_key or not secret_key:
+    # Get AWS credentials from arguments or environment variables
+    print("Access Key from arguments:", access_key)
+    print("Secret Key from arguments:", secret_key)
+    access_key = access_key or os.getenv('AWS_ACCESS_KEY_ID')
+    print("Access Key after fetching from os.getenv:", access_key)
+    secret_key = secret_key or os.getenv('AWS_SECRET_ACCESS_KEY')
+    print("Secret Key after fetching from os.getenv:", secret_key)
+    # Insert the print statement here
+    print(f"Access Key in Function: {access_key}")
+    print(f"Secret Key in function: {secret_key}")
+
+    # If either of the AWS_ACCESS_KEY_ID or AWS_SECRET_ACCESS_KEY credentials
+    # is unset, set to None or spaces/tabs or otherwise unprintable characters,
+    # return a 424 status code with the message 'Failed Dependency - Missing or
+    # Incomplete AWS credentials in .env or environment'
+    if not access_key or not secret_key or not access_key.strip() or not secret_key.strip():
         return {
             'status': 424,
-            'message': 'Failed Dependency - No working AWS credentials in .env or environment',
+            'message': 'Failed Dependency - Missing or Incomplete AWS credentials in .env or environment',
         }
 
-    session = Session(aws_access_key_id=access_key, aws_secret_access_key=secret_key)
-    
+    # Check if the credentials are valid
+    try:
+        session = Session(aws_access_key_id=access_key, aws_secret_access_key=secret_key)
+        print(f"Session Details: {session.__dict__}")
+        user = session.client('iam').get_user()
+        print(f"User Details: {user}")
+    except NoCredentialsError:
+        return {
+            'status': 403,
+            'message': 'Access Denied - AWS credentials are invalid',
+        }
+    except ClientError as e:
+        print(f"Exception details: {e}")
+        if e.response['Error']['Code'] == 'InvalidClientTokenId':
+            return {
+                'status': 403,
+                'message': 'Access Denied - AWS credentials are invalid',
+            }
+        raise e
+
+    # Check if the credentials have access to S3
     try:
         user = session.client('iam').get_user()
     except Exception as e:
@@ -340,14 +442,14 @@ def get_aws_credentials(debug: bool = False) -> Dict[str, Union[int, str]]:
             'status': 403,
             'message': 'Access Denied - AWS credentials are invalid',
         }
-
-    s3 = session.client('s3')
     response = s3_client.list_buckets()
     buckets = response['Buckets']
 
     bucket_names = [bucket['Name'] for bucket in buckets]
-    access = parallel_check_bucket_permissions(tuple(bucket_names), s3)
+    access = parallel_check_bucket_permissions(tuple(bucket_names), s3_client)
 
+    if 'access' in response:
+        print(f"Final buckets in response: {list(response['access'].keys())}")
 
     return {
         'status': 200,
@@ -359,34 +461,64 @@ def get_aws_credentials(debug: bool = False) -> Dict[str, Union[int, str]]:
         'access': access
     }
 
-@timing_decorator
+#@timing_decorator
 def is_binary_file(file_path_or_content: Union[str, bytes]) -> bool:
     """
-    # Check if a file or content is binary
+    Determine if the provided content or file path represents binary or text content.
 
-    ## Args
-    | Name      | Type              | Description |
-    |-----------|-------------------|-------------|
-    | file_path_or_content | string or bytes | The path to the file or the content of the file. |
+    Args:
+    | Name                | Type          | Description                               |
+    |---------------------|---------------|-------------------------------------------|
+    | file_path_or_content| str or bytes  | The path to the file or the content.      |
 
-    ## Returns
-    A boolean value of true if the file or content is binary, False otherwise.
+    Returns:
+    A boolean indicating if the content is binary (True) or text (False).
     """
-    if isinstance(file_path_or_content, str):
-        if file_path_or_content.startswith('s3://'):
-            bucket_name, key = file_path_or_content[5:].split('/', 1)
-            obj = s3_client.get_object(Bucket=bucket_name, Key=key)
-            return obj['ContentType'].startswith('application/')
+    try:
+        # Check if content is bytes
+        if isinstance(file_path_or_content, bytes):
+            try:
+                # Attempt to decode as UTF-8, if it fails, it's likely binary
+                file_path_or_content.decode('utf-8')
+                return False  # Decoding succeeded, likely text
+            except UnicodeDecodeError:
+                return True  # Decoding failed, likely binary
+
+        # If content is string, perform further checks
+        elif isinstance(file_path_or_content, str):
+            # Check for S3 URL
+            if file_path_or_content.startswith('s3://'):
+                # S3 logic here, assuming we can determine if the S3 object is binary or text
+                # Placeholder return, should be replaced with actual S3 object check
+                return True
+
+            # Check if content is a file path using regex
+            elif re.match(r"^(~?/)?(\.?([^/\0\n ]|\\ )+/?)*([^/\0\n ]+|'[^/\0\n']+')$", file_path_or_content):
+                if os.path.isfile(file_path_or_content):
+                    # File-based logic here, assuming we can determine if the local file is binary or text
+                    # Placeholder return, should be replaced with actual file content check
+                    return True
+
+                # String matches file path pattern but is not a file, treat as content
+                else:
+                    # Content-based logic here, assuming we can determine if the string is binary or text
+                    # Placeholder return, should be replaced with actual content analysis
+                    return False
+
+            # If the regex does not match, treat it as text content
+            else:
+                return False
+
+        # If the input is neither str nor bytes, raise a TypeError
         else:
-            with open(file_path_or_content, 'rb') as file:
-                content = file.read(1024)
-            mime_type = magic.from_buffer(content, mime=True)
-            return mime_type.startswith('application/')
-    elif isinstance(file_path_or_content, bytes):
-        mime_type = magic.from_buffer(file_path_or_content, mime=True)
-        return mime_type.startswith('application/')
-    else:
-        raise TypeError("file_path_or_content must be either str or bytes.")
+            raise TypeError("file_path_or_content must be either str or bytes.")
+            
+    except Exception as e:
+        # Log the exception or handle it as needed
+        raise e  # Reraising the exception after handling it
+
+# Note: Actual MIME type checks using 'magic' or S3 object content type checks are not included here.
+# Replace the placeholder returns with proper checks as needed.
 
 def get_s3_metadata(s3_url):
     """

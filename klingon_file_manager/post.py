@@ -32,7 +32,6 @@ from typing import Union, Dict, Optional
 import boto3
 import logging
 import base64
-
 from .utils import get_md5_hash, get_file_size, get_mime_type_content
 
 def post_file(
@@ -94,6 +93,12 @@ def post_file(
     | debug     | dictionary        | Debug information |
     """
     debug_info = {}
+
+    print(f"Path: {path}")
+    print(f"Content: {content}")
+    print(f"MD5: {md5}")
+    print(f"Metadata: {metadata}")
+    print(f"Debug: {debug}")
 
     # Default metadata
     # Set md5 if md5 is None

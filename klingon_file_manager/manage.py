@@ -154,6 +154,8 @@ def manage_file(
         'debug': debug_info if debug else {},  # The debug information
     }
 
+    print(f"DEBUG: result={result}")
+
     try:
         if action == 'get':
             get_result = get_file(path, debug)
@@ -166,7 +168,13 @@ def manage_file(
         elif action == 'post':
             result['binary'] = is_binary_file(content) if content else None
             debug_info['post_file_start'] = f"Starting post_file with path={path}, content={content[:10]}, md5={md5}, metadata={metadata}"
-            post_result = post_file(path, content, md5, metadata, debug)
+            post_result = post_file(
+                path=path, 
+                content=content, 
+                md5=md5,
+                metadata=metadata, 
+                debug=debug
+                )
             result['status'] = post_result['status']
             # Add the debug info for the post_file() function
             if debug or result['status'] == 500:
