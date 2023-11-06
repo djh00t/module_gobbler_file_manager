@@ -171,7 +171,6 @@ def manage_file(
             # Add the debug info for the post_file() function
             if debug or result['status'] == 500:
                 debug_info['post_file'] = post_result['debug']
-            return result
         elif action == 'delete':
             delete_result = delete_file(path, debug)
             result['status'] = delete_result['status']
@@ -187,7 +186,9 @@ def manage_file(
         # Add the debug info for the exception
         debug_info['exception'] = str(exception) if debug else None
         debug_info['error_message'] = str(exception) if debug else None
-    # If the debug flag is not set and there was no failure, remove the debug field
-    # No need to delete the 'debug' key as it will be empty if debug is False
-    if not debug and result['status'] != 500:
-        del result['debug']
+    finally:
+        # If the debug flag is not set and there was no failure, remove the debug field
+        # No need to delete the 'debug' key as it will be empty if debug is False
+        if not debug and result['status'] != 500:
+            del result['debug']
+        return result
