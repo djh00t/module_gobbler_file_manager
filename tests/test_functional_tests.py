@@ -59,8 +59,11 @@ def test_create_test_dirs():
     # Create Test Directories
     This test case is responsible for creating the tests/testfiles directory if it does not exist.
     """
-    print("Creating tests/testfiles directory")
-    os.mkdir("tests/testfiles")
+    if not os.path.exists("tests/testfiles"):
+        print("Creating tests/testfiles directory")
+        os.mkdir("tests/testfiles")
+    else:
+        print("tests/testfiles directory already exists")
 
 
 """
