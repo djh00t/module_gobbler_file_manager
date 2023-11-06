@@ -147,8 +147,8 @@ def manage_file(
         'action': action,  # The action performed
         'path': path,  # The path to the file
         'content': "<binary data>" if isinstance(content, bytes) and action != 'get' else (content[:10] if isinstance(content, str) else content[:10].decode('utf-8')) if content and debug else content,  # The content of the file
-        'content_size': len(content),  # The size of the content
-        'binary': is_binary_file(content),  # Whether the content is binary
+        'content_size': len(content) if content else None,  # The size of the content
+        'binary': is_binary_file(content) if content else None,  # Whether the content is binary
         'md5': md5,  # The MD5 hash of the content
         'metadata': metadata,  # The metadata of the file
         'debug': debug_info if debug else {},  # The debug information
