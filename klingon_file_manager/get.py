@@ -133,7 +133,7 @@ def _get_from_s3(path: str, debug: bool) -> Dict[str, Union[int, str, bytes, boo
     debug_info["bucket_name"] = bucket_name
     debug_info["key"] = key
 
-    s3 = resource('s3')
+    s3 = boto3.resource('s3')
     s3_object = s3.Object(bucket_name, key)
     
     try:
