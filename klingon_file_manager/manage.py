@@ -257,7 +257,7 @@ def move_file(source_path, dest_path, debug=False):
         binary = is_binary_file(source_path)
 
         # Retrieve the file using get.py functionality
-        get_result = get_file(source_path, binary, debug)
+        get_result = get_file(source_path, debug)
         if get_result['status'] != 200:
             return {"status": 500, "message": "Failed to retrieve the file."}
 
