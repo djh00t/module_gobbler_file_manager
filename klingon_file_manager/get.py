@@ -134,9 +134,8 @@ def _get_from_s3(path: str, debug: bool) -> Dict[str, Union[int, str, bytes, boo
     debug_info["key"] = key
 
     s3 = boto3.resource('s3')
-    s3_object = s3.Object(bucket_name, key)
-    
     try:
+        s3_object = s3.Object(bucket_name, key)
         content = s3_object.get()['Body'].read()
     except Exception as exception:
         debug_info["exception"] = str(exception)
