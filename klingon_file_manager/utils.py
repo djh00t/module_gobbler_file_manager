@@ -596,7 +596,7 @@ def get_file_size(content: Union[str, bytes]) -> int:
 
 def get_mime_type_content(content: Union[str, bytes]) -> str:
     """
-    Determines the MIME type of the given content using the magic library.
+    Determines the MIME type of the given content.
 
     Args:
         content (Union[str, bytes]): The content for which to determine the MIME type.
@@ -615,3 +615,32 @@ def get_mime_type_content(content: Union[str, bytes]) -> str:
     mime_type = magic_mime.from_buffer(content)
 
     return mime_type
+
+def get_md5_hash_filename(filename: str) -> str:
+    """
+    # Get the MD5 hash of a file using filename and path.
+
+    ## Arguments
+    
+    | Name      | Type              | Description | Default |
+    |-----------|-------------------|-------------|---------|
+    | filename  | string            | The name of the file | None |
+
+    Returns:
+    The MD5 hash of the file.
+    """
+
+    # Check if the filename is empty
+    if not filename:
+        return None
+
+    # Check if the file exists
+    if not os.path.exists(filename):
+        return None
+
+    # Open the file and read the contents
+    with open(filename, 'rb') as file:
+        content = file.read()
+
+    # Return the MD5 hash of the file contents
+    return get_md5_hash(content)
