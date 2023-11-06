@@ -38,32 +38,17 @@ AWS_S3_BUCKET_NAME = os.environ.get("AWS_S3_BUCKET_NAME")
 s3_bucket_name = AWS_S3_BUCKET_NAME
 """ s3_bucket_name - required for S3 access @private """
 
-def test_cleanup_test_files():
-    """
-    # Teardown Test Files
-    This test case is responsible for cleaning up and removing all test files created during the testing process, both locally and in the test files directory.
-    """
-    # Remove tests/testfiles directory if it exists
-    if os.path.exists('tests/testfiles'):
-        print("tests/testfiles directory exists, emptying it..")
-        # Remove all files in tests/testfiles directory
-        for file in os.listdir('tests/testfiles'):
-            print(f"Removing tests/testfiles/{file}")
-            os.remove(f"tests/testfiles/{file}")
-        # Remove tests/testfiles directory
-        print("Removing tests/testfiles directory")
-        os.rmdir('tests/testfiles')
 
 def test_create_test_dirs():
     """
     # Create Test Directories
-    This test case is responsible for creating the tests/testfiles directory if it does not exist.
+    This test case is responsible for creating the ./tests/testfiles directory if it does not exist.
     """
-    if not os.path.exists("tests/testfiles"):
+    if not os.path.exists("./tests/testfiles"):
         print("Creating tests/testfiles directory")
-        os.mkdir("tests/testfiles")
+        os.mkdir("./tests/testfiles")
     else:
-        print("tests/testfiles directory already exists")
+        print("./tests/testfiles directory already exists")
 
 
 """
@@ -95,25 +80,25 @@ test_txt_content = lorem.text()
 
 
 # Create a 1KB test binary file
-""" tests/testfiles/1kb.bin - 1KB binary file to be used in binary file tests """
-with open("tests/testfiles/1kb.bin", "wb") as f:
+""" ./tests/testfiles/1kb.bin - 1KB binary file to be used in binary file tests """
+with open("./tests/testfiles/1kb.bin", "wb") as f:
     f.write(os.urandom(1024))
     
 # Read the 1KB test binary file into test_bin_content
 """ test_bin_content - 1KB binary file content to be used in binary file tests """
-test_bin_content = open("tests/testfiles/1kb.bin", "rb").read()
+test_bin_content = open("./tests/testfiles/1kb.bin", "rb").read()
 
 # Hard link the 1KB test binary file to the test_bin_get file
 """ test_bin_get - name of the test binary file to be used in GET tests """
-os.link("tests/testfiles/1kb.bin", test_bin_get)
+os.link("./tests/testfiles/1kb.bin", test_bin_get)
 
 # Hard link the 1KB test binary file to the test_bin_post file
 """ test_bin_post - name of the test binary file to be used in POST tests """
-os.link("tests/testfiles/1kb.bin", test_bin_post)
+os.link("./tests/testfiles/1kb.bin", test_bin_post)
 
 # Hard link the 1KB test binary file to the test_bin_move file
 """ test_bin_move - name of the test binary file to be used in MOVE tests """
-os.link("tests/testfiles/1kb.bin", test_bin_move)
+os.link("./tests/testfiles/1kb.bin", test_bin_move)
 
 
 def compare_s3_local_file(local_file, s3_file):
@@ -452,5 +437,18 @@ def test_delete_s3_test_bin_get_file():
     assert result['path'] == f"s3://{s3_bucket_name}/{test_bin_get}"
 
 
-# Cleanup test files
-test_cleanup_test_files()
+### def test_cleanup_test_files():
+###     """
+###     # Teardown Test Files
+###     This test case is responsible for cleaning up and removing all test files created during the testing process, both locally and in the test files directory.
+###     """
+###     # Remove tests/testfiles directory if it exists
+###     if os.path.exists('tests/testfiles'):
+###         print("tests/testfiles directory exists, emptying it..")
+###         # Remove all files in tests/testfiles directory
+###         for file in os.listdir('tests/testfiles'):
+###             print(f"Removing tests/testfiles/{file}")
+###             os.remove(f"tests/testfiles/{file}")
+###         # Remove tests/testfiles directory
+###         print("Removing tests/testfiles directory")
+###         os.rmdir('tests/testfiles')
