@@ -269,8 +269,14 @@ def move_file(source_path, dest_path, debug=False):
         if post_result['status'] != 200:
             return {"status": 500, "message": "Failed to save the file to the destination."}
 
+        # Retrieve the file from the destination to get its MD5 hash
+        dest_get_result = get_file(dest_path, debug)
+        if dest_get_result['status'] != 200:
+            return {"status": 500, "message": "Failed to retrieve the file from the destination."}
+
+        dest_md5 = dest_get_result['md5']
+
         # Confirm the file is saved correctly by comparing MD5 checksums
-        dest_md5 = get_md5(dest_path, binary, debug)
         if file_md5 != dest_md5:
             return {"status": 500, "message": "MD5 checksum mismatch after moving the file."}
 
