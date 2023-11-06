@@ -90,3 +90,35 @@ def test_move_file_post_file_fails(mock_delete_file, mock_post_file, mock_get_fi
     # Assert that the get_file and post_file functions were called with the correct arguments
     mock_get_file.assert_called_once_with(source_path, False)
     mock_post_file.assert_called_once_with(dest_path, file_content, file_md5, False, False)
+
+@patch('klingon_file_manager.manage.get_file')
+@patch('klingon_file_manager.manage.post_file')
+@patch('klingon_file_manager.manage.delete_file')
+def test_move_file_delete_file_fails(mock_delete_file, mock_post_file, mock_get_file):
+    # Define the source and destination paths
+    source_path = '/path/to/source/file'
+    dest_path = '/path/to/destination/file'
+
+    # Define the file content and MD5 hash
+    file_content = b'Hello, world!'
+    file_md5 = 'fc3ff98e8c6a0d3087d515c0473f8677'
+
+    # Set up the mock get_file function to return the file content and MD5 hash
+    mock_get_file.return_value = {'status': 200, 'content': file_content, 'md5': file_md5}
+
+    # Set up the mock post_file function to return a successful status
+    mock_post_file.return_value = {'status': 200}
+
+    # Set up the mock delete_file function to return a failure status
+    mock_delete_file.return_value = {'status': 500}
+
+    # Call the move_file function
+    result = move_file(source_path, dest_path)
+
+    # Assert that the move_file function returned a failure status
+    assert result['status'] == 500
+
+    # Assert that the get_file, post_file, and delete_file functions were called with the correct arguments
+    mock_get_file.assert_called_once_with(source_path, False)
+    mock_post_file.assert_called_once_with(dest_path, file_content, file_md5, False, False)
+    mock_delete_file.assert_called_once_with(source_path, False, False)
