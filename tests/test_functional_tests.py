@@ -79,6 +79,9 @@ test_txt_content = lorem.text()
 
 
 
+# Ensure test directories are created
+test_create_test_dirs()
+
 # Create a 1KB test binary file
 """ ./tests/testfiles/1kb.bin - 1KB binary file to be used in binary file tests """
 with open("./tests/testfiles/1kb.bin", "wb") as f:
