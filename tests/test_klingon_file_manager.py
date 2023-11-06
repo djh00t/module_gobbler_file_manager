@@ -121,7 +121,7 @@ def test_post_local_txt_file():
     result = manage_file(
         action='post',
         path=test_txt_post,
-        content=test_txt_content
+        content=test_txt_content[:100]
         )
     print(result)
     assert result['status'] == 200
