@@ -7,13 +7,6 @@ file systems and AWS S3 storage. It provides an interface for reading, writing,
 and deleting files, with additional support for debugging and AWS
 authentication.
 
-# Functions
-
-## manage_file
-Main wrapper function that routes request to the appropriate submodules,
-returning standardized responses and performing specific actions based on user
-input.
-
 # Usage Examples
 
 To get a file from a local directory:
@@ -40,6 +33,14 @@ To delete a file from an S3 bucket:
 ```python
 >>> manage_file('delete', 's3://bucket/file')
 ```
+To move a file from a local directory to another local directory:
+```python
+>>> move_file('/path/to/local/file', '/path/to/local/destination')
+```
+To move a file from a local directory to an S3 bucket:
+```python
+>>> move_file('/path/to/local/file', 's3://bucket/file')
+```
 """
 
 from typing import Union, Dict, Optional, Callable
@@ -64,9 +65,10 @@ def manage_file(
     debug: bool = False,
 ) -> dict:
     """
-    # Main function to manage file operations.
+    # Manage File
+    Main function to manage file operations.
 
-    ## Parameters
+    ## Arguments
     | Name      | Type              | Description | Default |
     |-----------|-------------------|-------------|---------|
     | action    | string            | The action to perform. Can be 'get', 'post', or 'delete'. |   |
@@ -200,3 +202,101 @@ def manage_file(
         if not debug and result['status'] != 500:
             del result['debug']
         return result
+
+def move_file(source_path, dest_path, debug=False):
+    """
+    # Move File
+    Moves a file from a source path to a destination path.
+
+    This function uses auxiliary functions from `get.py`, `post.py`, and `delete.py` to first retrieve
+    the file from the source path, then save it to the destination path, and finally delete the original file.
+    It also checks if the file is binary and handles it accordingly during the operations. MD5 checksums are used
+    to verify the integrity of the file after moving.
+
+    ## Arguments
+
+    | Name         | Type    | Description                                                  | Default |
+    |--------------|---------|--------------------------------------------------------------|---------|
+    | source_path  | str     | The path (local or S3 URL) of the file to move.              | None    |
+    | dest_path    | str     | The destination path (local or S3 URL) to move the file to.  | None    |
+    | debug        | bool    | Flag to enable detailed error messages and logging.          | False   |
+
+    ## Returns
+    A dictionary with the following keys:
+    
+    | Key          | Type    | Description                                                  |
+    |--------------|---------|--------------------------------------------------------------|
+    | status       | int     | The HTTP status code indicating the outcome of the operation. |
+    | message      | str     | A message describing the outcome of the operation.            |
+    | source       | str     | The source path provided as input.                            |
+    | destination  | str     | The destination path provided as input.                       |
+    | md5          | str     | The MD5 checksum of the moved file.                           |
+
+    If the operation is successful, the status will be 200, and the message will indicate success.
+    If the operation fails, the status will be 500, and the message will provide an error explanation.
+
+    Example of a successful return:
+    {
+        "status": 200,
+        "message": "File moved successfully.",
+        "source": "path/to/source/file.txt",
+        "destination": "path/to/destination/file.txt",
+        "md5": "1B2M2Y8AsgTpgAmY7PhCfg=="
+    }
+
+    Example of a failed return:
+    {
+        "status": 500,
+        "message": "An error occurred while moving the file: [error description]"
+    }
+    """
+
+def move_file(source_path, dest_path, debug=False):
+    try:
+        # Check if the file is binary
+        binary = is_binary_file(source_path, debug)
+
+        # Retrieve the file using get.py functionality
+        get_result = get_file(source_path, binary, debug)
+        if get_result['status'] != 200:
+            return {"status": 500, "message": "Failed to retrieve the file."}
+
+        file_content = get_result['content']
+        file_md5 = get_result['md5']
+
+        # Save the file to the destination using post.py functionality
+        post_result = post_file(dest_path, file_content, file_md5, binary, debug)
+        if post_result['status'] != 200:
+            return {"status": 500, "message": "Failed to save the file to the destination."}
+
+        # Confirm the file is saved correctly by comparing MD5 checksums
+        dest_md5 = get_md5(dest_path, binary, debug)
+        if file_md5 != dest_md5:
+            return {"status": 500, "message": "MD5 checksum mismatch after moving the file."}
+
+        # Delete the file from the source path using delete.py functionality
+        delete_result = delete_file(source_path, binary, debug)
+        if delete_result['status'] != 200:
+            return {"status": 500, "message": "Failed to delete the file from the source."}
+
+        # Return the success result
+        return {
+            "status": 200,
+            "message": "File moved successfully.",
+            "source": source_path,
+            "destination": dest_path,
+            "md5": file_md5
+        }
+
+    except Exception as e:
+        # If there's any exception, return an error message
+        return {
+            "status": 500,
+            "message": "An error occurred while moving the file: " + str(e)
+        }
+
+    except Exception as e:
+        return {
+            "status": 500,
+            "message": "An error occurred while moving the file: " + str(e)
+        }
