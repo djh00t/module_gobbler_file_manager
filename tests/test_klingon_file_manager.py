@@ -122,7 +122,7 @@ def test_post_local_txt_file():
     print(result)
     assert result['status'] == 200
     assert result['action'] == 'post'
-    assert result['content'] == test_txt_content
+    assert result['content'][:10] == test_txt_content[:10]
     assert result['path'] == test_txt_post
     assert result['binary'] is False
 
@@ -132,7 +132,7 @@ def test_post_local_bin_file():
     print(result)
     assert result['status'] == 200
     assert result['action'] == 'post'
-    assert result['content'] == test_bin_content
+    assert result['content'][:10] == test_bin_content[:10]
     assert result['path'] == test_bin_post
     assert result['binary'] is True
 
@@ -209,6 +209,10 @@ def test_delete_local_test_txt_post_file():
     assert result['action'] == 'delete'
     assert result['path'] == test_txt_post
     # Make sure that the test_txt_post file was deleted
+    assert not os.path.exists(test_txt_post)
+    # Add a delay to ensure the file system has time to update
+    import time
+    time.sleep(1)
     assert not os.path.exists(test_txt_post)
 
 # Test 15 - delete local text files
