@@ -119,7 +119,7 @@ def test_move_file_delete_file_fails(mock_delete_file, mock_post_file, mock_get_
     assert result['status'] == 500
 
     # Assert that the get_file, post_file, and delete_file functions were called with the correct arguments
-    mock_get_file.assert_called_once_with(source_path, False)
+    mock_get_file.assert_has_calls([call(source_path, False), call(dest_path, False)])
     mock_post_file.assert_called_once_with(dest_path, file_content, file_md5, False, False)
     mock_delete_file.assert_called_once_with(source_path, False, False)
 
