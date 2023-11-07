@@ -367,12 +367,15 @@ def move_file(source_path, dest_path, debug=False):
                 }
             }
 
+        # Debugging: Ensure post_file is called with correct parameters
+        if debug:
+            print(f"DEBUG: Calling post_file with dest_path={dest_path}, content={get_content[:100]}, md5={get_md5}")
         # Save the file to the destination using post.py functionality
         post_result = post_file(
             path=dest_path, 
             content=get_content,
             md5=get_md5,
-            debug=get_debug
+            debug=debug  # Ensure debug flag is passed correctly
             )
 
         # Collect POST return vars
@@ -404,8 +407,9 @@ def move_file(source_path, dest_path, debug=False):
                 }
             }
 
-        # Use get_md5_hash() to get the MD5 checksum of the dest_path
-        dest_md5 = get_md5_hash_filename(dest_path)
+        # Retrieve the file from the destination path to verify MD5 checksum
+        dest_get_result = get_file(dest_path, debug)
+        dest_md5 = dest_get_result.get('md5', '')
 
         # Collect destination MD5 checksum success
         if dest_md5:
@@ -434,7 +438,7 @@ def move_file(source_path, dest_path, debug=False):
         else:
             return {
                 "status": 500,
-                "message": "An error occurred while moving the file: MD5 checksum mismatch after moving the file.", 
+                "message": "MD5 checksum mismatch after moving the file.", 
                 "debug": {
                     "get_md5": get_md5, 
                     "post_md5": post_md5, 
