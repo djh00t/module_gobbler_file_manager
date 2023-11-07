@@ -652,3 +652,31 @@ def get_md5_hash_filename(filename: str) -> str:
 
     # Return the MD5 hash of the file contents
     return get_md5_hash(content)
+# Function to check if a file exists
+def check_file_exists(file_path: str) -> bool:
+    """
+    Check if a file exists.
+
+    Args:
+    | Name      | Type     | Description           | Default |
+    |-----------|----------|-----------------------|---------|
+    | file_path | string   | Path to the file      |         |
+
+    Returns:
+    A boolean indicating if the file exists (True) or not (False).
+    """
+    # Check if the file_path is an S3 URL
+    if file_path.startswith('s3://'):
+        # Fetch the metadata of the S3 object
+        metadata = get_s3_metadata(file_path)
+        # If metadata is returned, the file exists
+        if metadata:
+            return True
+        # If no metadata is returned, the file does not exist
+        else:
+            return False
+
+    # If the file_path is not an S3 URL, assume it's a local file path
+    else:
+        # Check if the file exists
+        return os.path.exists(file_path)
