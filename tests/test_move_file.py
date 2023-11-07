@@ -41,7 +41,7 @@ def test_move_file(mock_get_file, mock_post_file, mock_delete_file, mock_get_md5
     mock_delete_file.return_value = {'status': 200, 'message': 'File deleted successfully from S3.', 'md5': dest_md5, 'debug': {}}
 
     # Setup the mock get_md5_hash_filename function to return the MD5 hash as a string
-    get_md5_hash_filename.return_value = file_md5
+    mock_get_md5_hash_filename.return_value = file_md5
 
     print(f"source_path: {source_path}")
     print(f"dest_path: {dest_path}")
