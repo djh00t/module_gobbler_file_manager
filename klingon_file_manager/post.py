@@ -34,12 +34,26 @@ import logging
 import base64
 from .utils import get_md5_hash, get_file_size, get_mime_type_content
 
+import os
+
 def post_file(
     path: str,
     content: Union[str, bytes],
     md5=None,
     metadata=None,
     debug=False) -> Dict[str, Union[int, str, Dict[str, str]]]:
+
+    # Check if content is a file path
+    if isinstance(content, str) and os.path.isfile(content):
+        try:
+            with open(content, 'rb') as file:
+                content = file.read()
+        except Exception as e:
+            return {
+                "status": 400,
+                "message": f"Failed to read file at path provided in content: {str(e)}",
+                "debug": {} if not debug else {"exception": str(e)}
+            }
 
     """
     # Post content to a file at a given path.
