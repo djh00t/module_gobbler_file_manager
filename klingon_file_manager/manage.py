@@ -411,7 +411,7 @@ def move_file(source_path, dest_path, debug=False):
             if get_md5 == post_md5 == dest_md5:
                 print(f"DEBUG:                   ALL MD5 CHECKSUMS MATCH!!!")
             else:
-                Exception("MD5 checksums do not match.")
+                raise Exception("MD5 checksums do not match.")
             print("===========================================================================")
 
             
