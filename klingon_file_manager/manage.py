@@ -345,18 +345,12 @@ def move_file(source_path, dest_path, debug=False):
         # Debugging
         # If debug is True print debug info
         if debug:
-            print("=============================================================")
-            print(f" DEBUG: GET result               STATUS: {get_status}")
-            print("=============================================================")
-            print(f"DEBUG:                          MESSAGE: {get_message}")
-            print(f"DEBUG:                           BINARY: {get_binary}")
-            print(f"DEBUG:                            DEBUG: {get_debug}")
+            print("===========================================================================")
+            print(f"DEBUG:                       GET STATUS: {get_status}")
+            print(f"DEBUG:                      GET MESSAGE: {get_message}")
             print(f"DEBUG:                          GET MD5: {get_md5}")
-            print(f"DEBUG:                           SOURCE: {source_path}")
-            print(f"DEBUG:                             DEST: {dest_path}")
-            # Print the first 100 characters of the content
-            print(f"DEBUG: get_content={get_content[:100]}")
-
+            print()
+            
         # If get_status isn't 200, return a 500 error
         if get_result['status'] != 200:
             return {
@@ -367,14 +361,10 @@ def move_file(source_path, dest_path, debug=False):
                 }
             }
 
-        # Debugging: Ensure post_file is called with correct parameters
-        if debug:
-            print(f"DEBUG: Calling post_file with dest_path={dest_path}, content={get_content[:100]}, md5={get_md5}")
         # Save the file to the destination using post.py functionality
         post_result = post_file(
             path=dest_path, 
             content=get_content,
-            md5=get_md5,
             debug=debug  # Ensure debug flag is passed correctly
             )
 
@@ -384,18 +374,12 @@ def move_file(source_path, dest_path, debug=False):
         post_md5 = post_result['md5']
         post_debug = post_result['debug']
 
-        # Debugging
         # If debug is True print debug info
         if debug:
-            print("=============================================================")
-            print(f" DEBUG: GET result               {get_status}")
-            print(f" DEBUG: POST result              {post_status}")
-            print("=============================================================")
-            print(f"DEBUG: post_result={post_result}")
-            print(f"DEBUG: post_status={post_status}")
-            print(f"DEBUG: post_message={post_message}")
-            print(f"DEBUG: post_md5={post_md5}")
-            print(f"DEBUG: post_debug={post_debug}")
+            print(f"DEBUG:                      POST STATUS: {post_status}")
+            print(f"DEBUG:                     POST MESSAGE: {post_message}")
+            print(f"DEBUG:                         POST MD5: {post_md5}")
+            print()
         
         if post_result['status'] != 200:
             return {
@@ -407,51 +391,6 @@ def move_file(source_path, dest_path, debug=False):
                 }
             }
 
-        # Retrieve the file from the destination path to verify MD5 checksum
-        dest_get_result = get_file(dest_path, debug)
-        dest_md5 = dest_get_result.get('md5', '')
-
-        # Collect destination MD5 checksum success
-        if dest_md5:
-            dest_md5_status = 200
-            dest_md5_message = "MD5 checksum calculated successfully."
-            
-        # If debug is True print debug info
-        if debug:
-            print("=============================================================")
-            print(f" DEBUG: GET result               {get_status}")
-            print(f" DEBUG: POST result              {post_status}")
-            print(f" DEBUG: DEST MD5 check           {dest_md5_status}")
-            print("=============================================================")
-
-            print(f"DEBUG: dest_path={dest_path}")
-            print(f"DEBUG: get_md5={get_md5}")
-            print(f"DEBUG: post_md5={post_md5}")
-            print(f"DEBUG: dest_md5={dest_md5}")
-
-        # Print "DEBUG: SUCCESS!!! all MD5 checksums match." if the MD5
-        # checksums match
-        if get_md5 == dest_md5 == post_md5:
-            # If debug is True print debug info
-            if debug:
-                print("DEBUG: SUCCESS!!! all MD5 checksums match.")
-        else:
-            return {
-                "status": 500,
-                "message": "MD5 checksum mismatch after moving the file.", 
-                "debug": {
-                    "get_md5": get_md5, 
-                    "post_md5": post_md5, 
-                    "dest_md5": dest_md5,
-                    "source_path": source_path, 
-                    "dest_path": dest_path, 
-                    "debug": {
-                        "get": get_result,
-                        "post": post_result
-                        }
-                    }
-                }
-
         # Delete the file from the source path using delete.py functionality
         delete_result = delete_file(source_path, debug)
 
@@ -460,18 +399,21 @@ def move_file(source_path, dest_path, debug=False):
         delete_message = delete_result['message']
         delete_debug = delete_result['debug']
 
+        # Retrieve the file from the destination path to verify MD5 checksum
+        dest_md5 = get_md5_hash_filename(dest_path)
+            
         # If debug is True print debug info
         if debug:
-            print("=============================================================")
-            print(f" DEBUG: GET result               {get_status}")
-            print(f" DEBUG: POST result              {post_status}")
-            print(f" DEBUG: DEST MD5 check           {dest_md5_status}")
-            print(f" DEBUG: DELETE result            {delete_status}")
-            print("=============================================================")
-            print(f"DEBUG: delete_result={delete_result}")
-            print(f"DEBUG: delete_status={delete_status}")
-            print(f"DEBUG: delete_message={delete_message}")
-            print(f"DEBUG: delete_debug={delete_debug}")
+            print(f"DEBUG:                    DELETE STATUS: {delete_status}")
+            print(f"DEBUG:                   DELETE MESSAGE: {delete_message}")
+            print(f"DEBUG:                  DESTINATION MD5: {dest_md5}")
+            print()
+            if get_md5 == post_md5 == dest_md5:
+                print(f"DEBUG:                   ALL MD5 CHECKSUMS MATCH!!!")
+            else:
+                Exception("MD5 checksums do not match.")
+            print("===========================================================================")
+
             
         if delete_result['status'] != 200:
             return {
@@ -483,19 +425,20 @@ def move_file(source_path, dest_path, debug=False):
                 }
             }
 
-        # Return the success result
-        return {
-            "status": 200,
-            "message": "File moved successfully.",
-            "source": source_path,
-            "destination": dest_path,
-            "md5": dest_md5,
-            "debug": {
-                "get": get_result,
-                "post": post_result,
-                "delete": delete_result
-                } if debug else ""
-        }
+        if get_md5 == post_md5 == dest_md5:
+            # Return the success result
+            return {
+                "status": 200,
+                "message": "File moved successfully.",
+                "source": source_path,
+                "destination": dest_path,
+                "md5": dest_md5,
+                "debug": {
+                    "get": get_result,
+                    "post": post_result,
+                    "delete": delete_result
+                    } if debug else ""
+            }
 
     except Exception as e:
         # If there's any exception, return an error message
