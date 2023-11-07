@@ -10,11 +10,11 @@ from unittest.mock import patch, MagicMock, call
 from klingon_file_manager import move_file
 
 # Mock the get_file, post_file, and delete_file functions
+@patch('klingon_file_manager.manage.get_md5_hash_filename')
 @patch('klingon_file_manager.manage.get_file')
 @patch('klingon_file_manager.manage.post_file')
 @patch('klingon_file_manager.manage.delete_file')
-@patch('klingon_file_manager.manage.get_md5_hash_filename')
-def test_move_file(mock_delete_file, mock_post_file, mock_get_file, get_md5_hash_filename):
+def test_move_file(mock_get_file, mock_post_file, mock_delete_file, mock_get_md5_hash_filename):
     """
     # Move File Test
     Tests the `move_file` function by mocking the `get_file`, `post_file`, and `delete_file` functions.
