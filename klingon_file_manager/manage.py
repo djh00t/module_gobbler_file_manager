@@ -340,16 +340,15 @@ def move_file(source_path, dest_path, debug=False):
         get_content = get_result['content']
         get_binary = get_result['binary']
         get_debug = get_result['debug']
-        # get_md5_hash_filename should return a string, not a dictionary
+        # get_md5_hash_filename returns a string, not a dictionary
         get_md5 = get_md5_hash_filename(source_path)
 
         # Debugging
-        # If debug is True print debug info
         if debug:
             print("===========================================================================")
-            print(f"DEBUG:                       GET STATUS: {get_status}")
-            print(f"DEBUG:                      GET MESSAGE: {get_message}")
-            print(f"DEBUG:                          GET MD5: {get_md5}")
+            print(f"DEBUG: GET STATUS: {get_status}")
+            print(f"DEBUG: GET MESSAGE: {get_message}")
+            print(f"DEBUG: GET MD5: {get_md5}")
             print()
             
         # If get_status isn't 200, return a 500 error
@@ -402,14 +401,13 @@ def move_file(source_path, dest_path, debug=False):
 
         # Retrieve the file from the destination path to verify MD5 checksum
         # The get_md5_hash_filename function should return a string, not a dictionary
-        # get_md5_hash_filename should return a string, not a dictionary
+        # get_md5_hash_filename returns a string, not a dictionary
         dest_md5 = get_md5_hash_filename(dest_path)
-            
-        # If debug is True print debug info
+
         if debug:
-            print(f"DEBUG:                    DELETE STATUS: {delete_status}")
-            print(f"DEBUG:                   DELETE MESSAGE: {delete_message}")
-            print(f"DEBUG:                  DESTINATION MD5: {dest_md5}")
+            print(f"DEBUG: DELETE STATUS: {delete_status}")
+            print(f"DEBUG: DELETE MESSAGE: {delete_message}")
+            print(f"DEBUG: DESTINATION MD5: {dest_md5}")
             print()
         
         # Check if the MD5 checksums match
