@@ -340,6 +340,7 @@ def move_file(source_path, dest_path, debug=False):
         get_content = get_result['content']
         get_binary = get_result['binary']
         get_debug = get_result['debug']
+        # get_md5_hash_filename should return a string, not a dictionary
         get_md5 = get_md5_hash_filename(source_path)
 
         # Debugging
@@ -401,6 +402,7 @@ def move_file(source_path, dest_path, debug=False):
 
         # Retrieve the file from the destination path to verify MD5 checksum
         # The get_md5_hash_filename function should return a string, not a dictionary
+        # get_md5_hash_filename should return a string, not a dictionary
         dest_md5 = get_md5_hash_filename(dest_path)
             
         # If debug is True print debug info
