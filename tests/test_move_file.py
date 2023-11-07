@@ -1,23 +1,24 @@
 """
 # Move File Tests
 
-This module contains pytest unit tests for the move_file function from the
+This module contains pytest unit tests for the `move_file` function from the
 `klingon_file_manager.manage` module. It tests the file moving process under various conditions.
 
 """
 import pytest
 from unittest.mock import patch, MagicMock, call
-from klingon_file_manager.manage import move_file
+from klingon_file_manager import move_file
 
 # Mock the get_file, post_file, and delete_file functions
 @patch('klingon_file_manager.manage.get_file')
 @patch('klingon_file_manager.manage.post_file')
 @patch('klingon_file_manager.manage.delete_file')
-def test_move_file(mock_delete_file, mock_post_file, mock_get_file):
+@patch('klingon_file_manager.manage.get_md5_hash_filename')
+def test_move_file(mock_delete_file, mock_post_file, mock_get_file, get_md5_hash_filename):
     """
     # Move File Test
-    Tests the move_file function by mocking the get_file, post_file, and delete_file functions.
-    Verifies that the move_file function returns a successful status and the correct source and destination paths.
+    Tests the `move_file` function by mocking the `get_file`, `post_file`, and `delete_file` functions.
+    Verifies that the `move_file` function returns a successful status and the correct source and destination paths.
     """
     # Define the source and destination paths
     source_path = '/path/to/source/file'
@@ -26,18 +27,33 @@ def test_move_file(mock_delete_file, mock_post_file, mock_get_file):
     # Define the file content and MD5 hash
     file_content = b'Hello, world!'
     file_md5 = 'fc3ff98e8c6a0d3087d515c0473f8677'
+    get_md5 = file_md5
+    post_md5 = file_md5
+    dest_md5 = file_md5
 
     # Set up the mock get_file function to return the file content and MD5 hash
-    mock_get_file.return_value = {'status': 200, 'content': file_content, 'md5': file_md5}
+    mock_get_file.return_value = {'status': 200, 'message': 'File read successfully.', 'content': file_content, 'binary': False, 'md5': get_md5, 'debug': {}}
 
     # Set up the mock post_file function to return a successful status
-    mock_post_file.return_value = {'status': 200}
+    mock_post_file.return_value = {'status': 200, 'message': 'File written successfully to S3.', 'md5': post_md5, 'debug': {}}
 
     # Set up the mock delete_file function to return a successful status
-    mock_delete_file.return_value = {'status': 200}
+    mock_delete_file.return_value = {'status': 200, 'message': 'File deleted successfully from S3.', 'md5': dest_md5, 'debug': {}}
+
+    # Setup the mock get_md5_hash_filename function to return the MD5 hash
+    get_md5_hash_filename.return_value = file_md5
+
+    print(f"source_path: {source_path}")
+    print(f"dest_path: {dest_path}")
 
     # Call the move_file function
-    result = move_file(source_path, dest_path)
+    result = move_file(
+        source_path=source_path,
+        dest_path=dest_path,
+        debug=True
+        )
+
+    print(f"Result: {result}")
 
     # Assert that the move_file function returned a successful status
     assert result['status'] == 200
@@ -61,8 +77,8 @@ def test_move_file(mock_delete_file, mock_post_file, mock_get_file):
 def test_move_file_get_file_fails(mock_delete_file, mock_post_file, mock_get_file):
     """
     # Move File Get File Fails Test
-    Tests the move_file function when the get_file function fails.
-    Verifies that the move_file function returns a failure status.
+    Tests the `move_file` function when the `get_file` function fails.
+    Verifies that the `move_file` function returns a failure status.
     """
     # Define the source and destination paths
     source_path = '/path/to/source/file'
@@ -86,8 +102,8 @@ def test_move_file_get_file_fails(mock_delete_file, mock_post_file, mock_get_fil
 def test_move_file_post_file_fails(mock_delete_file, mock_post_file, mock_get_file):
     """
     # Move File Post File Fails Test
-    Tests the move_file function when the post_file function fails.
-    Verifies that the move_file function returns a failure status.
+    Tests the `move_file` function when the `post_file` function fails.
+    Verifies that the `move_file` function returns a failure status.
     """
     # Define the source and destination paths
     source_path = '/path/to/source/file'
@@ -119,8 +135,8 @@ def test_move_file_post_file_fails(mock_delete_file, mock_post_file, mock_get_fi
 def test_move_file_delete_file_fails(mock_delete_file, mock_post_file, mock_get_file):
     """
     # Move File Delete File Fails Test
-    Tests the move_file function when the delete_file function fails.
-    Verifies that the move_file function returns a failure status.
+    Tests the `move_file` function when the `delete_file` function fails.
+    Verifies that the `move_file` function returns a failure status.
     """
     # Define the source and destination paths
     source_path = '/path/to/source/file'
@@ -156,8 +172,8 @@ def test_move_file_delete_file_fails(mock_delete_file, mock_post_file, mock_get_
 def test_move_file_md5_mismatch(mock_delete_file, mock_post_file, mock_get_file):
     """
     # Move File MD5 Mismatch Test
-    Tests the move_file function when the MD5 hashes of the source and destination files do not match.
-    Verifies that the move_file function returns a failure status due to MD5 mismatch.
+    Tests the `move_file` function when the MD5 hashes of the source and destination files do not match.
+    Verifies that the `move_file` function returns a failure status due to MD5 mismatch.
     """
     # Define the source and destination paths
     source_path = '/path/to/source/file'
@@ -195,8 +211,8 @@ def test_move_file_md5_mismatch(mock_delete_file, mock_post_file, mock_get_file)
 def test_move_file_exception_raised(mock_delete_file, mock_post_file, mock_get_file):
     """
     # Move File Exception Raised Test
-    Tests the move_file function when an exception is raised.
-    Verifies that the move_file function returns a failure status and the correct error message.
+    Tests the `move_file` function when an exception is raised.
+    Verifies that the `move_file` function returns a failure status and the correct error message.
     """
     # Define the source and destination paths
     source_path = '/path/to/source/file'
