@@ -334,14 +334,16 @@ def move_file(source_path, dest_path, debug=False):
         # Retrieve the file using get.py functionality
         get_result = get_file(source_path, debug)
 
+        # Ensure 'content' key is always present in the response
+        get_content = get_result.get('content', None)
+
         # GET return vars
         get_status = get_result['status']
         get_message = get_result['message']
-        get_content = get_result['content']
-        get_binary = get_result['binary']
-        get_debug = get_result['debug']
+        get_binary = get_result.get('binary', None)
+        get_debug = get_result.get('debug', {})
         # get_md5_hash_filename returns a string, not a dictionary
-        get_md5 = get_md5_hash_filename(source_path)
+        get_md5 = get_md5_hash_filename(source_path) if get_content else None
 
         # Debugging
         if debug:
