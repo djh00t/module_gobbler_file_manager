@@ -44,7 +44,9 @@ To move a file from a local directory to an S3 bucket:
 """
 
 from typing import Union, Dict, Optional, Callable
-from .utils import is_binary_file, get_aws_credentials
+import requests
+import os
+from .utils import is_binary_file, get_aws_credentials, get_md5_hash, get_md5_hash_filename,check_file_exists
 from .delete import delete_file
 from .post import post_file
 from .get import get_file
@@ -55,6 +57,68 @@ from .get import get_file
 # - AWS_SECRET_ACCESS_KEY
 aws_credentials = get_aws_credentials()
 """@private Get aws credentials from environment variables."""
+
+class FilesystemRouter:
+    """
+    # Filesystem Router
+
+    `FilesystemRouter` is a class that looks at requests it receives and routes
+    the request to the correct submodule for handling.
+
+    ## Arguments
+    
+    | Name      | Type              | Description | Default |
+    |-----------|-------------------|-------------|---------|
+    | list      | list            | A list containing the files to route | list |
+
+    ## Returns
+
+    The returns vary based on the function called, however the following is the
+    minimum content that should be returned in the dictionary:
+
+    ```python
+    {
+        'status': int,
+        'message': str,
+        'debug': dict,
+    }
+    ```
+    """
+
+
+    def remove_files(self, files):
+        """
+        # Remove Files
+        Removes all files in the given list, if they exist by passing them to
+        the `delete_file` function.
+
+        ## Args
+        files: A list of file paths.
+
+        ## Returns
+        
+        """
+        for file in files:
+            if exists := check_file_exists(file):
+                result = delete_file(file)
+
+                # Capture result variables
+                status = result['status']
+                message = result['message']
+                debug = result['debug']
+
+                return {
+                    "status": status,
+                    "message": message,
+                    "debug": debug
+                }
+                
+            else:
+                return {
+                    "status": 404,
+                    "message": f"File {file} not found.",
+                    "debug": {}
+                }
 
 def manage_file(
     action: str,
@@ -247,43 +311,173 @@ def move_file(source_path, dest_path, debug=False):
     Example of a failed return:
     {
         "status": 500,
-        "message": "An error occurred while moving the file: [error description]"
+        "message": "An error occurred while moving the file: [error description]",
+        "debug": {
+            "source_path": source_path, 
+            "dest_path": dest_path, 
+            "get_md5": get_md5, 
+            "post_md5": post_md5, 
+            "dest_md5": dest_md5, 
+            "debug": {
+                "get": get_result,
+                "post": post_result,
+                }
+            }
+        }
     }
     """
 
-def move_file(source_path, dest_path, debug=False):
     try:
         # Check if the file is binary
         binary = is_binary_file(source_path)
 
         # Retrieve the file using get.py functionality
         get_result = get_file(source_path, debug)
-        if get_result['status'] != 200:
-            return {"status": 500, "message": "Failed to retrieve the file."}
 
-        file_content = get_result['content']
-        file_md5 = get_result['md5']
+        # GET return vars
+        get_status = get_result['status']
+        get_message = get_result['message']
+        get_content = get_result['content']
+        get_binary = get_result['binary']
+        get_debug = get_result['debug']
+        get_md5 = get_md5_hash_filename(source_path)
+
+        # Debugging
+        # If debug is True print debug info
+        if debug:
+            print("=============================================================")
+            print(f" DEBUG: GET result               STATUS: {get_status}")
+            print("=============================================================")
+            print(f"DEBUG:                          MESSAGE: {get_message}")
+            print(f"DEBUG:                           BINARY: {get_binary}")
+            print(f"DEBUG:                            DEBUG: {get_debug}")
+            print(f"DEBUG:                          GET MD5: {get_md5}")
+            print(f"DEBUG:                           SOURCE: {source_path}")
+            print(f"DEBUG:                             DEST: {dest_path}")
+            # Print the first 100 characters of the content
+            print(f"DEBUG: get_content={get_content[:100]}")
+
+        # If get_status isn't 200, return a 500 error
+        if get_result['status'] != 200:
+            return {
+                "status": 500, 
+                "message": "Failed to retrieve the file.",
+                "debug": {
+                    "get": get_result
+                }
+            }
 
         # Save the file to the destination using post.py functionality
-        post_result = post_file(dest_path, file_content, file_md5, binary, debug)
+        post_result = post_file(
+            path=dest_path, 
+            content=get_content,
+            md5=get_md5,
+            debug=get_debug
+            )
+
+        # Collect POST return vars
+        post_status = post_result['status']
+        post_message = post_result['message']
+        post_md5 = post_result['md5']
+        post_debug = post_result['debug']
+
+        # Debugging
+        # If debug is True print debug info
+        if debug:
+            print("=============================================================")
+            print(f" DEBUG: GET result               {get_status}")
+            print(f" DEBUG: POST result              {post_status}")
+            print("=============================================================")
+            print(f"DEBUG: post_result={post_result}")
+            print(f"DEBUG: post_status={post_status}")
+            print(f"DEBUG: post_message={post_message}")
+            print(f"DEBUG: post_md5={post_md5}")
+            print(f"DEBUG: post_debug={post_debug}")
+        
         if post_result['status'] != 200:
-            return {"status": 500, "message": "Failed to save the file to the destination."}
+            return {
+                "status": 500, 
+                "message": "Failed to save the file to the destination.",
+                "debug": {
+                    "get": get_result,
+                    "post": post_result
+                }
+            }
 
-        # Retrieve the file from the destination to get its MD5 hash
-        dest_get_result = get_file(dest_path, debug)
-        if dest_get_result['status'] != 200:
-            return {"status": 500, "message": "Failed to retrieve the file from the destination."}
+        # Use get_md5_hash() to get the MD5 checksum of the dest_path
+        dest_md5 = get_md5_hash_filename(dest_path)
 
-        dest_md5 = dest_get_result['md5']
+        # Collect destination MD5 checksum success
+        if dest_md5:
+            dest_md5_status = 200
+            dest_md5_message = "MD5 checksum calculated successfully."
+            
+        # If debug is True print debug info
+        if debug:
+            print("=============================================================")
+            print(f" DEBUG: GET result               {get_status}")
+            print(f" DEBUG: POST result              {post_status}")
+            print(f" DEBUG: DEST MD5 check           {dest_md5_status}")
+            print("=============================================================")
 
-        # Confirm the file is saved correctly by comparing MD5 checksums
-        if file_md5 != dest_md5:
-            return {"status": 500, "message": "MD5 checksum mismatch after moving the file."}
+            print(f"DEBUG: dest_path={dest_path}")
+            print(f"DEBUG: get_md5={get_md5}")
+            print(f"DEBUG: post_md5={post_md5}")
+            print(f"DEBUG: dest_md5={dest_md5}")
+
+        # Print "DEBUG: SUCCESS!!! all MD5 checksums match." if the MD5
+        # checksums match
+        if get_md5 == dest_md5 == post_md5:
+            # If debug is True print debug info
+            if debug:
+                print("DEBUG: SUCCESS!!! all MD5 checksums match.")
+        else:
+            return {
+                "status": 500,
+                "message": "An error occurred while moving the file: MD5 checksum mismatch after moving the file.", 
+                "debug": {
+                    "get_md5": get_md5, 
+                    "post_md5": post_md5, 
+                    "dest_md5": dest_md5,
+                    "source_path": source_path, 
+                    "dest_path": dest_path, 
+                    "debug": {
+                        "get": get_result,
+                        "post": post_result
+                        }
+                    }
+                }
 
         # Delete the file from the source path using delete.py functionality
-        delete_result = delete_file(source_path, binary, debug)
+        delete_result = delete_file(source_path, debug)
+
+        # Collect DELETE return vars
+        delete_status = delete_result['status']
+        delete_message = delete_result['message']
+        delete_debug = delete_result['debug']
+
+        # If debug is True print debug info
+        if debug:
+            print("=============================================================")
+            print(f" DEBUG: GET result               {get_status}")
+            print(f" DEBUG: POST result              {post_status}")
+            print(f" DEBUG: DEST MD5 check           {dest_md5_status}")
+            print(f" DEBUG: DELETE result            {delete_status}")
+            print("=============================================================")
+            print(f"DEBUG: delete_result={delete_result}")
+            print(f"DEBUG: delete_status={delete_status}")
+            print(f"DEBUG: delete_message={delete_message}")
+            print(f"DEBUG: delete_debug={delete_debug}")
+            
         if delete_result['status'] != 200:
-            return {"status": 500, "message": "Failed to delete the file from the source."}
+            return {
+                "status": 500, "message": "Failed to delete the file from the source.",
+                "debug": {
+                    "get": get_result,
+                    "post": post_result,
+                    "delete": delete_result
+                }
+            }
 
         # Return the success result
         return {
@@ -291,17 +485,16 @@ def move_file(source_path, dest_path, debug=False):
             "message": "File moved successfully.",
             "source": source_path,
             "destination": dest_path,
-            "md5": file_md5
+            "md5": dest_md5,
+            "debug": {
+                "get": get_result,
+                "post": post_result,
+                "delete": delete_result
+                } if debug else ""
         }
 
     except Exception as e:
         # If there's any exception, return an error message
-        return {
-            "status": 500,
-            "message": "An error occurred while moving the file: " + str(e)
-        }
-
-    except Exception as e:
         return {
             "status": 500,
             "message": "An error occurred while moving the file: " + str(e)
