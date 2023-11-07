@@ -400,6 +400,7 @@ def move_file(source_path, dest_path, debug=False):
         delete_debug = delete_result['debug']
 
         # Retrieve the file from the destination path to verify MD5 checksum
+        # The get_md5_hash_filename function should return a string, not a dictionary
         dest_md5 = get_md5_hash_filename(dest_path)
             
         # If debug is True print debug info
@@ -408,11 +409,21 @@ def move_file(source_path, dest_path, debug=False):
             print(f"DEBUG:                   DELETE MESSAGE: {delete_message}")
             print(f"DEBUG:                  DESTINATION MD5: {dest_md5}")
             print()
-            if get_md5 == post_md5 == dest_md5:
-                print(f"DEBUG:                   ALL MD5 CHECKSUMS MATCH!!!")
-            else:
-                raise Exception("MD5 checksums do not match.")
-            print("===========================================================================")
+        
+        # Check if the MD5 checksums match
+        if get_md5 != post_md5 or post_md5 != dest_md5:
+            return {
+                "status": 500,
+                "message": "MD5 checksum mismatch after moving the file.",
+                "debug": {
+                    "get": get_result,
+                    "post": post_result,
+                    "delete": delete_result,
+                    "source_md5": get_md5,
+                    "post_md5": post_md5,
+                    "dest_md5": dest_md5
+                } if debug else {}
+            }
 
             
         if delete_result['status'] != 200:
