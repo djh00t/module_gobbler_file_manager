@@ -107,7 +107,7 @@ def test_small_upload_progress():
         path="s3://fsg-gobbler/tests/" + file_name,
         content=file_content,
         metadata=metadata,
-        debug=True
+        debug=False
     )
 
     # Announce the upload result
