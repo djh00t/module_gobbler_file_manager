@@ -76,9 +76,10 @@ def test_get_from_s3_success(mock_boto3_resource, mock_is_binary_file):
     # Set mock_is_binary_file
     mock_is_binary_file.return_value = True
 
-    # Mock the S3 object to simulate a successful get operation with the expected content
+    # Mock the S3 object to simulate a successful get operation with the expected content and MD5 metadata
     mock_boto3_resource.return_value.Object.return_value.get.return_value = {
-        'Body': MagicMock(read=lambda: b"mocked content")
+        'Body': MagicMock(read=lambda: b"mocked content"),
+        'Metadata': {'md5': "6cd3556deb0da54bca060b4c39479839"}
     }
     
     response = _get_from_s3(
@@ -148,7 +149,9 @@ def test_get_file_from_s3_success(mock_boto3_resource, mock_is_binary_file):
     mock_is_binary_file.return_value = True
     
     # Mock the get_md5_hash function to return a consistent MD5 value and ensure it is called with the correct arguments
+    # Also, ensure that the mocked MD5 value is used in the response
     with patch('klingon_file_manager.get.get_md5_hash', return_value="6cd3556deb0da54bca060b4c39479839") as mock_get_md5_hash:
+        mock_boto3_resource.return_value.Object.return_value.metadata.get.return_value = "6cd3556deb0da54bca060b4c39479839"
         response = get_file("s3://mocked_bucket/mocked_key", False)
         expected_response = {
             "status": 200,
