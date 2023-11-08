@@ -82,6 +82,8 @@ def test_get_from_s3_success(mock_boto3_resource, mock_is_binary_file):
         'Metadata': {'md5': get_md5}
     }
     mock_boto3_resource.return_value.Object.return_value.get.return_value = mock_s3_response
+    # Ensure that the metadata.get call returns the correct MD5 hash string
+    mock_boto3_resource.return_value.Object.return_value.metadata.get.return_value = get_md5
     
     response = _get_from_s3(
         path=src_path,
