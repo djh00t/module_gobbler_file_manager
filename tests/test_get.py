@@ -93,7 +93,8 @@ def test_get_from_s3_success(mock_boto3_resource, mock_is_binary_file):
         "message": "File read successfully from S3.",
         "content": b"mocked content",
         "binary": True,
-        "debug": {}
+        "debug": {},
+        "md5": "6cd3556deb0da54bca060b4c39479839"
     }
     
     assert response == expected_response
@@ -147,14 +148,14 @@ def test_get_file_from_s3_success(mock_boto3_resource, mock_is_binary_file):
     mock_is_binary_file.return_value = True
     
     # Mock the get_md5_hash function to return a consistent MD5 value and ensure it is called with the correct arguments
-    with patch('klingon_file_manager.get.get_md5_hash', return_value="mocked_md5_hash_value") as mock_get_md5_hash:
+    with patch('klingon_file_manager.get.get_md5_hash', return_value="6cd3556deb0da54bca060b4c39479839") as mock_get_md5_hash:
         response = get_file("s3://mocked_bucket/mocked_key", False)
         expected_response = {
             "status": 200,
             "message": "File read successfully from S3.",
             "content": b"mocked content",
             "binary": True,
-            "md5": "mocked_md5_hash_value",
+            "md5": "6cd3556deb0da54bca060b4c39479839",
             "debug": {}
         }
         
