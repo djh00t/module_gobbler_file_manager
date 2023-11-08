@@ -78,8 +78,8 @@ def test_get_from_s3_success(mock_boto3_resource, mock_is_binary_file):
 
     # Mock the S3 object to simulate a successful get operation with the expected content and MD5 metadata
     mock_boto3_resource.return_value.Object.return_value.get.return_value = {
-        'Body': MagicMock(read=lambda: b"mocked content"),
-        'Metadata': {'md5': "6cd3556deb0da54bca060b4c39479839"}
+        'Body': MagicMock(read=lambda: file_content),
+        'Metadata': {'md5': file_md5}
     }
     
     response = _get_from_s3(
