@@ -56,8 +56,7 @@ def mock_open_file():
     with patch('builtins.open', m):
         yield m
 
-@patch("klingon_file_manager.manage.get_file")
-def test_get_from_s3_success(mock_boto3_resource, mock_is_binary_file, mock_get_file):
+def test_get_from_s3_success(mock_boto3_resource, mock_is_binary_file):
     """
     # Get from S3 Success
     Verifies that a file can be successfully retrieved from S3 and correctly identifies it as binary or not.
@@ -128,6 +127,7 @@ def test_get_from_local_success(mock_open_file, mock_is_binary_file):
         "message": "File read successfully.",
         "content": b"mocked file content",
         "binary": True,
+        "md5": "3137f75275e870ffcb014f020fbc4a37",
         "debug": {}
     }
     
