@@ -75,7 +75,7 @@ def test_post_to_s3_failure():
     result = post_file(path, "Incorrect content")
     # Add assertions to check the result
     assert result["status"] == 500
-    assert "Failed to post file" in result["message"]
+    assert "The specified bucket does not exist" in result["message"]
 
 
 def test_post_to_local_failure():
