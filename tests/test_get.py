@@ -92,10 +92,10 @@ def test_get_from_s3_success(mock_boto3_resource, mock_is_binary_file):
     expected_response = {
         "status": 200,
         "message": "File read successfully from S3.",
-        "content": b"mocked content",
+        "content": file_content,
         "binary": True,
         "debug": {},
-        "md5": "6cd3556deb0da54bca060b4c39479839"
+        "md5": file_md5
     }
     
     assert response == expected_response
