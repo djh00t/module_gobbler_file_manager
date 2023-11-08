@@ -577,6 +577,16 @@ def get_s3_metadata(s3_url):
 def get_md5_hash(content: Union[str, bytes]) -> str:
     """
     # Calculates the MD5 hash of the given content.
+
+    ## Arguments
+
+    | Name      | Type              | Description | Default |
+    |-----------|-------------------|-------------|---------|
+    | content   | Union[str, bytes] | The content for which to calculate the MD5 hash. |   |
+
+    ## Returns
+    The MD5 hash of the content.
+    
     """
     if isinstance(content, str):
         return hashlib.md5(content.encode('utf-8')).hexdigest()
@@ -587,6 +597,16 @@ def get_md5_hash(content: Union[str, bytes]) -> str:
 def get_file_size(content: Union[str, bytes]) -> int:
     """
     # Calculates the size of the given content.
+
+    ## Arguments
+
+    | Name      | Type              | Description | Default |
+    |-----------|-------------------|-------------|---------|
+    | content   | Union[str, bytes] | The content for which to calculate the size. |   |
+
+    ## Returns
+    The size of the content in bytes.
+    
     """
     if isinstance(content, str):
         return len(content.encode('utf-8'))
@@ -652,6 +672,8 @@ def get_md5_hash_filename(filename: str) -> str:
 
     # Return the MD5 hash of the file contents
     return get_md5_hash(content)
+
+
 # Function to check if a file exists
 def check_file_exists(file_path: str) -> bool:
     """
@@ -680,3 +702,21 @@ def check_file_exists(file_path: str) -> bool:
     else:
         # Check if the file exists
         return os.path.exists(file_path)
+
+def compare_s3_local_file(local_file, s3_file):
+    """
+    # Compare S3 Local File
+    Validates that a file on S3 has the same content as a local file by downloading and comparing them.
+    """
+    # Download the S3 file to a tmp file name
+    s3 = boto3.resource('s3')
+    s3.meta.client.download_file(s3_bucket_name, s3_file, 'tests/tmp')
+    # Make sure that the tmp file was created
+    assert os.path.exists('tests/tmp')
+    # Compare the local file to the tmp file
+    local_file_content = open(local_file, 'rb').read()
+    tmp_file_content = open('tests/tmp', 'rb').read()
+    # Make sure that the local file and the tmp file have the same content
+    assert local_file_content == tmp_file_content
+    # Delete the tmp file
+    os.remove('tests/tmp')
