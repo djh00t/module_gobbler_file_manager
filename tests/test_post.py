@@ -181,8 +181,8 @@ def test_post_to_s3_authentication_failure():
     # Call the post_file function with an invalid S3 path
     result = post_file(s3_path, content)
     # Add assertions to check the result
-    assert result["status"] == 500  # Assuming it fails due to authentication error and returns a 500 status code
-    assert "Failed to post file" in result["message"]  # Check for an error message
+    assert result["status"] == 500
+    assert "The specified bucket does not exist" in result["message"]
     
 
 def test_post_to_local_directory_not_found():
@@ -267,8 +267,8 @@ def test_post_to_s3_invalid_bucket():
     # Call the post_file function with an invalid bucket name
     result = post_file(s3_path, content)
     # Add assertions to check the result
-    assert result["status"] == 500  # Assuming it fails due to an invalid bucket and returns a 500 status code
-    assert "Failed to post file" in result["message"]  # Check for an error message
+    assert result["status"] == 500
+    assert "Access Denied" in result["message"]
 
 def test_post_to_s3_create_path():
     """
