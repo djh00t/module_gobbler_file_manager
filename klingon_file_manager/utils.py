@@ -568,10 +568,11 @@ def get_s3_metadata(s3_url):
         print(response)
     except Exception as e:
         print(f"Error: {e}")
-        return {'Error': str(e)}
+        # Return an empty dictionary instead of None when an error occurs
+        return {'Error': str(e), 'Metadata': {}}
     
-    # Return the entire response
-    return response
+    # Return the entire response if no error occurred
+    return response.get('Metadata', {})
 
 # Function to get MD5 hash of the content
 def get_md5_hash(content: Union[str, bytes]) -> str:
