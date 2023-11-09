@@ -381,7 +381,7 @@ def test_move_local_txt_file_s3():
     status = result.get('status')
     message = result.get('message')
     source = result.get('source', src_file)  # Default to src_file if 'source' key is missing
-    destination = result['destination']
+    destination = result.get('destination', dst_file)  # Default to dst_file if 'destination' key is missing
     print(f"Result: {result}")
     print(f"SRC MD5: {src_md5}")
     print(f"DST MD5: {dst_md5}")

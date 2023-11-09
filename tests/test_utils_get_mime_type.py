@@ -99,7 +99,7 @@ def test_get_mime_type_existing_s3_file_with_md5_metadata():
 
         print(f"md5: {md5_check}")
         print(f"mime_type: {mime_type}")
-        assert md5_check == "f63bbe640a48144acd9b608b5eba4596"
+        assert md5_check == "f63bbe640a48144acd9b608b5eba4596", f"MD5 metadata does not match the expected value. Expected: 'f63bbe640a48144acd9b608b5eba4596', Got: '{md5_check}'"
 
 # Test with an S3 file that doesn't exist using the AWS_S3_BUCKET_NAME environment variable
 def test_get_mime_type_nonexistent_s3_file():

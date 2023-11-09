@@ -221,7 +221,7 @@ def test_post_to_s3_with_manual_md5():
     # Extracted MD5 from the response
     extracted_md5 = metadata.get('Metadata', {}).get('md5', '')  # Provide default empty string if 'md5' key is missing
     # Add an assertion to compare the stored MD5 hash with the calculated MD5 hash
-    assert extracted_md5 == md5_hash, "MD5 does not match the expected value"
+    assert extracted_md5 == md5_hash, f"MD5 does not match the expected value. Expected: {md5_hash}, Got: {extracted_md5}"
 
 
 def test_post_to_s3_with_incorrect_md5():
