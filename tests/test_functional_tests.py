@@ -17,9 +17,13 @@ bucket for testing purposes.
 
 """
 import os
-from klingon_file_manager import manage_file
+import logging
+from klingon_file_manager import manage_file, move_file, get_md5_hash_filename
 import lorem
 import boto3
+
+# Logging configuration
+logging.basicConfig(level=logging.INFO)
 
 """
 # AWS Credentials & Bucket Name
@@ -44,11 +48,24 @@ def test_create_test_dirs():
     # Create Test Directories
     This test case is responsible for creating the ./tests/testfiles directory if it does not exist.
     """
-    if not os.path.exists("./tests/testfiles"):
+    if not os.path.exists("tests/testfiles"):
         print("Creating tests/testfiles directory")
-        os.mkdir("./tests/testfiles")
+        os.mkdir("tests/testfiles")
     else:
         print("./tests/testfiles directory already exists")
+
+# Ensure test directories are created
+test_create_test_dirs()
+
+def generate_text_file(file_name, chars: int = 100):
+    """
+    # Generate Text File
+    Generates a text file with lorem ipsum content and returns the file path.
+    """
+    content = lorem.text()[:chars]
+    with open(file_name, 'w') as f:
+        f.write(content)
+    return file_name
 
 
 """
@@ -64,44 +81,52 @@ test_bin_get = 'tests/testfiles/test_get_bin_file.wav'
 # Test Files - post
 test_txt_post = 'tests/testfiles/test_post_txt_file.txt'
 """ test_txt_post - name of the test text file to be used in POST tests """
+generate_text_file(test_txt_post)
 test_bin_post = 'tests/testfiles/test_post_bin_file.wav'
 """ test_bin_post - name of the test binary file to be used in POST tests """
+
 
 # Test Files - move
 test_txt_move = 'tests/testfiles/test_move_txt_file.txt'
 """ test_txt_move - name of the test text file to be used in MOVE tests """
+generate_text_file(test_txt_move)
 test_bin_move = 'tests/testfiles/test_move_bin_file.wav'
 """ test_bin_move - name of the test binary file to be used in MOVE tests """
+
 
 # Generate a 100 word string of lorem ipsum text
 test_txt_content = lorem.text()
 """ test_txt_content - lorem ipsum text to be used in text file tests """
 
 
-
-# Ensure test directories are created
-test_create_test_dirs()
-
 # Create a 1KB test binary file
 """ ./tests/testfiles/1kb.bin - 1KB binary file to be used in binary file tests """
 with open("./tests/testfiles/1kb.bin", "wb") as f:
     f.write(os.urandom(1024))
     
-# Read the 1KB test binary file into test_bin_content
-""" test_bin_content - 1KB binary file content to be used in binary file tests """
-test_bin_content = open("./tests/testfiles/1kb.bin", "rb").read()
+# Read the 1KB test binary file into test_bin_content if
+# ./tests/testfiles/1kb.bin doesn't exist
+""" test_bin_content - binary content of the 1KB test binary file """
+with open("./tests/testfiles/1kb.bin", "rb") as f:
+    test_bin_content = f.read()
 
-# Hard link the 1KB test binary file to the test_bin_get file
+# Hard link the 1KB test binary file to the test_bin_get file if test_bin_get
+# doesn't exist
 """ test_bin_get - name of the test binary file to be used in GET tests """
-os.link("./tests/testfiles/1kb.bin", test_bin_get)
+if not os.path.exists(test_bin_get):
+    os.link("./tests/testfiles/1kb.bin", test_bin_get)
 
-# Hard link the 1KB test binary file to the test_bin_post file
+# Hard link the 1KB test binary file to the test_bin_post file if test_bin_post
+# doesn't exist
 """ test_bin_post - name of the test binary file to be used in POST tests """
-os.link("./tests/testfiles/1kb.bin", test_bin_post)
+if not os.path.exists(test_bin_post):
+    os.link("./tests/testfiles/1kb.bin", test_bin_post)
 
-# Hard link the 1KB test binary file to the test_bin_move file
+# Hard link the 1KB test binary file to the test_bin_move file if test_bin_move
+# doesn't exist
 """ test_bin_move - name of the test binary file to be used in MOVE tests """
-os.link("./tests/testfiles/1kb.bin", test_bin_move)
+if not os.path.exists(test_bin_move):
+    os.link("./tests/testfiles/1kb.bin", test_bin_move)
 
 
 def compare_s3_local_file(local_file, s3_file):
@@ -320,14 +345,53 @@ def test_move_local_txt_file_local():
     # Move Local Text File to Local Directory
     Tests the `move_file` function's ability to move a local text file to a local directory.
     """
-    result = move_file(test_txt_move, 'tests/testfiles/test_move_txt_file_moved.txt')
-    md5 = get_md5_hash(test_txt_move)
-    print(result)
+    src_file = 'tests/testfiles/test_move_local_txt_file.txt'
+    dst_file = 'tests/testfiles/test_move_local_txt_file_moved.txt'
+    generate_text_file(src_file, 100)
+    src_md5 = get_md5_hash_filename(src_file)
+    result = move_file(src_file, dst_file, True)
+    dst_md5 = get_md5_hash_filename(dst_file)
+    # Capture result variables
+    print(f"Result: {result}")
+    status = result['status']
+    message = result['message']
+    source = result['source']
+    destination = result['destination']
+    print(f"Result: {result}")
+    print(f"SRC MD5: {src_md5}")
+    print(f"DST MD5: {dst_md5}")
     assert result['status'] == 200
     assert result['message'] == 'File moved successfully.'
-    assert result['source'] == test_txt_move
-    assert result['destination'] == 'tests/testfiles/test_move_txt_file_moved.txt'
-    assert result['md5'] == md5
+    assert result['source'] == src_file
+    assert result['destination'] == dst_file
+    assert src_md5 == dst_md5
+
+def test_move_local_txt_file_s3():
+    """
+    # Move Local Text File to S3
+    Ensures the `move_file` function can move a local text file to S3.
+    """
+    src_file = 'tests/testfiles/test_move_local_txt_file.txt'
+    dst_file = f"s3://{s3_bucket_name}/development/unit-tests/test_move_local_txt_file_moved.txt"
+    generate_text_file(src_file, 100)
+    src_md5 = get_md5_hash_filename(src_file)
+    result = move_file(src_file, dst_file)
+    dst_md5 = get_md5_hash_filename(dst_file)
+    # Capture result variables
+    print(f"Result: {result}")
+    status = result['status']
+    message = result['message']
+    source = result['source']
+    destination = result['destination']
+    print(f"Result: {result}")
+    print(f"SRC MD5: {src_md5}")
+    print(f"DST MD5: {dst_md5}")
+    assert result['status'] == 200
+    assert result['message'] == 'File moved successfully.'
+    assert result['source'] == src_file
+    assert result['destination'] == dst_file
+    assert src_md5 == dst_md5
+
 
 def test_check_aws_access_key_id():
     """
@@ -440,18 +504,18 @@ def test_delete_s3_test_bin_get_file():
     assert result['path'] == f"s3://{s3_bucket_name}/{test_bin_get}"
 
 
-### def test_cleanup_test_files():
-###     """
-###     # Teardown Test Files
-###     This test case is responsible for cleaning up and removing all test files created during the testing process, both locally and in the test files directory.
-###     """
-###     # Remove tests/testfiles directory if it exists
-###     if os.path.exists('tests/testfiles'):
-###         print("tests/testfiles directory exists, emptying it..")
-###         # Remove all files in tests/testfiles directory
-###         for file in os.listdir('tests/testfiles'):
-###             print(f"Removing tests/testfiles/{file}")
-###             os.remove(f"tests/testfiles/{file}")
-###         # Remove tests/testfiles directory
-###         print("Removing tests/testfiles directory")
-###         os.rmdir('tests/testfiles')
+def test_cleanup_test_files():
+    """
+    # Teardown Test Files
+    This test case is responsible for cleaning up and removing all test files created during the testing process, both locally and in the test files directory.
+    """
+    # Remove tests/testfiles directory if it exists
+    if os.path.exists('tests/testfiles'):
+        print("tests/testfiles directory exists, emptying it..")
+        # Remove all files in tests/testfiles directory
+        for file in os.listdir('tests/testfiles'):
+            print(f"Removing tests/testfiles/{file}")
+            os.remove(f"tests/testfiles/{file}")
+        # Remove tests/testfiles directory
+        print("Removing tests/testfiles directory")
+        os.rmdir('tests/testfiles')
