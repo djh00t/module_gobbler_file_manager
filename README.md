@@ -15,7 +15,7 @@ The module looks for the following environment variables:
 ## Features
 - Supports both local and AWS S3 storage.
 - Single function interface (`manage_file`) to handle 'get', 'post', 'delete', and 'move' operations.
-- Debugging support
+- Enhanced debugging support
 - AWS credentials are fetched using the `get_aws_credentials` function
 - File operations are performed using the `read_file`, `write_file`, and `delete_file` functions
 - The `manage_file` function returns a dictionary containing the result of the file operation with the following schema:
@@ -36,12 +36,6 @@ The module looks for the following environment variables:
 - Utility functions such as `is_binary_file`, `get_md5_hash`, and `check_file_exists` to assist with file management tasks.
 - Internal functions `_get_from_s3`, `_get_from_local`, `_post_to_s3`, and `_post_to_local` for handling S3 and local file operations.
 
-- Utility function `get_mime_type` to fetch the MIME type of a file.
-- Utility function `is_binary_file` to check if a file is binary.
-- Internal function `_read_from_s3` for reading from S3 storage.
-- Internal function `_read_from_local` for reading from local storage.
-- Internal function `_write_to_s3` for writing to S3 storage.
-- Internal function `_write_to_local` for writing to local storage.
 
 ## Usage Examples
 ### Using `manage_file` function
@@ -200,8 +194,3 @@ To run tests, execute the following command:
 ```bash
 pytest
 ```
-For continuous testing with automatic reload upon file changes, use the `tl.py` script:
-```bash
-./tl.py -t tests/test_example.py -s 10
-```
-This will run the specified test every 10 seconds, reloading the test file if it changes.
