@@ -1,7 +1,7 @@
 # Klingon File Manager
 
 ## Introduction
-Klingon File Manager is a Python module designed for managing files on both local and AWS S3 storage. It provides a unified interface for file operations such as 'get', 'post', 'delete', and 'move'.
+Klingon File Manager is a Python module designed for managing files on both local and AWS S3 storage. It provides a unified interface for file operations such as 'get', 'post', 'delete', 'move', and additional utility functions.
 
 ## Installation
 Run the following command to install the package:
@@ -13,8 +13,8 @@ The module looks for the following environment variables:
 - `AWS_SECRET_ACCESS_KEY`
 
 ## Features
-- Supports both local and AWS S3 storage
-- Single function interface (`manage_file`) to handle 'get', 'post', and 'delete' operations
+- Supports both local and AWS S3 storage.
+- Single function interface (`manage_file`) to handle 'get', 'post', 'delete', and 'move' operations.
 - Debugging support
 - AWS credentials are fetched using the `get_aws_credentials` function
 - File operations are performed using the `read_file`, `write_file`, and `delete_file` functions
@@ -31,6 +31,8 @@ The module looks for the following environment variables:
     'debug': Dict[str, str]  # Debug information (only included if 'debug' flag is True)
 }
 ```
+- Utility functions such as `is_binary_file`, `get_md5_hash`, and `check_file_exists` to assist with file management tasks.
+- Internal functions `_get_from_s3`, `_get_from_local`, `_post_to_s3`, and `_post_to_local` for handling S3 and local file operations.
 
 - Utility function `get_mime_type` to fetch the MIME type of a file.
 - Utility function `is_binary_file` to check if a file is binary.
@@ -66,6 +68,7 @@ When the 'get' action is used with the `manage_file` function, the output is a d
     "debug": "object or null"
 }
 ```
+- The `move_file` function allows moving files between local and S3 storage, ensuring data integrity with MD5 checksums.
 
 Here is a description of each field:
 
@@ -135,6 +138,7 @@ When the 'delete' action is used with the `manage_file` function, the output is 
     "debug": "object or null"
 }
 ```
+- The `move_file` function allows moving files between local and S3 storage, ensuring data integrity with MD5 checksums.
 
 Here is a description of each field:
 
@@ -167,6 +171,7 @@ A dictionary containing the status of the write operation with the following sch
     "debug": Dict[str, str] # Debug information (only included if 'debug' flag is True)
 }
 ```
+- The `delete_file` function enables deletion of files from local and S3 storage with simple error handling.
 
 ### Usage Example
 
