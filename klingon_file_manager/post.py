@@ -32,15 +32,15 @@ from typing import Union, Dict, Optional
 import boto3
 import logging
 import base64
-from .utils import get_md5_hash, get_file_size, get_mime_type_content
+from .utils import get_md5_hash, get_md5_hash_filename, get_file_size, get_mime_type_content
 
 import os
 
 def post_file(
     path: str,
     content: Union[str, bytes],
-    md5=None,
-    metadata=None,
+    md5: str = None,
+    metadata: dict = None,
     debug=False) -> Dict[str, Union[int, str, Dict[str, str]]]:
 
     # Check if content is a file path
@@ -108,11 +108,11 @@ def post_file(
     """
     debug_info = {}
 
-    #print(f"Path: {path}")
-    #print(f"Content: {content}")
-    #print(f"MD5: {md5}")
-    #print(f"Metadata: {metadata}")
-    #print(f"Debug: {debug}")
+    print(f"Path: {path}")
+    print(f"Content: {content}")
+    print(f"MD5: {md5}")
+    print(f"Metadata: {metadata}")
+    print(f"Debug: {debug}")
 
     # Default metadata
     # Set md5 if md5 is None
@@ -230,72 +230,80 @@ def _post_to_s3(
     """
     debug_info = {}
 
-    # Your S3 logic here
-    # Extract S3 bucket and key from the path
-    s3_uri_parts = path[5:].split("/", 1)
-    bucket_name = s3_uri_parts[0]
-    key = s3_uri_parts[1]
+    try:
+        # Extract S3 bucket and key from the path
+        s3_uri_parts = path[5:].split("/", 1)
+        bucket_name = s3_uri_parts[0]
+        key = s3_uri_parts[1]
 
-    # Initialize S3 resource and client
-    s3_client = boto3.client('s3')
+        # Initialize S3 resource and client
+        s3_client = boto3.client('s3')
 
-    # Check for metadata = None
-    if metadata is None:
-        metadata = {}
+        # Check for metadata = None
+        if metadata is None:
+            metadata = {}
 
-    # Get md5 of content using get_md5_hash
-    calculated_md5 = get_md5_hash(content)
+        # Get md5 of content using get_md5_hash
+        calculated_md5 = get_md5_hash(content)
 
-    # Check if md5 is provided
-    if md5:
-        # Check if calculated_md5 matches md5. If not return a 409 error.
-        if calculated_md5 != md5:
-            return {
-                "status": 409,
-                "message": "Conflict - Provided MD5 does not match calculated MD5.",
-                "debug": debug_info if debug else {},
-            }
+        # Check if md5 is provided
+        if md5:
+            # Check if calculated_md5 matches md5. If not return a 409 error.
+            if calculated_md5 != md5:
+                return {
+                    "status": 409,
+                    "message": "Conflict - Provided MD5 does not match calculated MD5.",
+                    "debug": debug_info if debug else {},
+                }
+            
+        else:
+            # If no md5 is provided, set md5 to calculated_md5
+            md5 = calculated_md5
+
+        # Add md5 to object metadata if it isn't already there
+        metadata["md5"] = md5
+
+        # Assuming md5 contains the hexadecimal MD5 hash
+        hex_md5 = md5
+
+        # Convert the hexadecimal MD5 hash to bytes
+        md5_bytes = bytes.fromhex(hex_md5)
+
+        # Encode the bytes in base64 so AWS can use it in ContentMD5
+        content_md5 = base64.b64encode(md5_bytes).decode('utf-8')
+
+        # Convert all metadata values to strings
+        metadata_str = {k: str(v) for k, v in metadata.items()}
+
+        # Convert strings to bytes
+        content_bytes = content if isinstance(content, bytes) else content.encode('utf-8')
+
+        with io.BytesIO(content_bytes) as f:
+            f.seek(0)
+            # Use put_object method
+            result = s3_client.put_object(
+                Body=f.read(),
+                Bucket=bucket_name,
+                Key=key,
+                Metadata=metadata_str,
+                ContentMD5=content_md5,
+                ContentType=metadata.get('Content-Type', 'binary/octet-stream')  # Set the Content-Type
+            )
+
+        return {
+            "status": 200,
+            "message": "File written successfully to S3.",
+            "md5": metadata.get("md5", ""),
+            "debug": debug_info if debug else {},
+        }
         
-    else:
-        # If no md5 is provided, set md5 to calculated_md5
-        md5 = calculated_md5
-
-    # Add md5 to object metadata if it isn't already there
-    metadata["md5"] = md5
-
-    # Assuming md5 contains the hexadecimal MD5 hash
-    hex_md5 = md5
-
-    # Convert the hexadecimal MD5 hash to bytes
-    md5_bytes = bytes.fromhex(hex_md5)
-
-    # Encode the bytes in base64 so AWS can use it in ContentMD5
-    content_md5 = base64.b64encode(md5_bytes).decode('utf-8')
-
-    # Convert all metadata values to strings
-    metadata_str = {k: str(v) for k, v in metadata.items()}
-
-    # Convert strings to bytes
-    content_bytes = content if isinstance(content, bytes) else content.encode('utf-8')
-
-    with io.BytesIO(content_bytes) as f:
-        f.seek(0)
-        # Use put_object method
-        result = s3_client.put_object(
-            Body=f.read(),
-            Bucket=bucket_name,
-            Key=key,
-            Metadata=metadata_str,
-            ContentMD5=content_md5,
-            ContentType=metadata.get('Content-Type', 'binary/octet-stream')  # Set the Content-Type
-        )
-
-    return {
-        "status": 200,
-        "message": "File written successfully to S3.",
-        "md5": metadata.get("md5", ""),
-        "debug": debug_info if debug else {},
-    }
+    except Exception as e:
+        # Catch any unhandled exceptions and return an error message
+        return {
+            "status": 500,
+            "message": "An error occurred while posting the file to S3: " + str(e),
+            "debug": debug_info if debug else {},
+        }
 
 
 def _post_to_local(
@@ -322,6 +330,7 @@ def _post_to_local(
     {
         "status": 200,
         "message": "File written successfully.",
+        "md5": "d41d8cd98f00b204e9800998ecf8427e",
         "debug": {}
     }
     ```
@@ -330,6 +339,7 @@ def _post_to_local(
     |---|---|---|
     | status    | int       | HTTP-like status code |
     | message   | string    | Message describing the outcome |
+    | md5       | string    | MD5 hash of the written file |
     | debug     | dictionary | Debug information |
     
     """
@@ -342,23 +352,29 @@ def _post_to_local(
             debug_info['post_start'] = f"Starting post with content={content}"
             result = file.write(content)
 
+            # Get MD5 of written file
+            post_local_md5 = get_md5_hash_filename(path)
+            
             # If result is greater than or equal to 0, the write is considered successful
             if result >= 0:
                 return {
                     "status": 200,
                     "message": "File written successfully.",
+                    "md5": post_local_md5,
                     "debug": debug_info if debug else {},
                 }
             else:
                 return {
                     "status": 500,
                     "message": "Failed to post file.",
+                    "md5": post_local_md5,
                     "debug": debug_info if debug else {},
                 }
     except OSError as e:
         return {
             "status": 500,
             "message": f"Failed to post file: {e}",
+            "md5": post_local_md5,
             "debug": debug_info if debug else {},
         }
 

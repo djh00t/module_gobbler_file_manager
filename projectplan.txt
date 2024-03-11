@@ -1,4 +1,4 @@
-# Gobbler File Manager Module Project Plan
+# Klingon File Manager Module Project Plan
 
 ## High-level Overview
 - Create a Python module for file management for local and AWS S3 storage.
@@ -7,12 +7,12 @@
 ## Detailed Design
 
 ### Project Structure
-1. gobbler_file_manager/
+1. klingon_file_manager/
     - __init__.py
-    - gobbler_file_manager.py
+    - klingon_file_manager.py
     - utils.py
 2. tests/
-    - test_gobbler_file_manager.py
+    - test_klingon_file_manager.py
 3. docker/
     - Dockerfile
     - docker-compose.yml

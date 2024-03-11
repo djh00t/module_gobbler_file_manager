@@ -124,3 +124,4 @@ def delete_file(path: str, debug: bool = False) -> Dict[str, Union[int, str, Dic
             "message": "Failed to delete file.",
             "debug": debug_info if debug else {},
         }
+

@@ -637,42 +637,72 @@ def get_mime_type_content(content: Union[str, bytes]) -> str:
 
     return mime_type
 
-def get_md5_hash_filename(filename: str) -> str:
+def get_md5_hash_filename(filename: str, debug=False) -> str:
     """
-    # Get the MD5 hash of a file using filename and path.
-
+    Get the MD5 hash of a file using filename and path, with optional debugging information.
+    
     ## Arguments
     
-    | Name      | Type              | Description | Default |
-    |-----------|-------------------|-------------|---------|
-    | filename  | string            | The name of the file | None |
+    | Name      | Type    | Description                        | Default |
+    |-----------|---------|------------------------------------|---------|
+    | filename  | str     | The name of the file               | None    |
+    | debug     | bool    | Flag to return debugging information | False  |
 
     Returns:
-    The MD5 hash of the file.
+    The MD5 hash of the file, with optional debugging information.
     """
+    debug_info = {
+        'filename_provided': filename,
+        'steps': []
+    }
 
     # Check if the filename is empty
     if not filename:
-        return None
+        debug_info['error'] = "No filename supplied"
+        raise ValueError("No filename supplied")
 
     # Check if the filename is an S3 URL
     if filename.startswith('s3://'):
+        debug_info['steps'].append('Filename is an S3 URL')
         # Fetch the metadata of the S3 object
         metadata = get_s3_metadata(filename)
+        debug_info['steps'].append('S3 metadata retrieved')
+        debug_info['metadata'] = metadata
+        debug_info['md5_from_metadata'] = metadata['md5']
         # Extract the MD5 hash from the metadata
-        md5_hash = metadata.get('Metadata', {}).get('md5')
+        md5_hash = metadata['md5']
+        if debug:
+            debug_info['result'] = md5_hash
+            return debug_info
         return md5_hash
 
     # Check if the file exists
     if not os.path.exists(filename):
+        debug_info['steps'].append('File does not exist')
+        if debug:
+            debug_info['result'] = None
+            return debug_info
         return None
 
-    # Open the file and read the contents
-    with open(filename, 'rb') as file:
-        content = file.read()
+    try:
+        # Open the file and read the contents
+        with open(filename, 'rb') as file:
+            content = file.read()
+            debug_info['steps'].append('File content read')
+        # Return the MD5 hash of the file contents
+        md5_hash = get_md5_hash(content)
+        debug_info['steps'].append('MD5 hash computed')
+    except Exception as e:
+        debug_info['steps'].append(f'Error reading file: {e}')
+        if debug:
+            debug_info['error'] = str(e)
+            return debug_info
+        raise
 
-    # Return the MD5 hash of the file contents
-    return get_md5_hash(content)
+    if debug:
+        debug_info['result'] = md5_hash
+        return debug_info
+    return md5_hash
 
 
 # Function to check if a file exists

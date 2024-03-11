@@ -33,9 +33,6 @@ The module looks for the following environment variables:
 ```
 - Utility functions such as `is_binary_file`, `get_md5_hash`, and `check_file_exists` to assist with file management tasks.
 - Internal functions `_get_from_s3`, `_get_from_local`, `_post_to_s3`, and `_post_to_local` for handling S3 and local file operations.
-- Utility functions such as `is_binary_file`, `get_md5_hash`, and `check_file_exists` to assist with file management tasks.
-- Internal functions `_get_from_s3`, `_get_from_local`, `_post_to_s3`, and `_post_to_local` for handling S3 and local file operations.
-
 
 ## Usage Examples
 ### Using `manage_file` function
@@ -65,7 +62,6 @@ When the 'get' action is used with the `manage_file` function, the output is a d
     "debug": "object or null"
 }
 ```
-- The `move_file` function allows moving files between local and S3 storage, ensuring data integrity with MD5 checksums.
 - The `move_file` function allows moving files between local and S3 storage, ensuring data integrity with MD5 checksums.
 
 Here is a description of each field:
@@ -140,7 +136,6 @@ When the 'delete' action is used with the `manage_file` function, the output is 
 }
 ```
 - The `move_file` function allows moving files between local and S3 storage, ensuring data integrity with MD5 checksums.
-- The `move_file` function allows moving files between local and S3 storage, ensuring data integrity with MD5 checksums.
 
 Here is a description of each field:
 
@@ -174,7 +169,6 @@ A dictionary containing the status of the write operation with the following sch
 }
 ```
 - The `delete_file` function enables deletion of files from local and S3 storage with simple error handling.
-- The `delete_file` function enables deletion of files from local and S3 storage with simple error handling.
 
 ### Usage Example
 
@@ -186,11 +180,13 @@ result = post_file('path/to/local/file.txt', 'Hello, World!')
 print(result)
 ```
 
-## Contribution Guidelines
-If you wish to contribute to this project, please submit a pull request.
-
 ## Running Tests
 To run tests, execute the following command:
 ```bash
-pytest
+make test
 ```
+
+## Contribution Guidelines
+If you wish to contribute to this project, please submit a pull request.
+
+

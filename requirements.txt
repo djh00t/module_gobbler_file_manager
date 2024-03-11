@@ -7,7 +7,9 @@ pydantic
 sphinx_rtd_theme
 sphinx_autodoc_typehints
 nbsphinx
+setuptools
 ipython
+python-dotenv
 datetime
 uuid
 python-magic
@@ -22,3 +24,4 @@ mkdocstrings-crystal
 lru_cache
 GitPython
 pyenchant
+
