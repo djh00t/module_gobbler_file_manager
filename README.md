@@ -33,6 +33,8 @@ The module looks for the following environment variables:
 ```
 - Utility functions such as `is_binary_file`, `get_md5_hash`, and `check_file_exists` to assist with file management tasks.
 - Internal functions `_get_from_s3`, `_get_from_local`, `_post_to_s3`, and `_post_to_local` for handling S3 and local file operations.
+- Utility functions such as `is_binary_file`, `get_md5_hash`, and `check_file_exists` to assist with file management tasks.
+- Internal functions `_get_from_s3`, `_get_from_local`, `_post_to_s3`, and `_post_to_local` for handling S3 and local file operations.
 
 - Utility function `get_mime_type` to fetch the MIME type of a file.
 - Utility function `is_binary_file` to check if a file is binary.
@@ -68,6 +70,7 @@ When the 'get' action is used with the `manage_file` function, the output is a d
     "debug": "object or null"
 }
 ```
+- The `move_file` function allows moving files between local and S3 storage, ensuring data integrity with MD5 checksums.
 - The `move_file` function allows moving files between local and S3 storage, ensuring data integrity with MD5 checksums.
 
 Here is a description of each field:
@@ -105,6 +108,7 @@ When the 'post' action is used with the `manage_file` function, the output is a 
     "debug": "object or null"
 }
 ```
+- The `move_file` function allows moving files between local and S3 storage, ensuring data integrity with MD5 checksums.
 Here is a description of each field:
 
 - `status`: An integer representing the status of the operation. A status of 200 indicates success, while a status of 500 indicates an error.
@@ -139,6 +143,7 @@ When the 'delete' action is used with the `manage_file` function, the output is 
 }
 ```
 - The `move_file` function allows moving files between local and S3 storage, ensuring data integrity with MD5 checksums.
+- The `move_file` function allows moving files between local and S3 storage, ensuring data integrity with MD5 checksums.
 
 Here is a description of each field:
 
@@ -171,6 +176,7 @@ A dictionary containing the status of the write operation with the following sch
     "debug": Dict[str, str] # Debug information (only included if 'debug' flag is True)
 }
 ```
+- The `delete_file` function enables deletion of files from local and S3 storage with simple error handling.
 - The `delete_file` function enables deletion of files from local and S3 storage with simple error handling.
 
 ### Usage Example
