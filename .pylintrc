@@ -259,7 +259,7 @@ max-module-lines=99999
 # spaces.  Google's externaly-published style guide says 4, consistent with
 # PEP 8.  Here, we use 2 spaces, for conformity with many open-sourced Google
 # projects (like TensorFlow).
-indent-string='  '
+indent-string='    '
 
 # Number of spaces of indent required inside a hanging  or continued line.
 indent-after-paren=4
@@ -326,21 +326,23 @@ ignore-imports=no
 
 
 [SPELLING]
-
 # Spelling dictionary name. Available dictionaries: none. To make it working
 # install python-enchant package.
-spelling-dict=
+spelling-dict=en_US
 
 # List of comma separated words that should not be checked.
 spelling-ignore-words=
 
 # A path to a file that contains private dictionary; one word per line.
-spelling-private-dict-file=
+spelling-private-dict-file=private-dictionary.txt
 
 # Tells whether to store unknown words to indicated private dictionary in
 # --spelling-private-dict-file option instead of raising a message.
-spelling-store-unknown-words=no
+spelling-store-unknown-words=yes
 
+# Prevent Pylint from reporting any spelling errors in import statements, even
+# if they are misspelled.
+spelling-disable-file-import=True
 
 [IMPORTS]
 

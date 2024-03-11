@@ -1,3 +1,20 @@
+"""
+# Check Bucket Permissions Test Module
+Test module for AWS utilities in the klingon_file_manager
+
+This module contains tests for utility functions in the `klingon_file_manager.utils` module that handle AWS operations.
+
+Functions tested:
+- `klingon_file_manager.utils.check_bucket_permissions`
+
+Functions in this test module:
+- `test_check_bucket_permissions_no_such_bucket_list_objects`
+- `test_check_bucket_permissions_no_such_bucket_get_bucket_acl`
+- `test_check_bucket_permissions_no_such_bucket_put_delete_object`
+- `test_check_bucket_permissions_all_valid`
+- `test_check_bucket_permissions_mixed_permissions`
+
+"""
 import pytest
 from unittest.mock import MagicMock, patch
 from klingon_file_manager.utils import get_aws_credentials, parallel_check_bucket_permissions, check_bucket_permissions, get_mime_type
@@ -5,11 +22,15 @@ from botocore.exceptions import NoCredentialsError, ClientError
 
 # Define a custom exception class for NoSuchBucket
 class NoSuchBucketException(Exception):
-    """Mock class for NoSuchBucket exceptions."""
+    """
+    # NoSuchBucket Exception
+    Mock class for NoSuchBucket exceptions.
+    """
     pass
 
 def get_mock_s3_client():
     """
+    # Get Mock S3 Client
     Create and return a mock S3 client with predefined behaviors.
     
     Returns:
@@ -29,6 +50,20 @@ def get_mock_s3_client():
 
 # Mock parallel_check_bucket_permissions
 def mock_parallel_check_bucket_permissions(*args, **kwargs):
+    """
+    # Mock Parallel Check Bucket Permissions
+    Mock function to simulate the parallel checking of S3 bucket permissions.
+
+    This mock assumes all permissions (DeleteObject, GetBucketAcl, ListBucket, PutObject) are granted
+    for 'bucket1' and 'bucket2'. It returns a dictionary with these permissions set to True.
+
+    Args:
+        *args: Variable length argument list.
+        **kwargs: Arbitrary keyword arguments.
+
+    Returns:
+        dict: A dictionary containing the permissions for 'bucket1' and 'bucket2'.
+    """
     return {
         'bucket1': {
             'DeleteObject': True,
@@ -69,9 +104,12 @@ def mock_parallel_check_bucket_permissions(*args, **kwargs):
 
 def test_check_bucket_permissions_no_such_bucket_list_objects():
     """
+    # Test Check Bucket Permissions: No Such Bucket for List Objects
     Test function to check bucket permissions when the specified bucket does not exist.
     This test focuses on the 'list_objects_v2' operation.
 
+    The function tests the scenario where a ClientError is raised for a nonexistent bucket
+    during the list_objects_v2 operation, ensuring that the permissions are reported as False.
     """
     # Create a mock S3 client object
     mock_s3_client = MagicMock()
@@ -103,9 +141,12 @@ def test_check_bucket_permissions_no_such_bucket_list_objects():
 
 def test_check_bucket_permissions_no_such_bucket_get_bucket_acl():
     """
+    # Test Check Bucket Permissions: No Such Bucket for Get Bucket ACL
     Test function to check bucket permissions when the specified bucket does not exist.
     This test focuses on the 'get_bucket_acl' operation.
 
+    The function tests the scenario where a ClientError is raised for a nonexistent bucket
+    during the get_bucket_acl operation, ensuring that the permissions are reported as False.
     """
     # Create a mock S3 client object
     mock_s3_client = MagicMock()
@@ -137,9 +178,12 @@ def test_check_bucket_permissions_no_such_bucket_get_bucket_acl():
 
 def test_check_bucket_permissions_no_such_bucket_put_delete_object():
     """
+    # Test Check Bucket Permissions: No Such Bucket for Put/Delete Object
     Test function to check bucket permissions when the specified bucket does not exist.
     This test focuses on the 'put_object' and 'delete_object' operations.
 
+    The function tests the scenario where a ClientError is raised for a nonexistent bucket
+    during put_object and delete_object operations, ensuring that the permissions are reported as False.
     """
     # Create a mock S3 client object
     mock_s3_client = MagicMock()
@@ -170,11 +214,11 @@ def test_check_bucket_permissions_no_such_bucket_put_delete_object():
 
 def test_check_bucket_permissions_all_valid():
     """
-    Test function to check bucket permissions for a valid bucket with all permissions.
+    # Test Check Bucket Permissions: All Valid
+    Test function to check bucket permissions for a valid bucket with all permissions granted.
 
     This test ensures that when all S3 operations succeed without raising exceptions,
-    the check_bucket_permissions function correctly reports all permissions as valid.
-
+    the check_bucket_permissions function correctly reports all permissions as true.
     """
     mock_s3_client = get_mock_s3_client()
     print(f"mock_s3_client: {mock_s3_client}")
@@ -200,11 +244,12 @@ def test_check_bucket_permissions_all_valid():
 
 def test_check_bucket_permissions_mixed_permissions():
     """
+    # Test Check Bucket Permissions: Mixed Permissions
     Test function to check bucket permissions for a bucket with mixed permissions.
 
-    This test simulates a bucket with successful ListBucket and GetBucketAcl permissions,
-    but failed PutObject and DeleteObject permissions, raising AccessDenied exceptions.
-
+    This test simulates a bucket where ListBucket and GetBucketAcl operations succeed,
+    but PutObject and DeleteObject operations are denied, checking that the permissions
+    are correctly identified as a mix of True and False.
     """
     # Create a mock S3 client object
     mock_s3_client = MagicMock()

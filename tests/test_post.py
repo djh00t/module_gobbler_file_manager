@@ -19,7 +19,7 @@ Scenarios include:
 
 """
 import pytest
-from klingon_file_manager import post_file, get_s3_metadata
+from klingon_file_manager import post_file, get_md5_hash, get_md5_hash_filename
 import os
 import hashlib
 import logging
@@ -182,7 +182,7 @@ def test_post_to_s3_authentication_failure():
     result = post_file(s3_path, content)
     # Add assertions to check the result
     assert result["status"] == 500
-    assert "The specified bucket does not exist" in result["message"]
+    assert "An error occurred while posting the file to S3: An error occurred (AccessDenied) when calling the PutObject operation: Access Denied" in result["message"]
     
 
 def test_post_to_local_directory_not_found():
@@ -207,21 +207,21 @@ def test_post_to_s3_with_manual_md5():
     """
     # Define test parameters
     aws_s3_bucket_name = os.environ.get("AWS_S3_BUCKET_NAME")
-    s3_path = f"s3://{aws_s3_bucket_name}/development/unit-tests/file_with_md5.txt"
+    path = f"s3://{aws_s3_bucket_name}/development/unit-tests/file_with_md5.txt"
     content = "test_post_to_s3_with_manual_md5"
-    md5_hash = hashlib.md5(content.encode('utf-8')).hexdigest()  # Calculate the MD5 hash
+    src_md5 = get_md5_hash(content)  # Calculate the MD5 hash
     # Call the post_file function with MD5 hash
-    result = post_file(s3_path, content, md5=md5_hash)
+    result = post_file(path=path, content=content, md5=src_md5)
+    # Gather the MD5 hash from the result
+    post_md5 = result["md5"]
     # Add assertions to check the result
     assert result["status"] == 200  # Assuming it succeeds and returns a 200 status code
     assert "File written successfully to S3." in result["message"]  # Check for a success message
-    assert result["md5"] == md5_hash  # Check that the MD5 hash is returned in the result
+    assert result["md5"] == src_md5  # Check that the MD5 hash is returned in the result
     # Retrieve metadata from S3
-    metadata = get_s3_metadata(s3_path) or {'Metadata': {}}  # Ensure metadata is not None
-    # Extracted MD5 from the response
-    extracted_md5 = metadata.get('Metadata', {}).get('md5', '')  # Provide default empty string if 'md5' key is missing
+    dst_md5 = get_md5_hash_filename(path)
     # Add an assertion to compare the stored MD5 hash with the calculated MD5 hash
-    assert extracted_md5 == md5_hash, f"MD5 does not match the expected value. Expected: {md5_hash}, Got: {extracted_md5}"
+    assert src_md5 == post_md5 == dst_md5, f"MD5 does not match the expected value. Expected: src_md5: {src_md5} post_md5: {src_md5} dst_md5: {src_md5}, Got: src_md5: {src_md5} post_md5: {post_md5} dst_md5: {dst_md5}"
 
 
 def test_post_to_s3_with_incorrect_md5():

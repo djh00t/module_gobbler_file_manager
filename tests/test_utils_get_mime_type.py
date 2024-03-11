@@ -90,10 +90,12 @@ def test_get_mime_type_existing_s3_file_with_md5_metadata():
     the retrieved metadata matches the expected values.
     """
     if AWS_S3_BUCKET_NAME:
-        s3_url = f"s3://{AWS_S3_BUCKET_NAME}/development/unit-tests/do-not-delete/UNITTEST_20230705_035512_61355551234_1234.wav"
-        metadata = get_s3_metadata(s3_url) or {'Metadata': {}}  # Ensure metadata is not None
+        path = f"s3://{AWS_S3_BUCKET_NAME}/development/unit-tests/do-not-delete/UNITTEST_20230705_035512_61355551234_1234.wav"
+        print(f"path: {path}")
+        metadata = get_s3_metadata(path)
         # Retrieve md5 value from Metadata key in metadata dictionary
-        md5_check = metadata.get('Metadata', {}).get('md5', '')  # Provide default empty string if 'md5' key is missing
+        print(f"metadata: {metadata}")
+        md5_check = metadata['md5']
         # Retrieve mime_type value from metadata dictionary
         mime_type = metadata.get("mime_type")
 

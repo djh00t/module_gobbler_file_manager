@@ -20,3 +20,5 @@ mkdocs-literate-nav
 mkdocs-section-index
 mkdocstrings-crystal
 lru_cache
+GitPython
+pyenchant

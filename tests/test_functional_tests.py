@@ -376,12 +376,13 @@ def test_move_local_txt_file_s3():
     generate_text_file(src_file, 100)
     src_md5 = get_md5_hash_filename(src_file)
     result = move_file(src_file, dst_file)
+    dst_md5 = get_md5_hash_filename(dst_file)
     # Capture result variables
     print(f"Result: {result}")
-    status = result.get('status')
-    message = result.get('message')
-    source = result.get('source', src_file)  # Default to src_file if 'source' key is missing
-    destination = result.get('destination', dst_file)  # Default to dst_file if 'destination' key is missing
+    status = result['status']
+    message = result['message']
+    # source = result['source']
+    destination = result['destination']
     print(f"Result: {result}")
     print(f"SRC MD5: {src_md5}")
     print(f"DST MD5: {dst_md5}")

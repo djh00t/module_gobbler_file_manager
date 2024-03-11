@@ -1,0 +1,18 @@
+rule_settings:
+  disable:
+  - dont-use-with
+  - dont-shadow-arguments
+  - dont-self-assign-variables
+  - dont-reassign-foreach-variables
+  - dont-reassign-caught-exceptions
+  - dont-negate-is-instanceof-operands
+  - combine-object-destructuring
+  - binary-operator-identity
+  - avoid-using-var
+  - avoid-jumping-in-finally
+  - avoid-infinite-loops
+  - avoid-function-declarations-in-blocks
+  - assignment-operator
+  - dont-reassign-parameters
+  - dont-use-wrappers-for-builtins
+  - generators-should-yield

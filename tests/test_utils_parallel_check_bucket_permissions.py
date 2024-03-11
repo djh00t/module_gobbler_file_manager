@@ -1,3 +1,16 @@
+"""
+# Parallel Check Bucket Permissions Test Module
+Test module for AWS utilities in the klingon_file_manager
+
+This module contains tests for utility functions in the `klingon_file_manager.utils` module that handle AWS operations.
+
+Functions tested:
+- `klingon_file_manager.utils.parallel_check_bucket_permissions`
+
+Functions in this test module:
+- `test_parallel_check_bucket_permissions`
+
+"""
 import pytest
 from unittest.mock import MagicMock, patch
 from klingon_file_manager.utils import get_aws_credentials, parallel_check_bucket_permissions, check_bucket_permissions
@@ -7,11 +20,11 @@ from botocore.exceptions import NoCredentialsError, ClientError
 @patch('klingon_file_manager.utils.check_bucket_permissions')
 def test_parallel_check_bucket_permissions(mock_check):
     """
-    Test the parallel checking of bucket permissions.
+    # Test Parallel Check Bucket Permissions
+    
+    Ensures that `klingon_file_manager.utils.parallel_check_bucket_permissions` correctly identifies and returns the permissions for multiple S3 buckets concurrently.
 
-    This function tests the parallel_check_bucket_permissions function by mocking the check_bucket_permissions
-    function and providing different permissions for two buckets.
-
+    The test mocks the `check_bucket_permissions` function to simulate varying permissions across two different buckets, and then compares the results against expected values.
     """
     mock_s3_client = MagicMock()
     mock_check.side_effect = lambda bucket_name, s3_client: {
