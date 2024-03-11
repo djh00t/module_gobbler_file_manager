@@ -1,8 +1,7 @@
 # Klingon File Manager
 
 ## Introduction
-Klingon File Manager is a Python module designed for managing files both
-locally and on AWS S3 storage.  It provides functionalities to 'get', 'post', and 'delete' files using a unified interface.
+Klingon File Manager is a Python module designed for managing files on both local and AWS S3 storage. It provides a unified interface for file operations such as 'get', 'post', 'delete', and 'move'.
 
 ## Installation
 Run the following command to install the package:
@@ -24,10 +23,10 @@ The module looks for the following environment variables:
 {
     'action': str,         # Action performed ('get', 'post', or 'delete')
     'path': str,           # Path for the file operation
-    'content': Union[str, bytes],  # File content for 'get' and 'post' actions
+    'content': Union[str, bytes, None],  # File content for 'get' and 'post' actions
     'content_size_mb': float,  # Size of the content in megabytes
     'binary': bool,        # Flag indicating if the content is binary
-    'md5': str,            # The md5 hash of the file content for 'get' and 'post' actions
+    'md5': Optional[str],  # The md5 hash of the file content for 'get' and 'post' actions
     'status': int,         # HTTP-like status code (e.g., 200 for success, 500 for failure)
     'debug': Dict[str, str]  # Debug information (only included if 'debug' flag is True)
 }
@@ -144,9 +143,9 @@ Here is a description of each field:
 - `path`: A string representing the path of the file that was deleted.
 - `debug`: An object containing debug information, or `null` if debugging is not enabled.
 
-## `write_file` function
+## `post_file` function
 
-The `write_file` function in `klingon_file_manager/write.py` is used to write content to a file at a given path, which can be either a local file or an S3 object.
+The `post_file` function in `klingon_file_manager/post.py` is used to write content to a file at a given path, which can be either a local file or an S3 object.
 
 ### Arguments
 
@@ -164,7 +163,7 @@ A dictionary containing the status of the write operation with the following sch
 {
     "status": int,          # HTTP-like status code (e.g., 200 for success, 500 for failure)
     "message": str,         # Message describing the outcome
-    "md5": str,             # The MD5 hash of the written file (only included if status is 200)
+    "md5": Optional[str],   # The MD5 hash of the written file (only included if status is 200)
     "debug": Dict[str, str] # Debug information (only included if 'debug' flag is True)
 }
 ```
@@ -172,9 +171,9 @@ A dictionary containing the status of the write operation with the following sch
 ### Usage Example
 
 ```python
-from klingon_file_manager.write import write_file
+from klingon_file_manager.post import post_file
 
-result = write_file('path/to/local/file.txt', 'Hello, World!')
+result = post_file('path/to/local/file.txt', 'Hello, World!')
 
 print(result)
 ```
@@ -187,3 +186,8 @@ To run tests, execute the following command:
 ```bash
 pytest
 ```
+For continuous testing with automatic reload upon file changes, use the `tl.py` script:
+```bash
+./tl.py -t tests/test_example.py -s 10
+```
+This will run the specified test every 10 seconds, reloading the test file if it changes.
