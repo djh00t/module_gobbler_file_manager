@@ -132,18 +132,6 @@ logger.info(f"S3 files: {s3_files}")
 ```
 
 """
-import logging
-import os
-import warnings
-
-loglevel = os.getenv('PYTHON_LOGLEVEL', 'INFO').upper()
-logging.basicConfig(
-    level=getattr(logging, loglevel, logging.INFO),
-    format="%(asctime)s - %(levelname)s - %(message)s"
-)
-
-# Ignore specific DeprecationWarning from botocore
-warnings.filterwarnings("ignore", category=DeprecationWarning, module="botocore.auth", lineno=419)
 
 from .manage import manage_file, move_file, FilesystemRouter
 from .delete import delete_file
