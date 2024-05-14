@@ -145,7 +145,9 @@ logging.basicConfig(
 # Ignore specific DeprecationWarning from botocore
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="botocore.auth", lineno=419)
 
-from .manage import manage_file, move_file, FilesystemRouter
+from .manage import manage_file, move_file, FilesystemRouter, configure_logging
+configure_logging()
+
 from .delete import delete_file
 from .get import get_file
 from .post import post_file, _post_to_local, _post_to_s3

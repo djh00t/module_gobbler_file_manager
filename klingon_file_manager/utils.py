@@ -90,9 +90,6 @@ import time
 import logging
 from urllib.parse import urlparse
 
-# Logging configuration
-logging.basicConfig(level=logging.INFO)
-
 # Load environment variables from .env file
 load_dotenv()
 
