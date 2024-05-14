@@ -160,12 +160,12 @@ The `post_file` function in `klingon_file_manager/post.py` is used to write cont
 
 A dictionary containing the status of the write operation with the following schema:
 
-```json
+```python
 {
-    "status": int,          # HTTP-like status code (e.g., 200 for success, 500 for failure)
-    "message": str,         # Message describing the outcome
-    "md5": Optional[str],   # The MD5 hash of the file content (only included if status is 200)
-    "debug": Optional[Dict[str, str]] # Debug information (only included if 'debug' flag is True)
+    "status": int,                      # HTTP-like status code (e.g., 200 for success, 500 for failure)
+    "message": str,                     # Message describing the outcome
+    "md5": Optional[str],               # The MD5 hash of the file content (only included if status is 200)
+    "debug": Optional[Dict[str, str]]   # Debug information (only included if 'debug' flag is True)
 }
 ```
 - The `delete_file` function enables deletion of files from local and S3 storage with simple error handling.
