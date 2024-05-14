@@ -19,16 +19,17 @@ The module looks for the following environment variables:
 - AWS credentials are fetched using the `get_aws_credentials` function
 - File operations are performed using the `read_file`, `write_file`, and `delete_file` functions
 - The `manage_file` function returns a dictionary containing the result of the file operation with the following schema:
-```json
+
+```python
 {
-    'action': str,         # Action performed ('get', 'post', 'delete', or 'move')
-    'path': str,           # Path for the file operation
-    'content': Union[str, bytes, None],  # File content for 'get' and 'post' actions
-    'content_size_mb': float,  # Size of the content in megabytes
-    'binary': bool,        # Flag indicating if the content is binary
-    'md5': Optional[str],  # The md5 hash of the file content for 'get', 'post', and 'move' actions
-    'status': int,         # HTTP-like status code (e.g., 200 for success, 500 for failure)
-    'debug': Optional[Dict[str, str]]  # Debug information (only included if 'debug' flag is True)
+    'action': str,                      # Action performed ('get', 'post', 'delete', or 'move')
+    'path': str,                        # Path for the file operation
+    'content': Union[str, bytes, None], # File content for 'get' and 'post' actions
+    'content_size_mb': float,           # Size of the content in megabytes
+    'binary': bool,                     # Flag indicating if the content is binary
+    'md5': Optional[str],               # md5 hash of file content for 'get', 'post', and 'move' actions
+    'status': int,                      # HTTP-like status code (e.g., 200 for success, 500 for failure)
+    'debug': Optional[Dict[str, str]]   # Debug information (only included if 'debug' flag is True)
 }
 ```
 - Utility functions such as `is_binary_file`, `get_md5_hash`, and `check_file_exists` to assist with file management tasks.
@@ -100,9 +101,8 @@ When the 'post' action is used with the `manage_file` function, the output is a 
     "debug": "object or null"
 }
 ```
-- The `move_file` function allows moving files between local and S3 storage, ensuring data integrity with MD5 checksums.
+The `move_file` function allows moving files between local and S3 storage, ensuring data integrity with MD5 checksums.
 Here is a description of each field:
-
 - `status`: An integer representing the status of the operation. A status of 200 indicates success, while a status of 500 indicates an error.
 - `action`: A string representing the action performed. In this case, it will be 'post'.
 - `path`: A string representing the path of the file that was written.
