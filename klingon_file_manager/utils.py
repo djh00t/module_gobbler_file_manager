@@ -47,7 +47,7 @@ True
 To fetch AWS credentials:
 ```python
 >>> credentials = get_aws_credentials()
->>> print(credentials['aws_access_key_id'])
+>>> logger.info(credentials['aws_access_key_id'])
 {
     "status": 200,
     "message": "AWS credentials retrieved successfully.",
@@ -119,7 +119,7 @@ def timing_decorator(func: Callable) -> Callable:
     ```python
     >>> #@timing_decorator
     ... def example_function():
-    ...     print("Executing function...")
+    ...     logger.info("Executing function...")
     ...
     >>> example_function()
     Executing function...
@@ -130,7 +130,7 @@ def timing_decorator(func: Callable) -> Callable:
         start_time = time.time()
         result = func(*args, **kwargs)
         end_time = time.time()
-        print(f"{func.__name__} took {end_time - start_time} seconds to run.")
+        logger.info(f"{func.__name__} took {end_time - start_time} seconds to run.")
         return result
     return wrapper
 
@@ -238,8 +238,8 @@ def parallel_check_bucket_permissions(bucket_names: List[str], s3_client: Any) -
 #@timing_decorator
 #@lru_cache(maxsize=128)
 def check_bucket_permissions(bucket_name, s3_client):
-    print(f"Checking permissions for bucket: {bucket_name}")
-    print(f"Checking permissions for s3_client: {s3_client}")
+    logger.info(f"Checking permissions for bucket: {bucket_name}")
+    logger.info(f"Checking permissions for s3_client: {s3_client}")
     """
     # Check permissions of an S3 bucket
 
@@ -294,11 +294,11 @@ def check_bucket_permissions(bucket_name, s3_client):
         except ClientError as e:
             if e.response['Error']['Code'] == 'NoSuchBucket':
                 permissions = bucket_not_exists_permissions
-                print(f"No such bucket: {bucket_name}")
+                logger.info(f"No such bucket: {bucket_name}")
                 bucket_exists = False
             else:
                 permissions['ListBucket'] = False
-                print(f"Error checking ListBucket permission: {e}")
+                logger.info(f"Error checking ListBucket permission: {e}")
 
     # Check GetBucketAcl permission
     if bucket_exists:
@@ -308,11 +308,11 @@ def check_bucket_permissions(bucket_name, s3_client):
         except ClientError as e:
             if e.response['Error']['Code'] == 'NoSuchBucket':
                 permissions = bucket_not_exists_permissions
-                print(f"No such bucket: {bucket_name}")
+                logger.info(f"No such bucket: {bucket_name}")
                 bucket_exists = False
             else:
                 permissions['GetBucketAcl'] = False
-                print(f"Error checking GetBucketAcl permission: {e}")
+                logger.info(f"Error checking GetBucketAcl permission: {e}")
 
     # Check PutObject permission
     if bucket_exists:
@@ -324,11 +324,11 @@ def check_bucket_permissions(bucket_name, s3_client):
         except ClientError as e:
             if e.response['Error']['Code'] == 'NoSuchBucket':
                 permissions = bucket_not_exists_permissions
-                print(f"No such bucket: {bucket_name}")
+                logger.info(f"No such bucket: {bucket_name}")
                 bucket_exists = False
             else:
                 permissions['PutObject'] = False
-                print(f"Error checking PutObject permission: {e}")
+                logger.info(f"Error checking PutObject permission: {e}")
 
     # Check DeleteObject permission
     if bucket_exists:
@@ -338,14 +338,14 @@ def check_bucket_permissions(bucket_name, s3_client):
         except ClientError as e:
             if e.response['Error']['Code'] == 'NoSuchBucket':
                 permissions = bucket_not_exists_permissions
-                print(f"No such bucket: {bucket_name}")
+                logger.info(f"No such bucket: {bucket_name}")
                 bucket_exists = False
             elif e.response['Error']['Code'] != 'NoSuchKey':
                 permissions['DeleteObject'] = False
-                print(f"Error checking DeleteObject permission: {e}")
+                logger.info(f"Error checking DeleteObject permission: {e}")
             else:
                 permissions['DeleteObject'] = False
-                print(f"Error checking DeleteObject permission: {e}")
+                logger.info(f"Error checking DeleteObject permission: {e}")
 
     return permissions
 
@@ -394,15 +394,8 @@ def get_aws_credentials(debug: bool = False, access_key: str = None, secret_key:
     """
 
     # Get AWS credentials from arguments or environment variables
-    print("Access Key from arguments:", access_key)
-    print("Secret Key from arguments:", secret_key)
     access_key = access_key or os.getenv('AWS_ACCESS_KEY_ID')
-    print("Access Key after fetching from os.getenv:", access_key)
     secret_key = secret_key or os.getenv('AWS_SECRET_ACCESS_KEY')
-    print("Secret Key after fetching from os.getenv:", secret_key)
-    # Insert the print statement here
-    print(f"Access Key in Function: {access_key}")
-    print(f"Secret Key in function: {secret_key}")
 
     # If either of the AWS_ACCESS_KEY_ID or AWS_SECRET_ACCESS_KEY credentials
     # is unset, set to None or spaces/tabs or otherwise unprintable characters,
@@ -417,16 +410,16 @@ def get_aws_credentials(debug: bool = False, access_key: str = None, secret_key:
     # Check if the credentials are valid
     try:
         session = Session(aws_access_key_id=access_key, aws_secret_access_key=secret_key)
-        print(f"Session Details: {session.__dict__}")
+        logger.info(f"Session Details: {session.__dict__}")
         user = session.client('iam').get_user()
-        print(f"User Details: {user}")
+        logger.info(f"User Details: {user}")
     except NoCredentialsError:
         return {
             'status': 403,
             'message': 'Access Denied - AWS credentials are invalid',
         }
     except ClientError as e:
-        print(f"Exception details: {e}")
+        logger.info(f"Exception details: {e}")
         if e.response['Error']['Code'] == 'InvalidClientTokenId':
             return {
                 'status': 403,
@@ -449,7 +442,7 @@ def get_aws_credentials(debug: bool = False, access_key: str = None, secret_key:
     access = parallel_check_bucket_permissions(tuple(bucket_names), s3_client)
 
     if 'access' in response:
-        print(f"Final buckets in response: {list(response['access'].keys())}")
+        logger.info(f"Final buckets in response: {list(response['access'].keys())}")
 
     return {
         'status': 200,
@@ -554,7 +547,7 @@ def get_s3_metadata(s3_url):
     if __name__ == "__main__":
         s3_url = "s3://your-bucket-name/your-object-key"
         result = get_s3_metadata(s3_url)
-        print("Metadata:", result)
+        logger.info("Metadata:", result)
     ```
     """
     # Parse the S3 URL
@@ -565,9 +558,9 @@ def get_s3_metadata(s3_url):
     # Fetch the object metadata
     try:
         response = s3_client.head_object(Bucket=bucket_name, Key=key)
-        print(response)
+        logger.info(response)
     except Exception as e:
-        print(f"Error: {e}")
+        logger.info(f"Error: {e}")
         # Return an empty dictionary instead of None when an error occurs
         return {'Error': str(e), 'Metadata': {}}
     
