@@ -236,8 +236,8 @@ def parallel_check_bucket_permissions(bucket_names: List[str], s3_client: Any) -
 #@timing_decorator
 #@lru_cache(maxsize=128)
 def check_bucket_permissions(bucket_name, s3_client):
-    logger.info(f"Checking permissions for bucket: {bucket_name}")
-    logger.info(f"Checking permissions for s3_client: {s3_client}")
+    logger.debug(f"Checking permissions for bucket: {bucket_name}")
+    logger.debug(f"Checking permissions for s3_client: {s3_client}")
     """
     # Check permissions of an S3 bucket
 
@@ -408,9 +408,9 @@ def get_aws_credentials(debug: bool = False, access_key: str = None, secret_key:
     # Check if the credentials are valid
     try:
         session = Session(aws_access_key_id=access_key, aws_secret_access_key=secret_key)
-        logger.info(f"Session Details: {session.__dict__}")
+        logger.debug(f"Session Details: {session.__dict__}")
         user = session.client('iam').get_user()
-        logger.info(f"User Details: {user}")
+        logger.debug(f"User Details: {user}")
     except NoCredentialsError:
         return {
             'status': 403,
