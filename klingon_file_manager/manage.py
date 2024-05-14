@@ -45,8 +45,8 @@ To move a file from a local directory to an S3 bucket:
 
 from typing import Union, Dict, Optional, Callable
 import logging
-import requests
-import os
+#import requests
+#import os
 from .utils import (
     is_binary_file,
     get_aws_credentials,
@@ -58,9 +58,7 @@ from .delete import delete_file
 from .post import post_file
 from .get import get_file
 
-logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+
 
 # Use the get_aws_credentials function to get AWS credentials returned as a
 # json object containing the following keys:
@@ -240,7 +238,7 @@ def manage_file(
         "debug": debug_info if debug else {},  # The debug information
     }
 
-    print(f"DEBUG: result={result}")
+    logger.info(f"DEBUG: result={result}")
 
     try:
         if action == "get":
@@ -358,9 +356,9 @@ def move_file(src_path:str, dst_path: str, debug: bool = False):
 
     try:
         # Print the source and destination paths and debug state
-        print(f"XXX DEBUG FILE SRC:     {src_path}")
-        print(f"XXX DEBUG FILE DST:     {dst_path}")
-        print(f"XXX DEBUG FILE DEBUG:   {debug}")
+        logger.info(f"XXX DEBUG FILE SRC:     {src_path}")
+        logger.info(f"XXX DEBUG FILE DST:     {dst_path}")
+        logger.info(f"XXX DEBUG FILE DEBUG:   {debug}")
 
         # Check if the file is binary
         binary = is_binary_file(src_path)
@@ -368,15 +366,15 @@ def move_file(src_path:str, dst_path: str, debug: bool = False):
         logging.debug(f"Checked if file is binary: {binary}")
 
         # Print the source and destination paths and debug state
-        print(f"GET DEBUG FILE SRC:     {src_path}")
-        print(f"GET DEBUG FILE DEBUG:   {debug}")
+        logger.info(f"GET DEBUG FILE SRC:     {src_path}")
+        logger.info(f"GET DEBUG FILE DEBUG:   {debug}")
         # Retrieve the file using get.py functionality
         get_result = get_file(
             path=src_path,
             debug=debug,
         )
         
-        print(f"XXX GET DEBUG: {get_result}")
+        logger.info(f"XXX GET DEBUG: {get_result}")
 
         logging.debug(f"Retrieved content from src_path: {get_result}")
 
@@ -391,11 +389,11 @@ def move_file(src_path:str, dst_path: str, debug: bool = False):
         if src_status != 200:
             logging.error(src_message)
             logging.debug(get_result)
-            print(f"FAILED:          {src_message}")
+            logger.info(f"FAILED:          {src_message}")
             return get_result
         else:
             logging.info(f"{src_status} - {src_message}")
-            print(f"GET DEBUG: {get_result}")
+            logger.info(f"GET DEBUG: {get_result}")
 
         # Save the file to the destination using post.py functionality
         post_result = post_file(
@@ -418,31 +416,31 @@ def move_file(src_path:str, dst_path: str, debug: bool = False):
         if post_result["status"] != 200:
             logging.error(post_message)
             logging.debug(post_result)
-            print(f"FAILED:          {post_message}")
+            logger.info(f"FAILED:          {post_message}")
             return post_result
         else:
             logging.info(f"{post_status} - {post_message}")
-            print(f"GET DEBUG: {post_result}")
+            logger.info(f"GET DEBUG: {post_result}")
 
 
 
-        print(f"MD5 DEBUG:       SRC checksum:               {src_md5}")
-        print(f"MD5 DEBUG:       POST checksum:              {post_md5}")
-        print(f"MD5 DEBUG:       DST checksum:               {dst_md5}")
+        logger.info(f"MD5 DEBUG:       SRC checksum:               {src_md5}")
+        logger.info(f"MD5 DEBUG:       POST checksum:              {post_md5}")
+        logger.info(f"MD5 DEBUG:       DST checksum:               {dst_md5}")
 
         # Verify that the src_md5, post_md5 & dst_md5 checksums match
         if src_md5 == post_md5 == dst_md5:
             logging.info("All three MD5 checksums match - OK!")
-            print("MD5 DEBUG:       MD5 checksums match - OK!")
+            logger.info("MD5 DEBUG:       MD5 checksums match - OK!")
         else:
             logging.error(f"MD5 checksums do not match!")
             logging.error(f"SRC checksum:               {src_md5}")
             logging.error(f"POST checksum:              {post_md5}")
             logging.error(f"DST checksum:               {dst_md5}")
-            print(f"MD5 DEBUG:       MD5 checksums do not match!")
-            print(f"MD5 DEBUG:       SRC checksum:               {src_md5}")
-            print(f"MD5 DEBUG:       POST checksum:              {post_md5}")
-            print(f"MD5 DEBUG:       DST checksum:               {dst_md5}")
+            logger.info(f"MD5 DEBUG:       MD5 checksums do not match!")
+            logger.info(f"MD5 DEBUG:       SRC checksum:               {src_md5}")
+            logger.info(f"MD5 DEBUG:       POST checksum:              {post_md5}")
+            logger.info(f"MD5 DEBUG:       DST checksum:               {dst_md5}")
 
             return {
                 "status": 500,
@@ -461,12 +459,12 @@ def move_file(src_path:str, dst_path: str, debug: bool = False):
             }
 
         # Delete the file from the source path using delete.py functionality
-        print(f"DELETE DEBUG: {debug}")
+        logger.info(f"DELETE DEBUG: {debug}")
         delete_result = delete_file(
             path=src_path,
             debug=debug,
         )
-        print(f"XXX DELETE DEBUG: {delete_result}")
+        logger.info(f"XXX DELETE DEBUG: {delete_result}")
         logging.debug(f"Deleted file from src_path: {delete_result}")
 
         # Verify if delete_file was successful
