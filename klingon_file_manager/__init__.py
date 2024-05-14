@@ -141,7 +141,6 @@ logging.basicConfig(
     level=getattr(logging, loglevel, logging.INFO),
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
-logger = logging.getLogger(__name__)
 
 # Ignore specific DeprecationWarning from botocore
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="botocore.auth", lineno=419)

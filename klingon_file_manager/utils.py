@@ -76,7 +76,15 @@ To fetch AWS credentials:
 ```
 """
 import re
-from . import logger
+import logging
+import os
+
+loglevel = os.getenv('PYTHON_LOGLEVEL', 'INFO').upper()
+logging.basicConfig(
+    level=getattr(logging, loglevel, logging.INFO),
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 from boto3 import Session
 from dotenv import load_dotenv
 from typing import List, Dict, Union, Any, Callable
