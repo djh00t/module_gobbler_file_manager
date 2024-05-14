@@ -30,7 +30,8 @@ To get a file from an S3 bucket:
 import os
 import boto3
 from typing import Union, Dict
-from .utils import get_aws_credentials,is_binary_file,get_md5_hash,get_md5_hash_filename
+from .utils import get_aws_credentials, is_binary_file, get_md5_hash, get_md5_hash_filename
+from . import logger
 
 
 def get_file(

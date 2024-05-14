@@ -33,6 +33,7 @@ import boto3
 import logging
 import base64
 from .utils import get_md5_hash, get_md5_hash_filename, get_file_size, get_mime_type_content
+from . import logger
 
 import os
 

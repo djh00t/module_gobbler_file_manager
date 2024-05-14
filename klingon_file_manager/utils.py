@@ -76,6 +76,7 @@ To fetch AWS credentials:
 ```
 """
 import re
+from . import logger
 from boto3 import Session
 from dotenv import load_dotenv
 from typing import List, Dict, Union, Any, Callable

@@ -48,6 +48,7 @@ import logging
 #import requests
 #import os
 from .utils import (
+from . import logger
     is_binary_file,
     get_aws_credentials,
     get_md5_hash,

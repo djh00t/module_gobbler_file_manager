@@ -30,6 +30,7 @@ from typing import Union, Dict
 import os
 import boto3
 from .utils import get_aws_credentials
+from . import logger
 
 def delete_file(path: str, debug: bool = False) -> Dict[str, Union[int, str, Dict[str, str]]]:
     """
