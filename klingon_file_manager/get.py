@@ -31,8 +31,7 @@ import os
 import boto3
 from typing import Union, Dict
 from .utils import get_aws_credentials, is_binary_file, get_md5_hash, get_md5_hash_filename
-from . import logger
-
+import os
 
 def get_file(
     path: str, debug: bool = False
