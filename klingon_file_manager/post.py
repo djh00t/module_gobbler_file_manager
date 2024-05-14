@@ -33,7 +33,7 @@ import boto3
 import logging
 import base64
 from .utils import get_md5_hash, get_md5_hash_filename, get_file_size, get_mime_type_content
-from . import logger
+from .utils import logger
 
 import os
 
@@ -109,11 +109,11 @@ def post_file(
     """
     debug_info = {}
 
-    logger.info(f"Path: {path}")
-    logger.info(f"Content: {content}")
-    logger.info(f"MD5: {md5}")
-    logger.info(f"Metadata: {metadata}")
-    logger.info(f"Debug: {debug}")
+    logger.debug(f"Path: {path}")
+    logger.debug(f"Content: {content}")
+    logger.debug(f"MD5: {md5}")
+    logger.debug(f"Metadata: {metadata}")
+    logger.debug(f"Debug: {debug}")
 
     # Default metadata
     # Set md5 if md5 is None
