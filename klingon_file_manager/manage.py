@@ -47,7 +47,7 @@ from typing import Union, Dict, Optional, Callable
 import logging
 #import requests
 #import os
-from . import logger
+from .utils import logger
 from .utils import (
     is_binary_file,
     get_aws_credentials,
